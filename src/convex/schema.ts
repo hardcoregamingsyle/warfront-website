@@ -41,6 +41,14 @@ const schema = defineSchema(
       .index("by_username", ["username"]),
 
     // add other tables here
+    
+    pendingUsers: defineTable({
+      email: v.string(),
+      username: v.string(),
+      gender: v.string(),
+      dob: v.string(),
+      password: v.string(),
+    }).index("by_email", ["email"]),
 
     // tableName: defineTable({
     //   ...

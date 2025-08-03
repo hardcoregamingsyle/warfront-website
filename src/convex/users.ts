@@ -53,14 +53,14 @@ export const signupAction = action({
     dob: v.string(),
     password: v.string(),
   },
-  returns: v.id("users"),
+  returns: v.null(),
   handler: async (ctx, args) => {
     // Hash password in action (allows setTimeout)
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(args.password, salt);
 
-    // Call internal mutation with hashed password
-    const userId: Id<"users"> = await ctx.runMutation(internal.users.signupMutation, {
+    // Store pending user data
+    await ctx.runMutation(internal.users.storePendingUser, {
       username: args.username,
       email: args.email,
       gender: args.gender,
@@ -68,11 +68,11 @@ export const signupAction = action({
       passwordHash,
     });
 
-    return userId;
+    return null;
   },
 });
 
-export const signupMutation = internalMutation({
+export const storePendingUser = internalMutation({
   args: {
     username: v.string(),
     email: v.string(),
@@ -80,50 +80,52 @@ export const signupMutation = internalMutation({
     dob: v.string(),
     passwordHash: v.string(),
   },
-  returns: v.id("users"),
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-    const userId = await ctx.db.insert("users", {
-      name: args.username,
-      username: args.username.toLowerCase(), // Store username in lowercase
-      email: args.email.toLowerCase(), // Store email in lowercase
+    await ctx.db.insert("pendingUsers", {
+      email: args.email.toLowerCase(),
+      username: args.username.toLowerCase(),
       gender: args.gender,
       dob: args.dob,
       password: args.passwordHash,
-      otp,
-      otpExpires,
-      role: "user",
     });
-
-    // @ts-ignore - Bypassing TypeScript error due to Convex code generation issue
-    await ctx.scheduler.runAfter(0, internal.auth_resend.sendOtp, {
-      email: args.email,
-      otp,
-    });
-
-    return userId;
+    return null;
   },
 });
 
-export const verifyOtp = mutation({
+export const completeSignup = mutation({
   args: {
-    userId: v.id("users"),
-    otp: v.string(),
+    email: v.string(),
   },
-  handler: async (ctx, { userId, otp }) => {
-    const user = await ctx.db.get(userId);
+  handler: async (ctx, { email }) => {
+    const pendingUser = await ctx.db
+      .query("pendingUsers")
+      .withIndex("by_email", (q) => q.eq("email", email.toLowerCase()))
+      .unique();
 
-    if (!user || user.otp !== otp || (user.otpExpires ?? 0) < Date.now()) {
-      throw new Error("Invalid or expired OTP.");
+    if (!pendingUser) {
+      throw new Error("Pending user not found.");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", email.toLowerCase()))
+      .unique();
+
+    if (!user) {
+      throw new Error("User not found.");
     }
 
     await ctx.db.patch(user._id, {
-      otp: undefined,
-      otpExpires: undefined,
-      emailVerificationTime: Date.now(),
+      username: pendingUser.username,
+      gender: pendingUser.gender,
+      dob: pendingUser.dob,
+      password: pendingUser.password,
+      name: pendingUser.username,
+      role: "user",
     });
+
+    await ctx.db.delete(pendingUser._id);
 
     return { success: true };
   },
@@ -259,13 +261,3 @@ export const getCurrentUser = async (ctx: QueryCtx) => {
   }
   return await ctx.db.get(userId);
 };
-
-export const createUserSession = internalMutation({
-  args: { userId: v.id("users") },
-  returns: v.null(),
-  handler: async (ctx, { userId }) => {
-    // This function is no longer used for password login but kept for other potential auth flows.
-    // It is not possible to create a session directly on the backend with the email-otp provider.
-    return null;
-  },
-});
