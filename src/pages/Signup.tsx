@@ -89,8 +89,17 @@ export default function Signup() {
         return;
       }
 
+      // Filter out confirmPassword before sending to backend
+      const signupData = {
+        username: data.username,
+        email: data.email,
+        gender: data.gender,
+        dob: data.dob,
+        password: data.password,
+      };
+
       // Call signup action
-      const newUserId = await signup(data);
+      const newUserId = await signup(signupData);
       setUserId(newUserId);
       setEmail(data.email);
       setStep("otp");
