@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Mail, Lock } from "lucide-react";
+import { Loader2, Mail, Lock, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address."),
+  username: z.string().min(1, "Username is required."),
   password: z.string().min(1, "Password is required."),
 });
 
@@ -36,6 +37,7 @@ export default function Login() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
+      username: "",
       password: "",
     },
   });
@@ -92,6 +94,23 @@ export default function Login() {
               {form.formState.errors.email && (
                 <p className="text-red-500 text-sm">
                   {form.formState.errors.email.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Input
+                  id="username"
+                  {...form.register("username")}
+                  placeholder="your_username"
+                  className="pl-9 bg-slate-800 border-slate-600 focus:ring-red-500"
+                />
+              </div>
+              {form.formState.errors.username && (
+                <p className="text-red-500 text-sm">
+                  {form.formState.errors.username.message}
                 </p>
               )}
             </div>

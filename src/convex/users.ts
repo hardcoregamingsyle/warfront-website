@@ -39,17 +39,7 @@ export const checkAvailability = query({
       }
     }
 
-    if (args.email) {
-      const byEmail = await ctx.db
-        .query("users")
-        .withIndex("email", (q) => q.eq("email", args.email))
-        .unique();
-
-      if (byEmail) {
-        return { available: false, message: "Email is already in use." };
-      }
-    }
-
+    // Remove email uniqueness check - allow multiple accounts with same email
     return { available: true };
   },
 });
@@ -116,20 +106,26 @@ export const verifyOtp = mutation({
 export const login = mutation({
   args: {
     email: v.string(),
+    username: v.string(),
     password: v.string(),
   },
-  handler: async (ctx, { email, password }) => {
+  handler: async (ctx, { email, username, password }) => {
+    // First find user by username
     const user = await ctx.db
       .query("users")
-      .withIndex("email", (q) => q.eq("email", email))
+      .withIndex("by_username", (q) => q.eq("username", username))
       .unique();
 
     if (!user) {
       throw new Error("User not found.");
     }
 
+    // Verify the email matches
+    if (user.email !== email) {
+      throw new Error("Email and username do not match.");
+    }
+
     if (!user.password) {
-      // This case is for users who signed up with a passwordless method
       throw new Error(
         "This account was created with a different sign-in method. Please use that method to log in.",
       );
