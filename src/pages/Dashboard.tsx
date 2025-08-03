@@ -1,27 +1,22 @@
-// TODO: THIS IS THE DEFAULT DASHBOARD PAGE THAT THE USER WILL SEE AFTER AUTHENTICATION. ADD MAIN FUNCTIONALITY HERE.
-// This is the entry point for users who have just signed in
-
-import { Protected } from "@/lib/protected-page";
+import DashboardLayout from "@/layouts/DashboardLayout";
 import { motion } from "framer-motion";
-import { Loader } from "lucide-react";
 
 export default function Dashboard() {
   return (
-    <Protected>
+    <DashboardLayout>
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="flex flex-col items-center justify-center"
       >
         <div className="max-w-5xl mx-auto relative px-4">
-          {/* landing page goes here */}
-          <div className="flex items-center justify-center min-h-[200px]">
-            <Loader className="h-8 w-8 animate-spin mr-4" />
-            Generating your project...
-          </div>
+          <h1 className="text-4xl font-bold text-center">Welcome to the Dashboard</h1>
+          <p className="text-muted-foreground text-center mt-2">
+            This is where the main game content will be.
+          </p>
         </div>
       </motion.div>
-    </Protected>
+    </DashboardLayout>
   );
 }
