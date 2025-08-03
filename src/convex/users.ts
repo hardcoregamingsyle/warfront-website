@@ -184,7 +184,7 @@ export const loginAction = action({
     identifier: v.string(), // Can be either username or email
     password: v.string(),
   },
-  returns: v.null(),
+  returns: v.object({ email: v.string() }),
   handler: async (ctx, { identifier, password }) => {
     let user: any = null;
 
@@ -216,27 +216,12 @@ export const loginAction = action({
       throw new Error("Incorrect password.");
     }
 
-    // Call internal mutation to create session
-    const session: any = await ctx.runMutation(internal.users.createUserSession, {
-      userId: user._id,
-    });
-
-    return null;
-  },
-});
-
-export const createUserSession = internalMutation({
-  args: { userId: v.id("users") },
-  returns: v.null(),
-  handler: async (ctx, { userId }) => {
-    const user = await ctx.db.get(userId);
-    if (!user) {
-      throw new Error("User not found.");
+    if (!user.email) {
+      throw new Error("User email not found.");
     }
 
-    // @ts-ignore - Bypassing TypeScript error due to Convex code generation issue
-    const session = await ctx.auth.createSession(user);
-    return null;
+    // On success, return the user's email
+    return { email: user.email };
   },
 });
 
@@ -274,3 +259,13 @@ export const getCurrentUser = async (ctx: QueryCtx) => {
   }
   return await ctx.db.get(userId);
 };
+
+export const createUserSession = internalMutation({
+  args: { userId: v.id("users") },
+  returns: v.null(),
+  handler: async (ctx, { userId }) => {
+    // This function is no longer used for password login but kept for other potential auth flows.
+    // It is not possible to create a session directly on the backend with the email-otp provider.
+    return null;
+  },
+});
