@@ -16,6 +16,7 @@ import type {
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as auth_resend from "../auth_resend.js";
+import type * as generators_deleteAllUsers from "../generators/deleteAllUsers.js";
 import type * as http from "../http.js";
 import type * as users from "../users.js";
 
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   "auth/emailOtp": typeof auth_emailOtp;
   auth: typeof auth;
   auth_resend: typeof auth_resend;
+  "generators/deleteAllUsers": typeof generators_deleteAllUsers;
   http: typeof http;
   users: typeof users;
 }>;

@@ -32,7 +32,7 @@ export const checkAvailability = query({
     if (args.username) {
       const byUsername = await ctx.db
         .query("users")
-        .withIndex("by_username", (q) => q.eq("username", args.username))
+        .withIndex("by_username", (q) => q.eq("username", args.username.toLowerCase()))
         .unique();
 
       if (byUsername) {
@@ -87,8 +87,8 @@ export const signupMutation = internalMutation({
 
     const userId = await ctx.db.insert("users", {
       name: args.username,
-      username: args.username,
-      email: args.email,
+      username: args.username.toLowerCase(), // Store username in lowercase
+      email: args.email.toLowerCase(), // Store email in lowercase
       gender: args.gender,
       dob: args.dob,
       password: args.passwordHash,
@@ -149,7 +149,7 @@ export const getUserByUsername = internalQuery({
   handler: async (ctx, { username }) => {
     return await ctx.db
       .query("users")
-      .withIndex("by_username", (q) => q.eq("username", username))
+      .withIndex("by_username", (q) => q.eq("username", username.toLowerCase()))
       .unique();
   },
 });
@@ -174,7 +174,7 @@ export const getUserByEmail = internalQuery({
   handler: async (ctx, { email }) => {
     return await ctx.db
       .query("users")
-      .withIndex("email", (q) => q.eq("email", email))
+      .withIndex("email", (q) => q.eq("email", email.toLowerCase()))
       .first();
   },
 });
@@ -190,9 +190,9 @@ export const loginAction = action({
 
     // Check if identifier contains @ (likely email)
     if (identifier.includes("@")) {
-      user = await ctx.runQuery(internal.users.getUserByEmail, { email: identifier });
+      user = await ctx.runQuery(internal.users.getUserByEmail, { email: identifier.toLowerCase() });
     } else {
-      user = await ctx.runQuery(internal.users.getUserByUsername, { username: identifier });
+      user = await ctx.runQuery(internal.users.getUserByUsername, { username: identifier.toLowerCase() });
     }
 
     if (!user) {

@@ -41,18 +41,13 @@ export default function Login() {
     setError(null);
 
     try {
-      // Verify credentials with backend
-      await login(data);
-      
-      // Create session using the email from the verified user
-      const email = data.identifier.includes("@") ? data.identifier : "";
-      if (email) {
-        const formData = new FormData();
-        formData.append("email", email);
-        formData.append("code", "verified"); // Special code to indicate pre-verified
-        await signIn("email-otp", formData);
-      }
-      
+      // Normalize identifier to lowercase for consistency
+      const loginData = {
+        identifier: data.identifier.toLowerCase(),
+        password: data.password,
+      };
+
+      await login(loginData);
       toast.success("Logged in successfully!");
       navigate("/dashboard");
     } catch (err: any) {

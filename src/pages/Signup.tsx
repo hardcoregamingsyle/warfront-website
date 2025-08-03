@@ -77,10 +77,17 @@ export default function Signup() {
     setError(null);
 
     try {
+      // Normalize username and email to lowercase for consistency
+      const normalizedData = {
+        ...data,
+        username: data.username.toLowerCase(),
+        email: data.email.toLowerCase(),
+      };
+
       // Check availability first
       const availability = await convex.query(api.users.checkAvailability, {
-        username: data.username,
-        email: data.email,
+        username: normalizedData.username,
+        email: normalizedData.email,
       });
 
       if (!availability.available) {
@@ -91,17 +98,17 @@ export default function Signup() {
 
       // Filter out confirmPassword before sending to backend
       const signupData = {
-        username: data.username,
-        email: data.email,
-        gender: data.gender,
-        dob: data.dob,
-        password: data.password,
+        username: normalizedData.username,
+        email: normalizedData.email,
+        gender: normalizedData.gender,
+        dob: normalizedData.dob,
+        password: normalizedData.password,
       };
 
       // Call signup action
       const newUserId = await signup(signupData);
       setUserId(newUserId);
-      setEmail(data.email);
+      setEmail(normalizedData.email);
       setStep("otp");
       toast.success("Verification code sent to your email!");
     } catch (err: any) {
