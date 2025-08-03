@@ -8,43 +8,58 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/hooks/use-auth";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Loader2, Mail, User, Calendar, Users } from "lucide-react";
+import { Loader2, Mail, User, Calendar, Lock, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { z } from "zod";
 import { useMutation, useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
 import { toast } from "sonner";
+import { Id } from "@/convex/_generated/dataModel";
 
-const formSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters."),
-  email: z.string().email("Invalid email address."),
-  gender: z.enum(["male", "female", "other"], {
-    required_error: "Please select a gender.",
-  }),
-  dob: z.string().refine((val) => val && !isNaN(Date.parse(val)), {
-    message: "Please enter your date of birth.",
-  }),
-});
+const formSchema = z
+  .object({
+    username: z.string().min(3, "Username must be at least 3 characters."),
+    email: z.string().email("Invalid email address."),
+    gender: z.enum(["male", "female", "other"], {
+      required_error: "Please select a gender.",
+    }),
+    dob: z.string().refine((val) => val && !isNaN(Date.parse(val)), {
+      message: "Please enter your date of birth.",
+    }),
+    password: z.string().min(8, "Password must be at least 8 characters."),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function Signup() {
-  const { signIn } = useAuth();
   const navigate = useNavigate();
   const convex = useConvex();
-  const updateUserProfile = useMutation(api.users.updateUserProfile);
+  const signup = useMutation(api.users.signup);
+  const verifyOtp = useMutation(api.users.verifyOtp);
 
   const [step, setStep] = useState<"details" | "otp">("details");
-  const [formData, setFormData] = useState<FormData | null>(null);
+  const [userId, setUserId] = useState<Id<"users"> | null>(null);
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,10 +87,15 @@ export default function Signup() {
         return;
       }
 
-      const form = new FormData();
-      form.append("email", data.email);
-      await signIn("email-otp", form);
-      setFormData(data);
+      const newUserId = await signup({
+        username: data.username,
+        email: data.email,
+        gender: data.gender,
+        dob: data.dob,
+        password: data.password,
+      });
+      setUserId(newUserId);
+      setEmail(data.email);
       setStep("otp");
     } catch (err) {
       setError("Failed to send verification code. Please try again.");
@@ -86,24 +106,18 @@ export default function Signup() {
 
   const handleOtpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!formData) return;
+    if (!userId) return;
 
     setIsLoading(true);
     setError(null);
     try {
-      const form = new FormData();
-      form.append("email", formData.email);
-      form.append("code", otp);
-      await signIn("email-otp", form);
-
-      await updateUserProfile({
-        username: formData.username,
-        gender: formData.gender,
-        dob: formData.dob,
-      });
-
-      toast.success("Account created successfully!");
-      navigate("/dashboard");
+      const result = await verifyOtp({ userId, otp });
+      if (result.success) {
+        toast.success("Account verified! Please log in to continue.");
+        navigate("/login");
+      } else {
+        setError("An unknown error occurred.");
+      }
     } catch (error) {
       setError("The verification code you entered is incorrect.");
       setOtp("");
@@ -123,12 +137,14 @@ export default function Signup() {
           />
         </Link>
       </div>
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md bg-slate-900/50 border-slate-700 text-white">
         {step === "details" ? (
           <>
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Create an Account</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl tracking-tight">
+                Create an Account
+              </CardTitle>
+              <CardDescription className="text-slate-400">
                 Join the battle and create your commander profile.
               </CardDescription>
             </CardHeader>
@@ -140,12 +156,12 @@ export default function Signup() {
                 <div className="space-y-2">
                   <Label htmlFor="username">Username</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <Input
                       id="username"
                       {...form.register("username")}
                       placeholder="Your callsign"
-                      className="pl-9"
+                      className="pl-9 bg-slate-800 border-slate-600 focus:ring-red-500"
                     />
                   </div>
                   {form.formState.errors.username && (
@@ -157,13 +173,13 @@ export default function Signup() {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <Input
                       id="email"
                       {...form.register("email")}
                       placeholder="name@example.com"
                       type="email"
-                      className="pl-9"
+                      className="pl-9 bg-slate-800 border-slate-600 focus:ring-red-500"
                     />
                   </div>
                   {form.formState.errors.email && (
@@ -178,10 +194,14 @@ export default function Signup() {
                     <Button
                       type="button"
                       variant={
-                        form.watch("gender") === "male" ? "default" : "outline"
+                        form.watch("gender") === "male"
+                          ? "destructive"
+                          : "outline"
                       }
                       onClick={() =>
-                        form.setValue("gender", "male", { shouldValidate: true })
+                        form.setValue("gender", "male", {
+                          shouldValidate: true,
+                        })
                       }
                       className="flex-1"
                     >
@@ -191,7 +211,7 @@ export default function Signup() {
                       type="button"
                       variant={
                         form.watch("gender") === "female"
-                          ? "default"
+                          ? "destructive"
                           : "outline"
                       }
                       onClick={() =>
@@ -206,7 +226,9 @@ export default function Signup() {
                     <Button
                       type="button"
                       variant={
-                        form.watch("gender") === "other" ? "default" : "outline"
+                        form.watch("gender") === "other"
+                          ? "destructive"
+                          : "outline"
                       }
                       onClick={() =>
                         form.setValue("gender", "other", {
@@ -227,12 +249,12 @@ export default function Signup() {
                 <div className="space-y-2">
                   <Label htmlFor="dob">Date of Birth</Label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <Input
                       id="dob"
                       {...form.register("dob")}
                       type="date"
-                      className="pl-9"
+                      className="pl-9 bg-slate-800 border-slate-600 focus:ring-red-500"
                     />
                   </div>
                   {form.formState.errors.dob && (
@@ -241,12 +263,52 @@ export default function Signup() {
                     </p>
                   )}
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="password"
+                      {...form.register("password")}
+                      type="password"
+                      placeholder="********"
+                      className="pl-9 bg-slate-800 border-slate-600 focus:ring-red-500"
+                    />
+                  </div>
+                  {form.formState.errors.password && (
+                    <p className="text-red-500 text-sm">
+                      {form.formState.errors.password.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="confirmPassword"
+                      {...form.register("confirmPassword")}
+                      type="password"
+                      placeholder="********"
+                      className="pl-9 bg-slate-800 border-slate-600 focus:ring-red-500"
+                    />
+                  </div>
+                  {form.formState.errors.confirmPassword && (
+                    <p className="text-red-500 text-sm">
+                      {form.formState.errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
 
                 {error && (
                   <p className="text-red-500 text-sm text-center">{error}</p>
                 )}
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-red-600 hover:bg-red-700"
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -259,9 +321,11 @@ export default function Signup() {
         ) : (
           <>
             <CardHeader className="text-center">
-              <CardTitle>Check your email</CardTitle>
-              <CardDescription>
-                We've sent a code to {formData?.email}
+              <CardTitle className="text-2xl tracking-tight">
+                Check your email
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                We've sent a code to {email}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -275,7 +339,11 @@ export default function Signup() {
                   >
                     <InputOTPGroup>
                       {Array.from({ length: 6 }).map((_, index) => (
-                        <InputOTPSlot key={index} index={index} />
+                        <InputOTPSlot
+                          key={index}
+                          index={index}
+                          className="text-white bg-slate-800 border-slate-600"
+                        />
                       ))}
                     </InputOTPGroup>
                   </InputOTP>
@@ -287,7 +355,7 @@ export default function Signup() {
                 )}
                 <Button
                   type="submit"
-                  className="w-full mt-6"
+                  className="w-full mt-6 bg-red-600 hover:bg-red-700"
                   disabled={isLoading || otp.length !== 6}
                 >
                   {isLoading ? (
@@ -297,11 +365,11 @@ export default function Signup() {
                   )}
                 </Button>
               </form>
-              <p className="text-sm text-muted-foreground text-center mt-4">
+              <p className="text-sm text-slate-400 text-center mt-4">
                 Didn't receive a code?{" "}
                 <Button
                   variant="link"
-                  className="p-0 h-auto"
+                  className="p-0 h-auto text-red-500"
                   onClick={() => setStep("details")}
                 >
                   Try again
@@ -311,11 +379,11 @@ export default function Signup() {
           </>
         )}
       </Card>
-      <p className="text-center text-sm text-muted-foreground mt-4">
+      <p className="text-center text-sm text-slate-400 mt-4">
         Already have an account?{" "}
         <Link
           to="/login"
-          className="underline underline-offset-4 hover:text-primary"
+          className="underline underline-offset-4 hover:text-red-500"
         >
           Log in
         </Link>

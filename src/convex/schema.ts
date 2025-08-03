@@ -34,6 +34,9 @@ const schema = defineSchema(
       username: v.optional(v.string()),
       gender: v.optional(v.string()),
       dob: v.optional(v.string()),
+      password: v.optional(v.string()),
+      otp: v.optional(v.string()),
+      otpExpires: v.optional(v.number()),
     }).index("email", ["email"]) // index for the email. do not remove or modify
       .index("by_username", ["username"]),
 
