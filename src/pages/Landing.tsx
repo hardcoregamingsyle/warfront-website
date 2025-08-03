@@ -1,6 +1,7 @@
 import { AuthButton } from "@/components/auth/AuthButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { CloudinaryImage } from "@/components/CloudinaryImage";
 import { motion } from "framer-motion";
 import { 
   Shield, 
@@ -32,7 +33,13 @@ export default function Landing() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <img src="/warfront-logo.png" alt="Warfront Logo" className="h-12" />
+              <CloudinaryImage 
+                publicId="warfront/logo" 
+                alt="Warfront Logo" 
+                height={48}
+                className="h-12 w-auto"
+                cloudName="your-cloud-name"
+              />
             </div>
 
             {/* Desktop Navigation */}
@@ -411,7 +418,13 @@ export default function Landing() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="mb-4">
-                <img src="/warfront-logo.png" alt="Warfront Logo" className="h-12" />
+                <CloudinaryImage 
+                  publicId="warfront/logo" 
+                  alt="Warfront Logo" 
+                  height={48}
+                  className="h-12 w-auto"
+                  cloudName="your-cloud-name"
+                />
               </div>
               <p className="text-slate-400">
                 The ultimate military strategy card game experience.
