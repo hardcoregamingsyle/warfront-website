@@ -30,7 +30,12 @@ const schema = defineSchema(
       isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
 
       role: v.optional(roleValidator), // role of the user. do not remove
-    }).index("email", ["email"]), // index for the email. do not remove or modify
+
+      username: v.optional(v.string()),
+      gender: v.optional(v.string()),
+      dob: v.optional(v.string()),
+    }).index("email", ["email"]) // index for the email. do not remove or modify
+      .index("by_username", ["username"]),
 
     // add other tables here
 

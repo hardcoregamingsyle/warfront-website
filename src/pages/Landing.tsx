@@ -1,21 +1,20 @@
 import { AuthButton } from "@/components/auth/AuthButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CloudinaryImage } from "@/components/CloudinaryImage";
 import { motion } from "framer-motion";
-import { 
-  Shield, 
-  Sword, 
-  Target, 
-  Users, 
-  Trophy, 
-  Star,
-  Play,
-  Download,
+import {
   Menu,
-  X
+  Play,
+  Shield,
+  Star,
+  Sword,
+  Target,
+  Trophy,
+  Users,
+  X,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -45,8 +44,8 @@ export default function Landing() {
 
             {/* Auth Button */}
             <div className="hidden md:block">
-              <Button className="bg-red-600 hover:bg-red-700 text-white">
-                Join Battle
+              <Button asChild className="bg-red-600 hover:bg-red-700 text-white">
+                <Link to="/signup">Join Battle</Link>
               </Button>
             </div>
 
@@ -76,8 +75,11 @@ export default function Landing() {
                 <a href="#gameplay" className="block px-3 py-2 text-slate-300 hover:text-white">Gameplay</a>
                 <a href="#contact" className="block px-3 py-2 text-slate-300 hover:text-white">Contact</a>
                 <div className="px-3 py-2">
-                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                    Join Battle
+                  <Button
+                    asChild
+                    className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <Link to="/signup">Join Battle</Link>
                   </Button>
                 </div>
               </div>
@@ -111,9 +113,15 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg">
-                <Play className="mr-2 h-5 w-5" />
-                Start Playing
+              <Button
+                asChild
+                size="lg"
+                className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg"
+              >
+                <Link to="/signup">
+                  <Play className="mr-2 h-5 w-5" />
+                  Start Playing
+                </Link>
               </Button>
             </motion.div>
           </div>
@@ -260,9 +268,15 @@ export default function Landing() {
               Your military campaign starts now.
             </p>
             <div className="flex justify-center">
-              <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg">
-                <Play className="mr-2 h-5 w-5" />
-                Start Your Campaign
+              <Button
+                asChild
+                size="lg"
+                className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg"
+              >
+                <Link to="/signup">
+                  <Play className="mr-2 h-5 w-5" />
+                  Start Your Campaign
+                </Link>
               </Button>
             </div>
           </motion.div>
