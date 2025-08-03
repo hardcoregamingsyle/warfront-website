@@ -47,13 +47,9 @@ export default function Landing() {
 
             {/* Auth Button */}
             <div className="hidden md:block">
-              <AuthButton 
-                trigger={
-                  <Button className="bg-red-600 hover:bg-red-700 text-white">
-                    Join Battle
-                  </Button>
-                }
-              />
+              <Button className="bg-red-600 hover:bg-red-700 text-white">
+                Join Battle
+              </Button>
             </div>
 
             {/* Mobile menu button */}
@@ -84,13 +80,9 @@ export default function Landing() {
                 <a href="#community" className="block px-3 py-2 text-slate-300 hover:text-white">Community</a>
                 <a href="#contact" className="block px-3 py-2 text-slate-300 hover:text-white">Contact</a>
                 <div className="px-3 py-2">
-                  <AuthButton 
-                    trigger={
-                      <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                        Join Battle
-                      </Button>
-                    }
-                  />
+                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+                    Join Battle
+                  </Button>
                 </div>
               </div>
             </motion.div>
@@ -401,14 +393,10 @@ export default function Landing() {
               Your military campaign starts now.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <AuthButton 
-                trigger={
-                  <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg">
-                    <Play className="mr-2 h-5 w-5" />
-                    Start Your Campaign
-                  </Button>
-                }
-              />
+              <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg">
+                <Play className="mr-2 h-5 w-5" />
+                Start Your Campaign
+              </Button>
               <Button size="lg" variant="outline" className="border-slate-600 text-white hover:bg-slate-800 px-8 py-4 text-lg">
                 <Download className="mr-2 h-5 w-5" />
                 Download Free
