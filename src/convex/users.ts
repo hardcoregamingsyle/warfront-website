@@ -55,6 +55,14 @@ export const signupAction = action({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    // Check for username availability
+    const existingUser = await ctx.runQuery(internal.users.getUserByUsername, {
+      username: args.username.toLowerCase(),
+    });
+    if (existingUser) {
+      throw new Error("Username is already taken.");
+    }
+
     // Hash password in action (allows setTimeout)
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(args.password, salt);

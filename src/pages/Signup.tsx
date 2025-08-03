@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { api } from "@/convex/_generated/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -71,17 +71,8 @@ export default function Signup() {
         email: data.email.toLowerCase(),
       };
 
-      // Check availability first
-      const availability = await convex.query(api.users.checkAvailability, {
-        username: normalizedData.username,
-        email: normalizedData.email,
-      });
-
-      if (!availability.available) {
-        setError(availability.message || "Username or email is not available.");
-        setIsLoading(false);
-        return;
-      }
+      // The availability check is now implicitly handled by the backend during signup.
+      // The backend will throw an error if the username is taken, which will be caught here.
 
       // Filter out confirmPassword before sending to backend
       const signupData = {
@@ -179,7 +170,9 @@ export default function Signup() {
                   <div className="space-y-2">
                     <Label>Gender</Label>
                     <RadioGroup
-                      onValueChange={(value) => form.setValue("gender", value)}
+                      onValueChange={(value) =>
+                        form.setValue("gender", value as "male" | "female" | "other")
+                      }
                       className="flex gap-4 pt-2"
                     >
                       <div className="flex items-center space-x-2">
