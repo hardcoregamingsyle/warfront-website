@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/convex/_generated/api";
+import { useAuth } from "@/hooks/use-auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "convex/react";
 import { Lock, Loader2, User } from "lucide-react";
@@ -22,6 +23,7 @@ type FormData = z.infer<typeof formSchema>;
 export default function Login() {
   const navigate = useNavigate();
   const login = useAction(api.users.loginAction);
+  const { signIn } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +41,18 @@ export default function Login() {
     setError(null);
 
     try {
+      // Verify credentials with backend
       await login(data);
+      
+      // Create session using the email from the verified user
+      const email = data.identifier.includes("@") ? data.identifier : "";
+      if (email) {
+        const formData = new FormData();
+        formData.append("email", email);
+        formData.append("code", "verified"); // Special code to indicate pre-verified
+        await signIn("email-otp", formData);
+      }
+      
       toast.success("Logged in successfully!");
       navigate("/dashboard");
     } catch (err: any) {

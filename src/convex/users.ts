@@ -129,52 +129,6 @@ export const verifyOtp = mutation({
   },
 });
 
-export const loginAction = action({
-  args: {
-    identifier: v.string(), // Can be either username or email
-    password: v.string(),
-  },
-  returns: v.null(),
-  handler: async (ctx, { identifier, password }) => {
-    let user: any = null;
-
-    // Check if identifier contains @ (likely email)
-    if (identifier.includes("@")) {
-      user = await ctx.runQuery(internal.users.getUserByEmail, { email: identifier });
-    } else {
-      user = await ctx.runQuery(internal.users.getUserByUsername, { username: identifier });
-    }
-
-    if (!user) {
-      throw new Error("User not found.");
-    }
-
-    if (!user.password) {
-      throw new Error(
-        "This account was created with a different sign-in method. Please use that method to log in.",
-      );
-    }
-
-    if (!user.emailVerificationTime) {
-      throw new Error("Please verify your email before logging in.");
-    }
-
-    // Verify password in action (allows setTimeout)
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordCorrect) {
-      throw new Error("Incorrect password.");
-    }
-
-    // Call internal mutation to create session
-    const session: any = await ctx.runMutation(internal.users.createUserSession, {
-      userId: user._id,
-    });
-
-    return null;
-  },
-});
-
 export const getUserByUsername = internalQuery({
   args: { username: v.string() },
   returns: v.union(
@@ -222,6 +176,52 @@ export const getUserByEmail = internalQuery({
       .query("users")
       .withIndex("email", (q) => q.eq("email", email))
       .first();
+  },
+});
+
+export const loginAction = action({
+  args: {
+    identifier: v.string(), // Can be either username or email
+    password: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, { identifier, password }) => {
+    let user: any = null;
+
+    // Check if identifier contains @ (likely email)
+    if (identifier.includes("@")) {
+      user = await ctx.runQuery(internal.users.getUserByEmail, { email: identifier });
+    } else {
+      user = await ctx.runQuery(internal.users.getUserByUsername, { username: identifier });
+    }
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    if (!user.password) {
+      throw new Error(
+        "This account was created with a different sign-in method. Please use that method to log in.",
+      );
+    }
+
+    if (!user.emailVerificationTime) {
+      throw new Error("Please verify your email before logging in.");
+    }
+
+    // Verify password in action (allows setTimeout)
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      throw new Error("Incorrect password.");
+    }
+
+    // Call internal mutation to create session
+    const session: any = await ctx.runMutation(internal.users.createUserSession, {
+      userId: user._id,
+    });
+
+    return null;
   },
 });
 
