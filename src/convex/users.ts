@@ -1,7 +1,8 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { query, QueryCtx, mutation } from "./_generated/server";
+import { query, QueryCtx, mutation, action, internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 import bcrypt from "bcryptjs";
 
 /**
@@ -44,7 +45,7 @@ export const checkAvailability = query({
   },
 });
 
-export const signup = mutation({
+export const signupAction = action({
   args: {
     username: v.string(),
     email: v.string(),
@@ -52,12 +53,37 @@ export const signup = mutation({
     dob: v.string(),
     password: v.string(),
   },
+  returns: v.id("users"),
+  handler: async (ctx, args) => {
+    // Hash password in action (allows setTimeout)
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(args.password, salt);
+
+    // Call internal mutation with hashed password
+    const userId: Id<"users"> = await ctx.runMutation(internal.users.signupMutation, {
+      username: args.username,
+      email: args.email,
+      gender: args.gender,
+      dob: args.dob,
+      passwordHash,
+    });
+
+    return userId;
+  },
+});
+
+export const signupMutation = internalMutation({
+  args: {
+    username: v.string(),
+    email: v.string(),
+    gender: v.string(),
+    dob: v.string(),
+    passwordHash: v.string(),
+  },
+  returns: v.id("users"),
   handler: async (ctx, args) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(args.password, salt);
 
     const userId = await ctx.db.insert("users", {
       name: args.username,
@@ -65,7 +91,7 @@ export const signup = mutation({
       email: args.email,
       gender: args.gender,
       dob: args.dob,
-      password: passwordHash,
+      password: args.passwordHash,
       otp,
       otpExpires,
       role: "user",
@@ -103,18 +129,16 @@ export const verifyOtp = mutation({
   },
 });
 
-export const login = mutation({
+export const loginAction = action({
   args: {
     email: v.string(),
     username: v.string(),
     password: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, { email, username, password }) => {
-    // First find user by username
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_username", (q) => q.eq("username", username))
-      .unique();
+    // Get user data
+    const user: any = await ctx.runQuery(internal.users.getUserByUsername, { username });
 
     if (!user) {
       throw new Error("User not found.");
@@ -131,19 +155,60 @@ export const login = mutation({
       );
     }
 
+    if (!user.emailVerificationTime) {
+      throw new Error("Please verify your email before logging in.");
+    }
+
+    // Verify password in action (allows setTimeout)
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
       throw new Error("Incorrect password.");
     }
 
-    if (!user.emailVerificationTime) {
-      throw new Error("Please verify your email before logging in.");
+    // Call internal mutation to create session
+    const session: any = await ctx.runMutation(internal.users.createUserSession, {
+      userId: user._id,
+    });
+
+    return null;
+  },
+});
+
+export const getUserByUsername = internalQuery({
+  args: { username: v.string() },
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      _creationTime: v.number(),
+      name: v.optional(v.string()),
+      username: v.optional(v.string()),
+      email: v.optional(v.string()),
+      password: v.optional(v.string()),
+      emailVerificationTime: v.optional(v.number()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, { username }) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", username))
+      .unique();
+  },
+});
+
+export const createUserSession = internalMutation({
+  args: { userId: v.id("users") },
+  returns: v.null(),
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) {
+      throw new Error("User not found.");
     }
 
     // @ts-ignore - Bypassing TypeScript error due to Convex code generation issue
     const session = await ctx.auth.createSession(user);
-    return session;
+    return null;
   },
 });
 

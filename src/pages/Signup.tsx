@@ -26,7 +26,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { z } from "zod";
-import { useMutation, useConvex } from "convex/react";
+import { useMutation, useConvex, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
@@ -54,7 +54,7 @@ type FormData = z.infer<typeof formSchema>;
 export default function Signup() {
   const navigate = useNavigate();
   const convex = useConvex();
-  const signup = useMutation(api.users.signup);
+  const signup = useAction(api.users.signupAction);
   const verifyOtp = useMutation(api.users.verifyOtp);
 
   const [step, setStep] = useState<"details" | "otp">("details");
@@ -77,28 +77,26 @@ export default function Signup() {
     setError(null);
 
     try {
+      // Check availability first
       const availability = await convex.query(api.users.checkAvailability, {
         username: data.username,
         email: data.email,
       });
-      if (!availability?.available) {
-        setError(availability?.message || "Username or email is unavailable.");
+
+      if (!availability.available) {
+        setError(availability.message || "Username or email is not available.");
         setIsLoading(false);
         return;
       }
 
-      const newUserId = await signup({
-        username: data.username,
-        email: data.email,
-        gender: data.gender,
-        dob: data.dob,
-        password: data.password,
-      });
+      // Call signup action
+      const newUserId = await signup(data);
       setUserId(newUserId);
       setEmail(data.email);
       setStep("otp");
-    } catch (err) {
-      setError("Failed to send verification code. Please try again.");
+      toast.success("Verification code sent to your email!");
+    } catch (err: any) {
+      setError(err.message || "Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }

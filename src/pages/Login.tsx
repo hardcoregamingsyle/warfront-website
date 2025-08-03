@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { z } from "zod";
-import { useMutation } from "convex/react";
+import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 
@@ -28,7 +28,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function Login() {
   const navigate = useNavigate();
-  const login = useMutation(api.users.login);
+  const login = useAction(api.users.loginAction);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
