@@ -28,32 +28,17 @@ const schema = defineSchema(
       email: v.optional(v.string()), // email of the user. do not remove
       emailVerificationTime: v.optional(v.number()), // email verification time. do not remove
       isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
-
       role: v.optional(roleValidator), // role of the user. do not remove
 
-      username: v.optional(v.string()),
-      gender: v.optional(v.string()),
-      dob: v.optional(v.string()),
-      password: v.optional(v.string()),
-      otp: v.optional(v.string()),
-      otpExpires: v.optional(v.number()),
-    }).index("email", ["email"]) // index for the email. do not remove or modify
-      .index("by_username", ["username"]),
+      // Temporarily removing custom fields to debug auth flow
+      // username: v.optional(v.string()),
+      // gender: v.optional(v.string()),
+      // dob: v.optional(v.string()),
+      // password: v.optional(v.string()),
+    }).index("email", ["email"]), // index for the email. do not remove or modify
 
-    // add other tables here
-    
-    pendingUsers: defineTable({
-      email: v.string(),
-      username: v.string(),
-      gender: v.string(),
-      dob: v.string(),
-      password: v.string(),
-    }).index("by_email", ["email"]),
-
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    // Removing pendingUsers table to simplify the flow
+    // pendingUsers: defineTable({ ...
   },
   {
     schemaValidation: false,
