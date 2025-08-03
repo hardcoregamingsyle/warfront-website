@@ -131,22 +131,22 @@ export const verifyOtp = mutation({
 
 export const loginAction = action({
   args: {
-    email: v.string(),
-    username: v.string(),
+    identifier: v.string(), // Can be either username or email
     password: v.string(),
   },
   returns: v.null(),
-  handler: async (ctx, { email, username, password }) => {
-    // Get user data
-    const user: any = await ctx.runQuery(internal.users.getUserByUsername, { username });
+  handler: async (ctx, { identifier, password }) => {
+    let user: any = null;
+
+    // Check if identifier contains @ (likely email)
+    if (identifier.includes("@")) {
+      user = await ctx.runQuery(internal.users.getUserByEmail, { email: identifier });
+    } else {
+      user = await ctx.runQuery(internal.users.getUserByUsername, { username: identifier });
+    }
 
     if (!user) {
       throw new Error("User not found.");
-    }
-
-    // Verify the email matches
-    if (user.email !== email) {
-      throw new Error("Email and username do not match.");
     }
 
     if (!user.password) {
@@ -186,6 +186,9 @@ export const getUserByUsername = internalQuery({
       email: v.optional(v.string()),
       password: v.optional(v.string()),
       emailVerificationTime: v.optional(v.number()),
+      gender: v.optional(v.string()),
+      dob: v.optional(v.string()),
+      role: v.optional(v.string()),
     }),
     v.null()
   ),
@@ -194,6 +197,31 @@ export const getUserByUsername = internalQuery({
       .query("users")
       .withIndex("by_username", (q) => q.eq("username", username))
       .unique();
+  },
+});
+
+export const getUserByEmail = internalQuery({
+  args: { email: v.string() },
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      _creationTime: v.number(),
+      name: v.optional(v.string()),
+      username: v.optional(v.string()),
+      email: v.optional(v.string()),
+      password: v.optional(v.string()),
+      emailVerificationTime: v.optional(v.number()),
+      gender: v.optional(v.string()),
+      dob: v.optional(v.string()),
+      role: v.optional(v.string()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, { email }) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", email))
+      .first();
   },
 });
 
