@@ -25,7 +25,7 @@ const schema = defineSchema(
     users: defineTable({
       name: v.optional(v.string()), // name of the user. do not remove
       image: v.optional(v.string()), // image of the user. do not remove
-      email: v.string(), // email of the user. now required
+      email: v.optional(v.string()), // email of the user. do not remove
       emailVerificationTime: v.optional(v.number()), // email verification time. do not remove
       isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
       role: v.optional(roleValidator), // role of the user. do not remove
