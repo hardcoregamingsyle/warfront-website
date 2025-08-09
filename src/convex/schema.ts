@@ -31,11 +31,11 @@ const schema = defineSchema(
       role: v.optional(roleValidator), // role of the user. do not remove
 
       // Custom fields for signup
-      username: v.optional(v.string()),
+      username: v.string(),
       gender: v.optional(v.string()),
       dob: v.optional(v.string()), // Date of Birth
       region: v.optional(v.string()),
-      password: v.optional(v.string()), // This will be a hashed password
+      password: v.string(), // This will be a hashed password
       twoFactorEnabled: v.optional(v.boolean()),
     })
       .index("email", ["email"]) // index for the email. do not remove or modify
