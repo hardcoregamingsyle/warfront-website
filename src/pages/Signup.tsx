@@ -36,6 +36,9 @@ import {
 } from "@/components/ui/input-otp";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { countries } from "countries-list";
+
+const countryNames = Object.values(countries).map((country) => country.name);
 
 const signupSchema = z
   .object({
@@ -45,7 +48,7 @@ const signupSchema = z
     dob: z.string().refine((val) => !isNaN(Date.parse(val)), {
       message: "Invalid date format",
     }),
-    region: z.string().min(2, "Region is required"),
+    region: z.string().min(1, "Region is required"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
   })
@@ -213,9 +216,23 @@ export default function Signup() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Region</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., North America" {...field} />
-                        </FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your region" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {countryNames.map((countryName) => (
+                              <SelectItem key={countryName} value={countryName}>
+                                {countryName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
