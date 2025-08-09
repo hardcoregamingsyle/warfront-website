@@ -177,6 +177,12 @@ export const verifyPassword = query({
       throw new Error("User not found.");
     }
 
+    if (!user.password) {
+      throw new Error(
+        "Password login not available for this account. Please use another sign-in method.",
+      );
+    }
+
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
