@@ -3,7 +3,7 @@ import { internal } from "./_generated/api";
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { ROLES } from "./schema";
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcryptjs";
 
 /**
  * Get the current signed in user. Returns null if the user is not signed in.
@@ -39,50 +39,57 @@ export const startSignup = mutation({
     region: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const existingUserByEmail = await ctx.db
-      .query("users")
-      .withIndex("email", (q) => q.eq("email", args.email))
-      .unique();
+    try {
+      const existingUserByEmail = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", args.email))
+        .unique();
 
-    if (existingUserByEmail) {
-      throw new Error("An account with this email already exists.");
+      if (existingUserByEmail) {
+        throw new Error("An account with this email already exists.");
+      }
+
+      const existingUserByUsername = await ctx.db
+        .query("users")
+        .withIndex("username", (q) => q.eq("username", args.username))
+        .unique();
+
+      if (existingUserByUsername) {
+        throw new Error("This username is already taken.");
+      }
+
+      const existingPendingUser = await ctx.db
+        .query("pendingUsers")
+        .withIndex("email", (q) => q.eq("email", args.email))
+        .unique();
+
+      if (existingPendingUser) {
+        await ctx.db.delete(existingPendingUser._id);
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(args.password, salt);
+
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+      await ctx.db.insert("pendingUsers", {
+        ...args,
+        password: hashedPassword,
+        otp,
+        otpExpires,
+      });
+
+      await ctx.scheduler.runAfter(0, internal.auth_actions.sendOtpEmail, {
+        email: args.email,
+        otp,
+      });
+    } catch (error: any) {
+      console.error("Error in startSignup mutation:", error);
+      throw new Error(
+        error.message || "An unknown error occurred during signup.",
+      );
     }
-
-    const existingUserByUsername = await ctx.db
-      .query("users")
-      .withIndex("username", (q) => q.eq("username", args.username))
-      .unique();
-
-    if (existingUserByUsername) {
-      throw new Error("This username is already taken.");
-    }
-
-    const existingPendingUser = await ctx.db
-      .query("pendingUsers")
-      .withIndex("email", (q) => q.eq("email", args.email))
-      .unique();
-
-    if (existingPendingUser) {
-      await ctx.db.delete(existingPendingUser._id);
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(args.password, salt);
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-    await ctx.db.insert("pendingUsers", {
-      ...args,
-      password: hashedPassword,
-      otp,
-      otpExpires,
-    });
-
-    await ctx.scheduler.runAfter(0, internal.auth_actions.sendOtpEmail, {
-      email: args.email,
-      otp,
-    });
   },
 });
 
