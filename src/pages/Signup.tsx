@@ -118,7 +118,7 @@ export default function Signup() {
   const { setToken } = useAuth();
   const onOtpSubmit = async (values: OtpFormValues) => {
     try {
-      const token = await verifyOtpAndCreateUser({
+      const { token } = await verifyOtpAndCreateUser({
         email: emailForOtp,
         otp: values.otp,
       });

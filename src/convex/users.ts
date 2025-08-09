@@ -153,7 +153,16 @@ export const verifyOtpAndCreateUser = mutation({
 
     await ctx.db.delete(pendingUser._id);
 
-    return userId;
+    const token = nanoid();
+    const expires = Date.now() + SESSION_DURATION;
+
+    await ctx.db.insert("sessions", {
+      userId: userId,
+      token,
+      expires,
+    });
+
+    return { token };
   },
 });
 
