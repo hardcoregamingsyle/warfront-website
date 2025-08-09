@@ -40,50 +40,69 @@ export const startSignup = mutation({
   },
   handler: async (ctx, args) => {
     try {
+      console.log("Starting signup for:", args.email);
+
+      console.log("Checking for existing user by email...");
       const existingUserByEmail = await ctx.db
         .query("users")
         .withIndex("email", (q) => q.eq("email", args.email))
         .unique();
 
       if (existingUserByEmail) {
+        console.log("User with this email already exists.");
         throw new Error("An account with this email already exists.");
       }
+      console.log("No existing user with this email.");
 
+      console.log("Checking for existing user by username...");
       const existingUserByUsername = await ctx.db
         .query("users")
         .withIndex("username", (q) => q.eq("username", args.username))
         .unique();
 
       if (existingUserByUsername) {
+        console.log("User with this username already exists.");
         throw new Error("This username is already taken.");
       }
+      console.log("No existing user with this username.");
 
+      console.log("Checking for pending user...");
       const existingPendingUser = await ctx.db
         .query("pendingUsers")
         .withIndex("email", (q) => q.eq("email", args.email))
         .unique();
 
       if (existingPendingUser) {
+        console.log("Deleting existing pending user.");
         await ctx.db.delete(existingPendingUser._id);
       }
+      console.log("No pending user found or deleted.");
 
+      console.log("Hashing password...");
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(args.password, salt);
+      console.log("Password hashed.");
 
+      console.log("Generating OTP...");
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+      console.log("OTP generated.");
 
+      console.log("Inserting into pendingUsers...");
       await ctx.db.insert("pendingUsers", {
         ...args,
         password: hashedPassword,
         otp,
         otpExpires,
       });
+      console.log("Inserted into pendingUsers.");
 
+      console.log("Scheduling OTP email...");
       await ctx.scheduler.runAfter(0, internal.auth_actions.sendOtpEmail, {
         email: args.email,
         otp,
       });
+      console.log("OTP email scheduled. Signup process successful.");
     } catch (error: any) {
       console.error("Error in startSignup mutation:", error);
       throw new Error(
