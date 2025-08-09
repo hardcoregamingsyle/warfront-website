@@ -105,7 +105,12 @@ export default function Signup() {
       setStep("otp");
       toast.success("Verification code sent to your email!");
     } catch (error: any) {
-      toast.error(error.data || "Failed to start signup. Please try again.");
+      console.error("Signup failed:", error);
+      toast.error(
+        error?.data?.message ||
+          error?.data ||
+          "Failed to start signup. Please try again.",
+      );
     }
   };
 
@@ -118,7 +123,10 @@ export default function Signup() {
       toast.success("Account created successfully! You can now log in.");
       navigate("/login");
     } catch (error: any) {
-      toast.error(error.data || "Invalid OTP or request expired.");
+      console.error("OTP verification failed:", error);
+      toast.error(
+        error?.data?.message || error?.data || "Invalid OTP or request expired.",
+      );
     }
   };
 
