@@ -1,33 +1,39 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
-import { mutation, query, QueryCtx } from "./_generated/server";
+import {
+  action,
+  internalMutation,
+  mutation,
+  query,
+  QueryCtx,
+} from "./_generated/server";
 import { v } from "convex/values";
 import { ROLES } from "./schema";
 import * as bcrypt from "bcryptjs";
+import { nanoid } from "nanoid";
 
-/**
- * Get the current signed in user. Returns null if the user is not signed in.
- * THIS FUNCTION IS READ-ONLY. DO NOT MODIFY.
- */
-export const currentUser = query({
-  args: {},
-  handler: async (ctx) => {
-    return await getCurrentUser(ctx);
-  },
-});
+const SESSION_DURATION = 1000 * 60 * 60 * 24 * 7; // 7 days
 
-/**
- * Use this function internally to get the current user data. Remember to handle the null user case.
- * @param ctx
- * @returns
- */
-export const getCurrentUser = async (ctx: QueryCtx) => {
-  const userId = await getAuthUserId(ctx);
-  if (userId === null) {
+async function getUserFromSession(ctx: QueryCtx, token?: string) {
+  if (!token) return null;
+
+  const userSession = await ctx.db
+    .query("sessions")
+    .withIndex("by_token", (q) => q.eq("token", token))
+    .unique();
+
+  if (!userSession || userSession.expires < Date.now()) {
     return null;
   }
-  return await ctx.db.get(userId);
-};
+
+  return await ctx.db.get(userSession.userId);
+}
+
+export const currentUser = query({
+  args: { token: v.optional(v.string()) },
+  handler: async (ctx, { token }) => {
+    return await getUserFromSession(ctx, token);
+  },
+});
 
 export const startSignup = mutation({
   args: {
@@ -188,5 +194,63 @@ export const verifyPassword = query({
       email: user.email,
       twoFactorEnabled: user.twoFactorEnabled ?? false,
     };
+  },
+});
+
+export const login = mutation({
+  args: {
+    identifier: v.string(),
+    password: v.string(),
+  },
+  handler: async (ctx, { identifier, password }) => {
+    // Try to find user by email
+    let user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", identifier))
+      .unique();
+
+    // If not found, try to find by username
+    if (!user) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("username", (q) => q.eq("username", identifier))
+        .unique();
+    }
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      throw new Error("Incorrect password.");
+    }
+
+    // Create session
+    const token = nanoid();
+    const expires = Date.now() + SESSION_DURATION;
+
+    await ctx.db.insert("sessions", {
+      userId: user._id,
+      token,
+      expires,
+    });
+
+    return token;
+  },
+});
+
+export const logout = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (session) {
+      await ctx.db.delete(session._id);
+    }
   },
 });

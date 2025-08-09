@@ -1,4 +1,3 @@
-import { AuthCard } from "@/components/auth/AuthCard";
 import { useAuth } from "@/hooks/use-auth";
 import { Suspense, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
@@ -14,9 +13,14 @@ function SignIn() {
     }
   }, [isLoading, isAuthenticated, searchParams, navigate]);
 
+  useEffect(() => {
+    // Redirect to login page since we removed AuthCard
+    navigate("/login");
+  }, [navigate]);
+
   return (
     <div className="flex h-screen items-center justify-center">
-      <AuthCard />
+      <p>Redirecting to login...</p>
     </div>
   );
 }

@@ -37,6 +37,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { countries } from "countries-list";
+import { useAuth } from "@/hooks/use-auth";
 
 const countryNames = Object.values(countries).map((country) => country.name);
 
@@ -114,14 +115,16 @@ export default function Signup() {
     }
   };
 
+  const { setToken } = useAuth();
   const onOtpSubmit = async (values: OtpFormValues) => {
     try {
-      await verifyOtpAndCreateUser({
+      const token = await verifyOtpAndCreateUser({
         email: emailForOtp,
         otp: values.otp,
       });
-      toast.success("Account created successfully! You can now log in.");
-      navigate("/login");
+      setToken(token);
+      toast.success("Account created successfully!");
+      navigate("/dashboard");
     } catch (error: any) {
       console.error("OTP verification failed:", error);
       toast.error(

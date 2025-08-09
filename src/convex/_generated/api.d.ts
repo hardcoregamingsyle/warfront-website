@@ -13,8 +13,6 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as auth_emailOtp from "../auth/emailOtp.js";
-import type * as auth from "../auth.js";
 import type * as auth_actions from "../auth_actions.js";
 import type * as auth_resend from "../auth_resend.js";
 import type * as generators_deleteAllUsers from "../generators/deleteAllUsers.js";
@@ -32,8 +30,6 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  "auth/emailOtp": typeof auth_emailOtp;
-  auth: typeof auth;
   auth_actions: typeof auth_actions;
   auth_resend: typeof auth_resend;
   "generators/deleteAllUsers": typeof generators_deleteAllUsers;

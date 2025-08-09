@@ -45,7 +45,6 @@ export default function Landing() {
             {/* Auth Button */}
             <div className="hidden md:block">
               <AuthButton 
-                useModal={false}
                 trigger={<Button className="bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
               />
             </div>
@@ -77,7 +76,6 @@ export default function Landing() {
                 <a href="#contact" className="block px-3 py-2 text-slate-300 hover:text-white">Contact</a>
                 <div className="px-3 py-2">
                   <AuthButton 
-                    useModal={false}
                     trigger={<Button className="w-full bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
                   />
                 </div>
@@ -113,7 +111,6 @@ export default function Landing() {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <AuthButton 
-                useModal={false}
                 trigger={
                   <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg">
                     <Play className="mr-2 h-5 w-5" />
@@ -267,7 +264,6 @@ export default function Landing() {
             </p>
             <div className="flex justify-center">
               <AuthButton 
-                useModal={false}
                 trigger={
                   <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg">
                     <Play className="mr-2 h-5 w-5" />

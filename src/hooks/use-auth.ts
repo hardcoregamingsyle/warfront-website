@@ -1,23 +1,41 @@
 import { api } from "@/convex/_generated/api";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvexAuth, useQuery } from "convex/react";
-
+import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 
+const TOKEN_KEY = "auth_token";
+
 export function useAuth() {
-  const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
-  const user = useQuery(api.users.currentUser);
-  const { signIn, signOut } = useAuthActions();
+  const [token, setToken] = useState<string | null>(() =>
+    localStorage.getItem(TOKEN_KEY),
+  );
 
-  const [isLoading, setIsLoading] = useState(true);
+  const user = useQuery(api.users.currentUser, token ? { token } : { token: undefined });
+  const login = useMutation(api.users.login);
+  const logoutMutation = useMutation(api.users.logout);
 
-  // This effect updates the loading state once auth is loaded and user data is available
-  // It ensures we only show content when both authentication state and user data are ready
+  const isAuthenticated = !!user;
+  const isLoading = user === undefined;
+
   useEffect(() => {
-    if (!isAuthLoading && user !== undefined) {
-      setIsLoading(false);
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(TOKEN_KEY);
     }
-  }, [isAuthLoading, user]);
+  }, [token]);
+
+  const signIn = async (args: { identifier: string; password: string }) => {
+    const newToken = await login(args);
+    setToken(newToken);
+    return newToken;
+  };
+
+  const signOut = () => {
+    if (token) {
+      logoutMutation({ token });
+    }
+    setToken(null);
+  };
 
   return {
     isLoading,
@@ -25,5 +43,7 @@ export function useAuth() {
     user,
     signIn,
     signOut,
+    token,
+    setToken,
   };
 }

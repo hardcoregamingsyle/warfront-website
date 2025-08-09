@@ -1,4 +1,3 @@
-import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { Infer, v } from "convex/values";
 
@@ -18,17 +17,13 @@ export type Role = Infer<typeof roleValidator>;
 
 const schema = defineSchema(
   {
-    // default auth tables using convex auth.
-    ...authTables, // do not remove or modify
-
-    // the users table is the default users table that is brought in by the authTables
     users: defineTable({
-      name: v.optional(v.string()), // name of the user. do not remove
-      image: v.optional(v.string()), // image of the user. do not remove
-      email: v.optional(v.string()), // email of the user. do not remove
-      emailVerificationTime: v.optional(v.number()), // email verification time. do not remove
-      isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
-      role: v.optional(roleValidator), // role of the user. do not remove
+      name: v.optional(v.string()),
+      image: v.optional(v.string()),
+      email: v.string(),
+      emailVerificationTime: v.optional(v.number()),
+      
+      role: v.optional(roleValidator),
 
       // Custom fields for signup
       username: v.string(),
@@ -38,7 +33,7 @@ const schema = defineSchema(
       password: v.string(), // This will be a hashed password
       twoFactorEnabled: v.optional(v.boolean()),
     })
-      .index("email", ["email"]) // index for the email. do not remove or modify
+      .index("email", ["email"])
       .index("username", ["username"]),
 
     pendingUsers: defineTable({
@@ -51,6 +46,12 @@ const schema = defineSchema(
       otp: v.string(),
       otpExpires: v.number(), // Expiration timestamp
     }).index("email", ["email"]),
+
+    sessions: defineTable({
+      userId: v.id("users"),
+      token: v.string(),
+      expires: v.number(),
+    }).index("by_token", ["token"]),
   },
   {
     schemaValidation: false,
