@@ -1,118 +1,314 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Label } from "@/components/ui/label";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { ArrowRight, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router";
+
+const signupSchema = z
+  .object({
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email(),
+    gender: z.enum(["male", "female", "other", "prefer_not_to_say"]),
+    dob: z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: "Invalid date format",
+    }),
+    region: z.string().min(2, "Region is required"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+type SignupFormValues = z.infer<typeof signupSchema>;
+
+const otpSchema = z.object({
+  otp: z.string().length(6, "Your one-time password must be 6 characters."),
+});
+
+type OtpFormValues = z.infer<typeof otpSchema>;
 
 export default function Signup() {
-  const { signIn } = useAuthActions();
-  const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
-  const [otp, setOtp] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<"details" | "otp">("details");
+  const [emailForOtp, setEmailForOtp] = useState("");
   const navigate = useNavigate();
 
-  const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  const startSignup = useMutation(api.users.startSignup);
+  const verifyOtpAndCreateUser = useMutation(api.users.verifyOtpAndCreateUser);
+
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      gender: "prefer_not_to_say",
+      dob: "",
+      region: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const otpForm = useForm<OtpFormValues>({
+    resolver: zodResolver(otpSchema),
+    defaultValues: { otp: "" },
+  });
+
+  const onDetailsSubmit = async (values: SignupFormValues) => {
     try {
-      const formData = new FormData(event.currentTarget);
-      await signIn("email-otp", formData);
-      setStep({ email: formData.get("email") as string });
-      toast.success("Verification code sent!");
-    } catch (error) {
-      console.error("Email sign-in error:", error);
-      setError("Failed to send verification code. Please try again.");
-    } finally {
-      setIsLoading(false);
+      await startSignup({
+        username: values.username,
+        email: values.email,
+        password: values.password,
+        gender: values.gender,
+        dob: values.dob,
+        region: values.region,
+      });
+      setEmailForOtp(values.email);
+      setStep("otp");
+      toast.success("Verification code sent to your email!");
+    } catch (error: any) {
+      toast.error(error.data || "Failed to start signup. Please try again.");
     }
   };
 
-  const handleOtpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  const onOtpSubmit = async (values: OtpFormValues) => {
     try {
-      const formData = new FormData(event.currentTarget);
-      await signIn("email-otp", formData);
-      toast.success("Account created successfully!");
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("OTP verification error:", error);
-      setError("The verification code you entered is incorrect.");
-    } finally {
-      setIsLoading(false);
+      await verifyOtpAndCreateUser({
+        email: emailForOtp,
+        otp: values.otp,
+      });
+      toast.success("Account created successfully! You can now log in.");
+      navigate("/login");
+    } catch (error: any) {
+      toast.error(error.data || "Invalid OTP or request expired.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-slate-800/50 border-slate-700 text-white">
-        {step === "signIn" ? (
+    <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-slate-800 border-red-500/20">
+        {step === "details" ? (
           <>
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl font-bold tracking-tight text-red-500">Join the Battle</CardTitle>
-              <CardDescription className="text-slate-400">Enter your email to get a verification code.</CardDescription>
+            <CardHeader>
+              <CardTitle className="text-red-400">Create Your Account</CardTitle>
+              <CardDescription>
+                Join the ranks of elite commanders.
+              </CardDescription>
             </CardHeader>
-            <form onSubmit={handleEmailSubmit}>
-              <CardContent>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative flex items-center gap-2">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      name="email"
-                      placeholder="name@example.com"
-                      type="email"
-                      className="pl-9 bg-slate-900/50 border-slate-600 focus:ring-red-500"
-                      disabled={isLoading}
-                      required
-                    />
-                    <Button type="submit" variant="outline" size="icon" disabled={isLoading}>
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-                {error && <p className="mt-4 text-sm text-red-500 text-center">{error}</p>}
-              </CardContent>
-            </form>
+            <CardContent>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onDetailsSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your call sign" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="name@example.com"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Gender</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your gender" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                            <SelectItem value="prefer_not_to_say">
+                              Prefer not to say
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dob"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date of Birth</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="region"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Region</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., North America" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full bg-red-600 hover:bg-red-700"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {form.formState.isSubmitting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Create Account
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
           </>
         ) : (
           <>
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl font-bold tracking-tight text-red-500">Check your email</CardTitle>
-              <CardDescription className="text-slate-400">We've sent a code to {step.email}</CardDescription>
+            <CardHeader>
+              <CardTitle className="text-red-400">Verify Your Email</CardTitle>
+              <CardDescription>
+                Enter the 6-digit code sent to {emailForOtp}
+              </CardDescription>
             </CardHeader>
-            <form onSubmit={handleOtpSubmit}>
-              <CardContent className="space-y-6">
-                <input type="hidden" name="email" value={step.email} />
-                <input type="hidden" name="code" value={otp} />
-                <div className="flex justify-center">
-                  <InputOTP value={otp} onChange={setOtp} maxLength={6} disabled={isLoading}>
-                    <InputOTPGroup>
-                      {Array.from({ length: 6 }).map((_, index) => (
-                        <InputOTPSlot key={index} index={index} />
-                      ))}
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
-                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={isLoading || otp.length !== 6}>
-                  {isLoading ? "Verifying..." : "Verify Account"}
-                </Button>
-                <div className="text-center text-sm text-slate-400">
-                  <Button variant="link" className="p-0 h-auto text-red-500" onClick={() => setStep("signIn")}>
-                    Use a different email
+            <CardContent>
+              <Form {...otpForm}>
+                <form
+                  onSubmit={otpForm.handleSubmit(onOtpSubmit)}
+                  className="space-y-6"
+                >
+                  <FormField
+                    control={otpForm.control}
+                    name="otp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>One-Time Password</FormLabel>
+                        <FormControl>
+                          <InputOTP maxLength={6} {...field}>
+                            <InputOTPGroup className="w-full justify-center">
+                              <InputOTPSlot index={0} />
+                              <InputOTPSlot index={1} />
+                              <InputOTPSlot index={2} />
+                              <InputOTPSlot index={3} />
+                              <InputOTPSlot index={4} />
+                              <InputOTPSlot index={5} />
+                            </InputOTPGroup>
+                          </InputOTP>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full bg-red-600 hover:bg-red-700"
+                    disabled={otpForm.formState.isSubmitting}
+                  >
+                    {otpForm.formState.isSubmitting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Verify and Sign Up
                   </Button>
-                </div>
-              </CardContent>
-            </form>
+                </form>
+              </Form>
+            </CardContent>
           </>
         )}
       </Card>

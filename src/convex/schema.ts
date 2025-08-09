@@ -25,20 +25,32 @@ const schema = defineSchema(
     users: defineTable({
       name: v.optional(v.string()), // name of the user. do not remove
       image: v.optional(v.string()), // image of the user. do not remove
-      email: v.optional(v.string()), // email of the user. do not remove
+      email: v.string(), // email of the user. now required
       emailVerificationTime: v.optional(v.number()), // email verification time. do not remove
       isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
       role: v.optional(roleValidator), // role of the user. do not remove
 
-      // Temporarily removing custom fields to debug auth flow
-      // username: v.optional(v.string()),
-      // gender: v.optional(v.string()),
-      // dob: v.optional(v.string()),
-      // password: v.optional(v.string()),
-    }).index("email", ["email"]), // index for the email. do not remove or modify
+      // Custom fields for signup
+      username: v.string(),
+      gender: v.optional(v.string()),
+      dob: v.optional(v.string()), // Date of Birth
+      region: v.optional(v.string()),
+      password: v.string(), // This will be a hashed password
+      twoFactorEnabled: v.optional(v.boolean()),
+    })
+      .index("email", ["email"]) // index for the email. do not remove or modify
+      .index("username", ["username"]),
 
-    // Removing pendingUsers table to simplify the flow
-    // pendingUsers: defineTable({ ...
+    pendingUsers: defineTable({
+      username: v.string(),
+      email: v.string(),
+      password: v.string(), // Hashed password
+      gender: v.optional(v.string()),
+      dob: v.optional(v.string()),
+      region: v.optional(v.string()),
+      otp: v.string(),
+      otpExpires: v.number(), // Expiration timestamp
+    }).index("email", ["email"]),
   },
   {
     schemaValidation: false,
