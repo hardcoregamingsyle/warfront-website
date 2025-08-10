@@ -27,11 +27,9 @@ const schema = defineSchema(
 
       // Custom fields for signup
       username: v.string(),
-      gender: v.optional(v.string()),
-      dob: v.optional(v.string()), // Date of Birth
-      region: v.optional(v.string()),
       password: v.string(), // This will be a hashed password
       twoFactorEnabled: v.optional(v.boolean()),
+      faction: v.optional(v.string()),
     })
       .index("email", ["email"])
       .index("username", ["username"]),
@@ -40,9 +38,7 @@ const schema = defineSchema(
       username: v.string(),
       email: v.string(),
       password: v.string(), // Hashed password
-      gender: v.optional(v.string()),
-      dob: v.optional(v.string()),
-      region: v.optional(v.string()),
+      faction: v.optional(v.string()),
       otp: v.string(),
       otpExpires: v.number(), // Expiration timestamp
     }).index("email", ["email"]),

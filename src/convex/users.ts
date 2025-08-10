@@ -40,9 +40,7 @@ export const startSignup = mutation({
     username: v.string(),
     email: v.string(),
     password: v.string(),
-    gender: v.optional(v.string()),
-    dob: v.optional(v.string()),
-    region: v.optional(v.string()),
+    faction: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     try {

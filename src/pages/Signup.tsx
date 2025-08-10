@@ -45,11 +45,7 @@ const signupSchema = z
   .object({
     username: z.string().min(3, "Username must be at least 3 characters"),
     email: z.string().email(),
-    gender: z.enum(["male", "female", "other", "prefer_not_to_say"]),
-    dob: z.string().refine((val) => !isNaN(Date.parse(val)), {
-      message: "Invalid date format",
-    }),
-    region: z.string().min(1, "Region is required"),
+    faction: z.enum(["valkyrie", "sentinel", "reaver", "aegis"]),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
   })
@@ -79,9 +75,7 @@ export default function Signup() {
     defaultValues: {
       username: "",
       email: "",
-      gender: "prefer_not_to_say",
-      dob: "",
-      region: "",
+      faction: "valkyrie" as const,
       password: "",
       confirmPassword: "",
     },
@@ -98,9 +92,7 @@ export default function Signup() {
         username: values.username,
         email: values.email,
         password: values.password,
-        gender: values.gender,
-        dob: values.dob,
-        region: values.region,
+        faction: values.faction,
       });
       setEmailForOtp(values.email);
       setStep("otp");
@@ -182,66 +174,24 @@ export default function Signup() {
                   />
                   <FormField
                     control={form.control}
-                    name="gender"
+                    name="faction"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gender</FormLabel>
+                        <FormLabel>Faction</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select your gender" />
+                              <SelectValue placeholder="Select your faction" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="male">Male</SelectItem>
-                            <SelectItem value="female">Female</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                            <SelectItem value="prefer_not_to_say">
-                              Prefer not to say
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="dob"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date of Birth</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="region"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Region</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select your region" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {countryNames.map((countryName) => (
-                              <SelectItem key={countryName} value={countryName}>
-                                {countryName}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="valkyrie">Valkyrie</SelectItem>
+                            <SelectItem value="sentinel">Sentinel</SelectItem>
+                            <SelectItem value="reaver">Reaver</SelectItem>
+                            <SelectItem value="aegis">Aegis</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
