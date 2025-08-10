@@ -308,6 +308,7 @@ export default function Signup() {
                 <form
                   onSubmit={otpForm.handleSubmit(onOtpSubmit)}
                   className="space-y-6"
+                  autoComplete="off"
                 >
                   <FormField
                     control={otpForm.control}
@@ -320,7 +321,7 @@ export default function Signup() {
                             maxLength={6}
                             {...field}
                             placeholder="______"
-                            autoComplete="one-time-code"
+                            autoComplete="off"
                             className="text-center text-2xl tracking-[0.8em]"
                           />
                         </FormControl>
