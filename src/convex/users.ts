@@ -36,7 +36,67 @@ export const currentUser = query({
   },
 });
 
-export const startSignup = mutation({
+export const _getSignupChecks = internalQuery({
+  args: { email: v.string(), username: v.string() },
+  handler: async (ctx, { email, username }) => {
+    const existingUserByEmail = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", email))
+      .unique();
+
+    const existingUserByUsername = await ctx.db
+      .query("users")
+      .withIndex("username", (q) => q.eq("username", username))
+      .unique();
+
+    const existingPendingUser = await ctx.db
+      .query("pendingUsers")
+      .withIndex("email", (q) => q.eq("email", email))
+      .unique();
+
+    return {
+      existingUserByEmail,
+      existingUserByUsername,
+      existingPendingUser,
+    };
+  },
+});
+
+export const _clearAndCreatePendingUser = internalMutation({
+  args: {
+    userData: v.object({
+      username: v.string(),
+      email: v.string(),
+      password: v.string(), // Hashed
+      gender: v.optional(v.string()),
+      dob: v.optional(v.string()),
+      region: v.optional(v.string()),
+    }),
+    otp: v.string(),
+    otpExpires: v.number(),
+    userToDelete: v.optional(v.id("users")),
+    pendingUserToDelete: v.optional(v.id("pendingUsers")),
+  },
+  handler: async (
+    ctx,
+    { userData, otp, otpExpires, userToDelete, pendingUserToDelete },
+  ) => {
+    if (userToDelete) {
+      await ctx.db.delete(userToDelete);
+    }
+    if (pendingUserToDelete) {
+      await ctx.db.delete(pendingUserToDelete);
+    }
+
+    await ctx.db.insert("pendingUsers", {
+      ...userData,
+      otp,
+      otpExpires,
+    });
+  },
+});
+
+export const startSignup = action({
   args: {
     username: v.string(),
     email: v.string(),
@@ -49,47 +109,28 @@ export const startSignup = mutation({
     try {
       console.log("Starting signup for:", args.email);
 
-      console.log("Checking for existing user by email...");
-      const existingUserByEmail = await ctx.db
-        .query("users")
-        .withIndex("email", (q) => q.eq("email", args.email))
-        .unique();
+      const {
+        existingUserByEmail,
+        existingUserByUsername,
+        existingPendingUser,
+      } = await ctx.runQuery(internal.users._getSignupChecks, {
+        email: args.email,
+        username: args.username,
+      });
 
       if (existingUserByEmail) {
         if (existingUserByEmail.emailVerificationTime) {
           console.log("User with this email already exists and is verified.");
-          throw new Error("An account with this email already exists. Please log in.");
-        } else {
-          // User exists but is not verified (leftover from failed signup).
-          // Delete them to allow re-signup.
-          console.log("Existing unverified user found. Deleting to allow re-signup.");
-          await ctx.db.delete(existingUserByEmail._id);
+          throw new Error(
+            "An account with this email already exists. Please log in.",
+          );
         }
       }
-
-      console.log("Checking for existing user by username...");
-      const existingUserByUsername = await ctx.db
-        .query("users")
-        .withIndex("username", (q) => q.eq("username", args.username))
-        .unique();
 
       if (existingUserByUsername) {
         console.log("User with this username already exists.");
         throw new Error("This username is already taken.");
       }
-      console.log("No existing user with this username.");
-
-      console.log("Checking for pending user...");
-      const existingPendingUser = await ctx.db
-        .query("pendingUsers")
-        .withIndex("email", (q) => q.eq("email", args.email))
-        .unique();
-
-      if (existingPendingUser) {
-        console.log("Deleting existing pending user.");
-        await ctx.db.delete(existingPendingUser._id);
-      }
-      console.log("No pending user found or deleted.");
 
       console.log("Hashing password...");
       const salt = await bcrypt.genSalt(10);
@@ -101,12 +142,16 @@ export const startSignup = mutation({
       const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
       console.log("OTP generated.");
 
-      console.log("Inserting into pendingUsers...");
-      await ctx.db.insert("pendingUsers", {
-        ...args,
-        password: hashedPassword,
+      console.log("Clearing old entries and inserting into pendingUsers...");
+      await ctx.runMutation(internal.users._clearAndCreatePendingUser, {
+        userData: {
+          ...args,
+          password: hashedPassword,
+        },
         otp,
         otpExpires,
+        userToDelete: existingUserByEmail?._id,
+        pendingUserToDelete: existingPendingUser?._id,
       });
       console.log("Inserted into pendingUsers.");
 
@@ -117,7 +162,7 @@ export const startSignup = mutation({
       });
       console.log("OTP email scheduled. Signup process successful.");
     } catch (error: any) {
-      console.error("Error in startSignup mutation:", error);
+      console.error("Error in startSignup action:", error);
       throw new Error(
         error.message || "An unknown error occurred during signup.",
       );

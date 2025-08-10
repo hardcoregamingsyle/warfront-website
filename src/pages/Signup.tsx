@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import {
@@ -69,7 +69,7 @@ export default function Signup() {
   const [emailForOtp, setEmailForOtp] = useState("");
   const navigate = useNavigate();
 
-  const startSignup = useMutation(api.users.startSignup);
+  const startSignup = useAction(api.users.startSignup);
   const verifyOtpAndCreateUser = useMutation(api.users.verifyOtpAndCreateUser);
 
   const form = useForm<SignupFormValues>({
