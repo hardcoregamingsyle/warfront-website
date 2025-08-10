@@ -316,16 +316,13 @@ export default function Signup() {
                       <FormItem>
                         <FormLabel>One-Time Password</FormLabel>
                         <FormControl>
-                          <InputOTP maxLength={6} {...field}>
-                            <InputOTPGroup className="w-full justify-center">
-                              <InputOTPSlot index={0} />
-                              <InputOTPSlot index={1} />
-                              <InputOTPSlot index={2} />
-                              <InputOTPSlot index={3} />
-                              <InputOTPSlot index={4} />
-                              <InputOTPSlot index={5} />
-                            </InputOTPGroup>
-                          </InputOTP>
+                          <Input
+                            maxLength={6}
+                            {...field}
+                            placeholder="______"
+                            autoComplete="one-time-code"
+                            className="text-center text-2xl tracking-[0.8em]"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

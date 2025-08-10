@@ -10,6 +10,7 @@ function InputOTP({
   ...props
 }: React.ComponentProps<typeof OTPInput> & {
   containerClassName?: string;
+  autoComplete?: string;
 }) {
   return (
     <OTPInput
