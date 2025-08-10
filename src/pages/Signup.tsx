@@ -2,6 +2,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useNavigate, Link } from "react-router";
+import { useAction, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { countries } from "countries-list";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,18 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMutation, useAction } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { toast } from "sonner";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { Loader2 } from "lucide-react";
-import { Link, useNavigate } from "react-router";
-import { countries } from "countries-list";
-import { useAuth } from "@/hooks/use-auth";
 
 const countryNames = Object.values(countries).map((country) => country.name);
 
@@ -59,7 +54,9 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 const otpSchema = z.object({
-  verificationCode: z.string().length(6, "Your one-time password must be 6 characters."),
+  oneTimeCode: z
+    .string()
+    .length(6, "Your one-time password must be 6 characters."),
 });
 
 type OtpFormValues = z.infer<typeof otpSchema>;
@@ -67,6 +64,7 @@ type OtpFormValues = z.infer<typeof otpSchema>;
 export default function Signup() {
   const [step, setStep] = useState<"details" | "otp">("details");
   const [emailForOtp, setEmailForOtp] = useState("");
+  const [isOtpFieldActive, setIsOtpFieldActive] = useState(false);
   const navigate = useNavigate();
 
   const startSignup = useAction(api.users.startSignup);
@@ -87,7 +85,7 @@ export default function Signup() {
 
   const otpForm = useForm<OtpFormValues>({
     resolver: zodResolver(otpSchema),
-    defaultValues: { verificationCode: "" },
+    defaultValues: { oneTimeCode: "" },
   });
 
   const onDetailsSubmit = async (values: SignupFormValues) => {
@@ -116,7 +114,7 @@ export default function Signup() {
     try {
       const { token } = await verifyOtpAndCreateUser({
         email: emailForOtp,
-        otp: values.verificationCode,
+        otp: values.oneTimeCode,
       });
       setToken(token);
       toast.success("Account created successfully!");
@@ -124,7 +122,9 @@ export default function Signup() {
     } catch (error: any) {
       console.error("OTP verification failed:", error);
       toast.error(
-        error?.data?.message || error?.data || "Invalid OTP or request expired.",
+        error?.data?.message ||
+          error?.data ||
+          "Invalid OTP or request expired.",
       );
     }
   };
@@ -135,7 +135,9 @@ export default function Signup() {
         {step === "details" ? (
           <>
             <CardHeader>
-              <CardTitle className="text-red-400">Create Your Account</CardTitle>
+              <CardTitle className="text-red-400">
+                Create Your Account
+              </CardTitle>
               <CardDescription>
                 Join the ranks of elite commanders.
               </CardDescription>
@@ -310,19 +312,27 @@ export default function Signup() {
                   className="space-y-6"
                   autoComplete="off"
                 >
+                  {/* Autofill trap */}
+                  <div style={{ position: "absolute", left: "-9999px" }}>
+                    <input type="text" autoComplete="username" />
+                    <input type="password" autoComplete="current-password" />
+                  </div>
                   <FormField
                     control={otpForm.control}
-                    name="verificationCode"
+                    name="oneTimeCode"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>One-Time Password</FormLabel>
                         <FormControl>
                           <Input
-                            maxLength={6}
                             {...field}
-                            placeholder="______"
-                            autoComplete="off"
+                            maxLength={6}
+                            placeholder="_ _ _ _ _ _"
                             className="text-center text-2xl tracking-[0.8em]"
+                            autoComplete="one-time-code"
+                            inputMode="numeric"
+                            readOnly={!isOtpFieldActive}
+                            onFocus={() => setIsOtpFieldActive(true)}
                           />
                         </FormControl>
                         <FormMessage />
