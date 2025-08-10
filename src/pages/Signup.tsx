@@ -59,7 +59,7 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 const otpSchema = z.object({
-  otp: z.string().length(6, "Your one-time password must be 6 characters."),
+  verificationCode: z.string().length(6, "Your one-time password must be 6 characters."),
 });
 
 type OtpFormValues = z.infer<typeof otpSchema>;
@@ -87,7 +87,7 @@ export default function Signup() {
 
   const otpForm = useForm<OtpFormValues>({
     resolver: zodResolver(otpSchema),
-    defaultValues: { otp: "" },
+    defaultValues: { verificationCode: "" },
   });
 
   const onDetailsSubmit = async (values: SignupFormValues) => {
@@ -116,7 +116,7 @@ export default function Signup() {
     try {
       const { token } = await verifyOtpAndCreateUser({
         email: emailForOtp,
-        otp: values.otp,
+        otp: values.verificationCode,
       });
       setToken(token);
       toast.success("Account created successfully!");
@@ -312,7 +312,7 @@ export default function Signup() {
                 >
                   <FormField
                     control={otpForm.control}
-                    name="otp"
+                    name="verificationCode"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>One-Time Password</FormLabel>
