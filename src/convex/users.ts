@@ -2,6 +2,7 @@ import { internal } from "./_generated/api";
 import {
   action,
   internalMutation,
+  internalQuery,
   mutation,
   query,
   QueryCtx,
@@ -173,12 +174,10 @@ export const verifyOtpAndCreateUser = mutation({
   },
 });
 
-export const verifyPassword = query({
-  args: {
-    identifier: v.string(),
-    password: v.string(),
-  },
-  handler: async (ctx, { identifier, password }) => {
+// This is an internal helper query, not exposed to the client directly.
+export const _getUserByIdentifier = internalQuery({
+  args: { identifier: v.string() },
+  handler: async (ctx, { identifier }) => {
     // Try to find user by email
     let user = await ctx.db
       .query("users")
@@ -189,11 +188,40 @@ export const verifyPassword = query({
     if (!user) {
       user = await ctx.db
         .query("users")
-        // This will throw an error if the `username` index doesn't exist.
-        // I've already added it in `schema.ts`.
         .withIndex("username", (q) => q.eq("username", identifier))
         .unique();
     }
+
+    return user;
+  },
+});
+
+// This is an internal helper mutation, not exposed to the client directly.
+export const _createSession = internalMutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const token = nanoid();
+    const expires = Date.now() + SESSION_DURATION;
+
+    await ctx.db.insert("sessions", {
+      userId: userId,
+      token,
+      expires,
+    });
+
+    return token;
+  },
+});
+
+export const verifyPassword = action({
+  args: {
+    identifier: v.string(),
+    password: v.string(),
+  },
+  handler: async (ctx, { identifier, password }): Promise<{email: string, twoFactorEnabled: boolean}> => {
+    const user = await ctx.runQuery(internal.users._getUserByIdentifier, {
+      identifier,
+    });
 
     if (!user) {
       throw new Error("User not found.");
@@ -207,31 +235,21 @@ export const verifyPassword = query({
 
     // Return email for the next step (OTP) and 2FA status
     return {
-      email: user.email,
+      email: user.email!,
       twoFactorEnabled: user.twoFactorEnabled ?? false,
     };
   },
 });
 
-export const login = mutation({
+export const login = action({
   args: {
     identifier: v.string(),
     password: v.string(),
   },
-  handler: async (ctx, { identifier, password }) => {
-    // Try to find user by email
-    let user = await ctx.db
-      .query("users")
-      .withIndex("email", (q) => q.eq("email", identifier))
-      .unique();
-
-    // If not found, try to find by username
-    if (!user) {
-      user = await ctx.db
-        .query("users")
-        .withIndex("username", (q) => q.eq("username", identifier))
-        .unique();
-    }
+  handler: async (ctx, { identifier, password }): Promise<string> => {
+    const user = await ctx.runQuery(internal.users._getUserByIdentifier, {
+      identifier,
+    });
 
     if (!user) {
       throw new Error("User not found.");
@@ -243,14 +261,8 @@ export const login = mutation({
       throw new Error("Incorrect password.");
     }
 
-    // Create session
-    const token = nanoid();
-    const expires = Date.now() + SESSION_DURATION;
-
-    await ctx.db.insert("sessions", {
+    const token = await ctx.runMutation(internal.users._createSession, {
       userId: user._id,
-      token,
-      expires,
     });
 
     return token;

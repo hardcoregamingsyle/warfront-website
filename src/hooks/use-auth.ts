@@ -1,5 +1,5 @@
 import { api } from "@/convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { useEffect, useState } from "react";
 
 const TOKEN_KEY = "auth_token";
@@ -10,7 +10,7 @@ export function useAuth() {
   );
 
   const user = useQuery(api.users.currentUser, token ? { token } : { token: undefined });
-  const login = useMutation(api.users.login);
+  const login = useAction(api.users.login);
   const logoutMutation = useMutation(api.users.logout);
 
   const isAuthenticated = !!user;
