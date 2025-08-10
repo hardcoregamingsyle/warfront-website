@@ -55,10 +55,16 @@ export const startSignup = mutation({
         .unique();
 
       if (existingUserByEmail) {
-        console.log("User with this email already exists.");
-        throw new Error("An account with this email already exists.");
+        if (existingUserByEmail.emailVerificationTime) {
+          console.log("User with this email already exists and is verified.");
+          throw new Error("An account with this email already exists. Please log in.");
+        } else {
+          // User exists but is not verified (leftover from failed signup).
+          // Delete them to allow re-signup.
+          console.log("Existing unverified user found. Deleting to allow re-signup.");
+          await ctx.db.delete(existingUserByEmail._id);
+        }
       }
-      console.log("No existing user with this email.");
 
       console.log("Checking for existing user by username...");
       const existingUserByUsername = await ctx.db
@@ -148,6 +154,7 @@ export const verifyOtpAndCreateUser = mutation({
       ...userData,
       name: userData.username,
       role: ROLES.USER,
+      emailVerificationTime: Date.now(), // Mark email as verified
       twoFactorEnabled: false,
     });
 

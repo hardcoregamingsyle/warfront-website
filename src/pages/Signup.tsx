@@ -35,7 +35,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Loader2 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { countries } from "countries-list";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -106,9 +106,7 @@ export default function Signup() {
     } catch (error: any) {
       console.error("Signup failed:", error);
       toast.error(
-        error?.data?.message ||
-          error?.data ||
-          "Failed to start signup. Please try again.",
+        error.message || "Failed to start signup. Please try again.",
       );
     }
   };
@@ -286,6 +284,15 @@ export default function Signup() {
                   </Button>
                 </form>
               </Form>
+              <p className="mt-4 text-center text-sm text-slate-400">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="font-semibold text-red-400 hover:text-red-500"
+                >
+                  Log in
+                </Link>
+              </p>
             </CardContent>
           </>
         ) : (
