@@ -20,12 +20,12 @@ export default function Header() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="sticky top-0 z-50 w-full border-b border-slate-700 bg-slate-900"
     >
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
         <Link to="/" className="mr-6 flex items-center space-x-2">
           <img src="/assets/Untitled_design.png" alt="Warfront Logo" className="h-12 w-auto" />
-          <span className="hidden font-bold sm:inline-block">Warfront</span>
+          <span className="hidden font-bold sm:inline-block text-red-500">Warfront</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm">
@@ -33,7 +33,7 @@ export default function Header() {
             <Link
               key={link.href}
               to={link.href}
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="transition-colors hover:text-red-400 text-red-500 font-medium"
             >
               {link.label}
             </Link>
@@ -47,7 +47,7 @@ export default function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden text-red-500 hover:text-red-400"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -60,21 +60,21 @@ export default function Header() {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
-          className="md:hidden bg-background/95"
+          className="md:hidden bg-slate-900"
         >
           <div className="px-4 pt-2 pb-4 space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-foreground/80 hover:bg-accent"
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-red-500 hover:bg-slate-800"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.icon}
                 {link.label}
               </Link>
             ))}
-            <div className="border-t border-border/40 pt-4">
+            <div className="border-t border-slate-700 pt-4">
               <UserButton />
             </div>
           </div>
