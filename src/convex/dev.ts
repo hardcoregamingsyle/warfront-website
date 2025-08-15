@@ -10,11 +10,7 @@ export const deleteAll = mutation({
     const sessionDeletions = sessions.map(session => ctx.db.delete(session._id));
     await Promise.all(sessionDeletions);
 
-    const pendingUsers = await ctx.db.query("pendingUsers").collect();
-    const pendingUserDeletions = pendingUsers.map(pendingUser => ctx.db.delete(pendingUser._id));
-    await Promise.all(pendingUserDeletions);
-
-    console.log(`Deleted ${users.length} users, ${sessions.length} sessions, and ${pendingUsers.length} pending users.`);
-    return `Deleted ${users.length} users, ${sessions.length} sessions, and ${pendingUsers.length} pending users.`;
+    console.log(`Deleted ${users.length} users, ${sessions.length} sessions.`);
+    return `Deleted ${users.length} users, ${sessions.length} sessions.`;
   },
 });

@@ -36,17 +36,6 @@ const schema = defineSchema(
       .index("email", ["email"])
       .index("username", ["username"]),
 
-    pendingUsers: defineTable({
-      username: v.string(),
-      email: v.string(),
-      password: v.string(), // Hashed password
-      gender: v.optional(v.string()),
-      dob: v.optional(v.string()),
-      region: v.optional(v.string()),
-      otp: v.string(),
-      otpExpires: v.number(), // Expiration timestamp
-    }).index("email", ["email"]),
-
     sessions: defineTable({
       userId: v.id("users"),
       token: v.string(),
