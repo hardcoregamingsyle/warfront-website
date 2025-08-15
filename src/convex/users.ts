@@ -248,3 +248,10 @@ export const logout = mutation({
     }
   },
 });
+
+export const _updateUserPassword = internalMutation({
+    args: { userId: v.id("users"), hashedPassword: v.string() },
+    handler: async (ctx, { userId, hashedPassword }) => {
+        await ctx.db.patch(userId, { password: hashedPassword });
+    },
+});

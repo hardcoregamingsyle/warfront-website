@@ -55,3 +55,39 @@ export const users = action({
     return `Seeded ${usersToCreate.length} users.`;
   },
 });
+
+export const updateUserCredentials = action({
+  handler: async (ctx) => {
+    const newPassword = "Belive*8";
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    const usernamesToUpdate = [
+      "warfront_admin",
+      "admin",
+      "CardSetter1",
+      "CardSetter2",
+      "Warfront_Admin2",
+    ];
+
+    let updatedCount = 0;
+
+    for (const username of usernamesToUpdate) {
+      const user = await ctx.runQuery(internal.users._getUserByIdentifier, {
+        identifier: username,
+      });
+
+      if (user) {
+        await ctx.runMutation(internal.users._updateUserPassword, {
+          userId: user._id,
+          hashedPassword: hashedPassword,
+        });
+        console.log(`Updated password for user: ${username}`);
+        updatedCount++;
+      } else {
+        console.log(`User ${username} not found, skipping.`);
+      }
+    }
+    return `Updated credentials for ${updatedCount} users.`;
+  },
+});
