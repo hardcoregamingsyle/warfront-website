@@ -49,20 +49,14 @@ export const _getSignupChecks = internalQuery({
       .withIndex("username", (q) => q.eq("username", username))
       .unique();
 
-    const existingPendingUser = await ctx.db
-      .query("pendingUsers")
-      .withIndex("email", (q) => q.eq("email", email))
-      .unique();
-
     return {
       existingUserByEmail,
       existingUserByUsername,
-      existingPendingUser,
     };
   },
 });
 
-export const _clearAndCreatePendingUser = internalMutation({
+export const _createUserAndSession = internalMutation({
   args: {
     userData: v.object({
       username: v.string(),
@@ -72,139 +66,15 @@ export const _clearAndCreatePendingUser = internalMutation({
       dob: v.optional(v.string()),
       region: v.optional(v.string()),
     }),
-    otp: v.string(),
-    otpExpires: v.number(),
-    userToDelete: v.optional(v.id("users")),
-    pendingUserToDelete: v.optional(v.id("pendingUsers")),
   },
-  handler: async (
-    ctx,
-    { userData, otp, otpExpires, userToDelete, pendingUserToDelete },
-  ) => {
-    if (userToDelete) {
-      await ctx.db.delete(userToDelete);
-    }
-    if (pendingUserToDelete) {
-      await ctx.db.delete(pendingUserToDelete);
-    }
-
-    await ctx.db.insert("pendingUsers", {
-      ...userData,
-      otp,
-      otpExpires,
-    });
-  },
-});
-
-export const startSignup = action({
-  args: {
-    username: v.string(),
-    email: v.string(),
-    password: v.string(),
-    gender: v.optional(v.string()),
-    dob: v.optional(v.string()),
-    region: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    try {
-      console.log("Starting signup for:", args.email);
-
-      const {
-        existingUserByEmail,
-        existingUserByUsername,
-        existingPendingUser,
-      } = await ctx.runQuery(internal.users._getSignupChecks, {
-        email: args.email,
-        username: args.username,
-      });
-
-      if (existingUserByEmail) {
-        if (existingUserByEmail.emailVerificationTime) {
-          console.log("User with this email already exists and is verified.");
-          throw new Error(
-            "An account with this email already exists. Please log in.",
-          );
-        }
-      }
-
-      if (existingUserByUsername) {
-        console.log("User with this username already exists.");
-        throw new Error("This username is already taken.");
-      }
-
-      console.log("Hashing password...");
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(args.password, salt);
-      console.log("Password hashed.");
-
-      console.log("Generating OTP...");
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-      console.log("OTP generated.");
-
-      console.log("Clearing old entries and inserting into pendingUsers...");
-      await ctx.runMutation(internal.users._clearAndCreatePendingUser, {
-        userData: {
-          ...args,
-          password: hashedPassword,
-        },
-        otp,
-        otpExpires,
-        userToDelete: existingUserByEmail?._id,
-        pendingUserToDelete: existingPendingUser?._id,
-      });
-      console.log("Inserted into pendingUsers.");
-
-      console.log("Scheduling OTP email...");
-      await ctx.scheduler.runAfter(0, internal.auth_actions.sendOtpEmail, {
-        email: args.email,
-        otp,
-      });
-      console.log("OTP email scheduled. Signup process successful.");
-    } catch (error: any) {
-      console.error("Error in startSignup action:", error);
-      throw new Error(
-        error.message || "An unknown error occurred during signup.",
-      );
-    }
-  },
-});
-
-export const verifyOtpAndCreateUser = mutation({
-  args: {
-    email: v.string(),
-    otp: v.string(),
-  },
-  handler: async (ctx, { email, otp }) => {
-    const pendingUser = await ctx.db
-      .query("pendingUsers")
-      .withIndex("email", (q) => q.eq("email", email))
-      .unique();
-
-    if (!pendingUser) {
-      throw new Error("No pending signup found for this email.");
-    }
-
-    if (pendingUser.otp !== otp) {
-      throw new Error("Invalid OTP.");
-    }
-
-    if (Date.now() > pendingUser.otpExpires) {
-      await ctx.db.delete(pendingUser._id);
-      throw new Error("OTP has expired. Please try signing up again.");
-    }
-
-    const { _id, otp: _, otpExpires: __, ...userData } = pendingUser;
-
+  handler: async (ctx, { userData }) => {
     const userId = await ctx.db.insert("users", {
       ...userData,
       name: userData.username,
       role: ROLES.USER,
-      emailVerificationTime: Date.now(), // Mark email as verified
+      emailVerificationTime: Date.now(), // Mark email as verified immediately
       twoFactorEnabled: false,
     });
-
-    await ctx.db.delete(pendingUser._id);
 
     const token = nanoid();
     const expires = Date.now() + SESSION_DURATION;
@@ -216,6 +86,56 @@ export const verifyOtpAndCreateUser = mutation({
     });
 
     return { token };
+  },
+});
+
+export const signupAndLogin = action({
+  args: {
+    username: v.string(),
+    email: v.string(),
+    password: v.string(),
+    gender: v.optional(v.string()),
+    dob: v.optional(v.string()),
+    region: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<{ token: string }> => {
+    try {
+      const { existingUserByEmail, existingUserByUsername } =
+        await ctx.runQuery(internal.users._getSignupChecks, {
+          email: args.email,
+          username: args.username,
+        });
+
+      if (existingUserByEmail) {
+        throw new Error(
+          "An account with this email already exists. Please log in.",
+        );
+      }
+
+      if (existingUserByUsername) {
+        throw new Error("This username is already taken.");
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(args.password, salt);
+
+      const { token } = await ctx.runMutation(
+        internal.users._createUserAndSession,
+        {
+          userData: {
+            ...args,
+            password: hashedPassword,
+          },
+        },
+      );
+
+      return { token };
+    } catch (error: any) {
+      console.error("Error in signup action:", error);
+      throw new Error(
+        error.message || "An unknown error occurred during signup.",
+      );
+    }
   },
 });
 
