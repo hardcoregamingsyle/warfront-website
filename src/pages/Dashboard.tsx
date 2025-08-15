@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Swords, Shield, Users, Trophy, Target, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router";
 
 export default function Dashboard() {
   return (
@@ -35,9 +36,11 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-300 text-sm mb-4">Jump into combat immediately</p>
-                <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                  Deploy Now
-                </Button>
+                <Link to="/battle">
+                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+                    Deploy Now
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -50,9 +53,11 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-300 text-sm mb-4">Manage your weapons and gear</p>
-                <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                  View Inventory
-                </Button>
+                <Link to="/inventory">
+                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+                    View Inventory
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -65,9 +70,11 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-300 text-sm mb-4">Challenge other commanders</p>
-                <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                  Find Match
-                </Button>
+                <Link to="/multi_battle">
+                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+                    Find Match
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -80,9 +87,11 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-300 text-sm mb-4">Compete for glory and rewards</p>
-                <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                  Enter Arena
-                </Button>
+                <Link to="/competetive">
+                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+                    Enter Arena
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
@@ -167,9 +176,11 @@ export default function Dashboard() {
                   <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8">
                     Start Tutorial
                   </Button>
-                  <Button size="lg" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10 px-8">
-                    View Inventory
-                  </Button>
+                  <Link to="/inventory">
+                    <Button size="lg" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10 px-8">
+                      View Inventory
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
