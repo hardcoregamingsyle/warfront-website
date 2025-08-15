@@ -1,7 +1,10 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useNavigate, Link, useLocation } from "react-router";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,20 +22,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { useNavigate, Link } from "react-router";
-import { useAuth } from "@/hooks/use-auth";
 
 const loginSchema = z.object({
-  identifier: z.string().min(1, "Email or username is required"),
-  password: z.string().min(1, "Password is required"),
+  identifier: z.string().min(1, "Please enter your email or username"),
+  password: z.string().min(1, "Please enter your password"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useAuth();
 
   const form = useForm<LoginFormValues>({
@@ -47,10 +47,11 @@ export default function Login() {
     try {
       await signIn(values);
       toast.success("Logged in successfully!");
-      navigate("/dashboard");
+      const redirect = new URLSearchParams(location.search).get("redirect");
+      navigate(redirect || "/dashboard");
     } catch (error: any) {
       console.error("Login failed:", error);
-      toast.error(error?.message || "Login failed. Please try again.");
+      toast.error(error.message || "Login failed. Please check your credentials.");
     }
   };
 
@@ -60,7 +61,7 @@ export default function Login() {
         <CardHeader>
           <CardTitle className="text-red-400">Welcome Back, Commander</CardTitle>
           <CardDescription>
-            Sign in to continue your campaign.
+            Enter your credentials to access the command center.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -73,10 +74,7 @@ export default function Login() {
                   <FormItem>
                     <FormLabel>Email or Username</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter your email or username"
-                        {...field}
-                      />
+                      <Input placeholder="Your call sign or email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -89,7 +87,7 @@ export default function Login() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Enter your password" {...field} />
+                      <Input type="password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -103,18 +101,19 @@ export default function Login() {
                 {form.formState.isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Sign In
+                Log In
               </Button>
             </form>
           </Form>
-          <div className="mt-4 text-center">
-            <p className="text-sm text-slate-400">
-              Don't have an account?{" "}
-              <Link to="/signup" className="text-red-400 hover:text-red-300">
-                Sign up here
-              </Link>
-            </p>
-          </div>
+          <p className="mt-4 text-center text-sm text-slate-400">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="font-semibold text-red-400 hover:text-red-500"
+            >
+              Sign up
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>
