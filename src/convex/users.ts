@@ -29,6 +29,13 @@ async function getUserFromSession(ctx: QueryCtx, token?: string) {
   return await ctx.db.get(userSession.userId);
 }
 
+export const fromToken = internalQuery({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    return await getUserFromSession(ctx, token);
+  },
+});
+
 export const currentUser = query({
   args: { token: v.optional(v.string()) },
   handler: async (ctx, { token }) => {

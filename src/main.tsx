@@ -22,6 +22,7 @@ import BattleHistory from "./pages/BattleHistory.tsx";
 import Battle from "./pages/Battle.tsx";
 import MultiBattle from "./pages/MultiBattle.tsx";
 import Competitive from "./pages/Competitive.tsx";
+import BattleRoom from "./pages/BattleRoom.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -70,6 +71,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/battle" element={<Battle />} />
+            <Route path="/battle/:battleId" element={<BattleRoom />} />
             <Route path="/multi_battle" element={<MultiBattle />} />
             <Route path="/competetive" element={<Competitive />} />
           </Routes>
