@@ -54,7 +54,7 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 const otpSchema = z.object({
-  oneTimeCode: z
+  verificationCode: z
     .string()
     .length(6, "Your one-time password must be 6 characters."),
 });
@@ -64,7 +64,6 @@ type OtpFormValues = z.infer<typeof otpSchema>;
 export default function Signup() {
   const [step, setStep] = useState<"details" | "otp">("details");
   const [emailForOtp, setEmailForOtp] = useState("");
-  const [isOtpFieldActive, setIsOtpFieldActive] = useState(false);
   const navigate = useNavigate();
 
   const startSignup = useAction(api.users.startSignup);
@@ -85,7 +84,7 @@ export default function Signup() {
 
   const otpForm = useForm<OtpFormValues>({
     resolver: zodResolver(otpSchema),
-    defaultValues: { oneTimeCode: "" },
+    defaultValues: { verificationCode: "" },
   });
 
   const onDetailsSubmit = async (values: SignupFormValues) => {
@@ -114,7 +113,7 @@ export default function Signup() {
     try {
       const { token } = await verifyOtpAndCreateUser({
         email: emailForOtp,
-        otp: values.oneTimeCode,
+        otp: values.verificationCode,
       });
       setToken(token);
       toast.success("Account created successfully!");
@@ -314,12 +313,12 @@ export default function Signup() {
                 >
                   {/* Autofill trap */}
                   <div style={{ position: "absolute", left: "-9999px" }}>
-                    <input type="text" autoComplete="username" />
+                    <input type="email" autoComplete="email" />
                     <input type="password" autoComplete="current-password" />
                   </div>
                   <FormField
                     control={otpForm.control}
-                    name="oneTimeCode"
+                    name="verificationCode"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>One-Time Password</FormLabel>
@@ -329,10 +328,8 @@ export default function Signup() {
                             maxLength={6}
                             placeholder="_ _ _ _ _ _"
                             className="text-center text-2xl tracking-[0.8em]"
-                            autoComplete="one-time-code"
+                            autoComplete="off"
                             inputMode="numeric"
-                            readOnly={!isOtpFieldActive}
-                            onFocus={() => setIsOtpFieldActive(true)}
                           />
                         </FormControl>
                         <FormMessage />
