@@ -78,6 +78,12 @@ export default function JoinBattle() {
             </p>
           </div>
 
+          <div className="max-w-4xl mx-auto mb-4 flex justify-end">
+            <Button className="bg-red-600 hover:bg-red-700 text-white">
+              Create Battle
+            </Button>
+          </div>
+
           <div className="max-w-4xl mx-auto space-y-4">
             {battles.map((battle, index) => (
               <motion.div

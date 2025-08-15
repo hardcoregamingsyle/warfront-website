@@ -36,6 +36,17 @@ const schema = defineSchema(
       .index("email", ["email"])
       .index("username", ["username"]),
 
+    battles: defineTable({
+      hostId: v.id("users"),
+      opponentId: v.optional(v.id("users")),
+      status: v.union(
+        v.literal("Open"),
+        v.literal("Full"),
+        v.literal("In Progress"),
+        v.literal("Finished"),
+      ),
+    }).index("by_status", ["status"]),
+
     sessions: defineTable({
       userId: v.id("users"),
       token: v.string(),
