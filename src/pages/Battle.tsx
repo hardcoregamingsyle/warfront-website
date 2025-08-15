@@ -16,21 +16,27 @@ export default function Battle() {
   const battles = useQuery(api.battles.listAll);
   const createBattle = useMutation(api.battles.create);
   const joinBattle = useMutation(api.battles.join);
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (battles && user) {
-        const myHostedBattle = battles.find(b => b.hostId === user._id && b.status === "Full");
-        if (myHostedBattle) {
-            navigate(`/battle/${myHostedBattle._id}`);
-        }
+      const myHostedBattle = battles.find(
+        (b) => b.hostId === user._id && b.status === "Full",
+      );
+      if (myHostedBattle) {
+        navigate(`/battle/${myHostedBattle._id}`);
+      }
     }
   }, [battles, user, navigate]);
 
   const handleCreateBattle = async () => {
+    if (!token) {
+      toast.error("You must be logged in to create a battle.");
+      return;
+    }
     try {
-      await createBattle();
+      await createBattle({ token });
       toast.success("Battle created successfully!");
     } catch (error: any) {
       toast.error(error.message || "Failed to create battle.");
@@ -38,8 +44,12 @@ export default function Battle() {
   };
 
   const handleJoinBattle = async (battleId: Id<"battles">) => {
+    if (!token) {
+      toast.error("You must be logged in to join a battle.");
+      return;
+    }
     try {
-      await joinBattle({ battleId });
+      await joinBattle({ battleId, token });
       toast.success("Joined battle successfully! Redirecting...");
       navigate(`/battle/${battleId}`);
     } catch (error: any) {
@@ -81,7 +91,9 @@ export default function Battle() {
               </div>
             )}
             {battles && battles.length === 0 && (
-              <p className="text-center text-slate-400">No open battles. Be the first to create one!</p>
+              <p className="text-center text-slate-400">
+                No open battles. Be the first to create one!
+              </p>
             )}
             {battles?.map((battle, index) => (
               <motion.div
@@ -94,49 +106,69 @@ export default function Battle() {
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4 w-1/3">
                       <Avatar>
-                        <AvatarImage src={battle.host?.image} alt={battle.host?.name} />
-                        <AvatarFallback>{battle.host?.name?.charAt(0)}</AvatarFallback>
+                        <AvatarImage
+                          src={battle.host?.image}
+                          alt={battle.host?.name}
+                        />
+                        <AvatarFallback>
+                          {battle.host?.name?.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
-                      <span className="font-semibold text-slate-200">{battle.host?.name}</span>
+                      <span className="font-semibold text-slate-200">
+                        {battle.host?.name}
+                      </span>
                     </div>
-                    
+
                     <div className="flex items-center gap-4">
-                      <span className="text-slate-500 text-2xl font-thin">VS</span>
+                      <span className="text-slate-500 text-2xl font-thin">
+                        VS
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-4 w-1/3 justify-center">
                       {battle.opponent ? (
                         <>
                           <Avatar>
-                            <AvatarImage src={battle.opponent?.image} alt={battle.opponent?.name} />
-                            <AvatarFallback>{battle.opponent?.name?.charAt(0)}</AvatarFallback>
+                            <AvatarImage
+                              src={battle.opponent?.image}
+                              alt={battle.opponent?.name}
+                            />
+                            <AvatarFallback>
+                              {battle.opponent?.name?.charAt(0)}
+                            </AvatarFallback>
                           </Avatar>
-                          <span className="font-semibold text-slate-200">{battle.opponent?.name}</span>
+                          <span className="font-semibold text-slate-200">
+                            {battle.opponent?.name}
+                          </span>
                         </>
                       ) : (
-                        <span className="text-green-400 font-bold">Waiting for Opponent...</span>
+                        <span className="text-green-400 font-bold">
+                          Waiting for Opponent...
+                        </span>
                       )}
                     </div>
-                    
+
                     <div className="w-1/4 text-right">
-                      {battle.status === "Open" && user?._id !== battle.hostId && (
-                        <Button
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => handleJoinBattle(battle._id)}
-                        >
-                          Join Battle
-                        </Button>
-                      )}
+                      {battle.status === "Open" &&
+                        user?._id !== battle.hostId && (
+                          <Button
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => handleJoinBattle(battle._id)}
+                          >
+                            Join Battle
+                          </Button>
+                        )}
                       {battle.status === "Full" && (
                         <Button variant="destructive" disabled>
                           Full
                         </Button>
                       )}
-                       {battle.status === "Open" && user?._id === battle.hostId && (
-                        <Button variant="ghost" disabled>
-                          Your Battle
-                        </Button>
-                      )}
+                      {battle.status === "Open" &&
+                        user?._id === battle.hostId && (
+                          <Button variant="ghost" disabled>
+                            Your Battle
+                          </Button>
+                        )}
                     </div>
                   </CardContent>
                 </Card>

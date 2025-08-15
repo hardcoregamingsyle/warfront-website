@@ -1,25 +1,28 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 
-export const create = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("User not authenticated.");
-    }
-    const user = await ctx.db
-        .query("users")
-        .withIndex("email", (q) => q.eq("email", identity.email!))
+async function getUserFromToken(ctx: any, token: string) {
+    const userSession = await ctx.db
+        .query("sessions")
+        .withIndex("by_token", (q: any) => q.eq("token", token))
         .unique();
 
-    if (!user) {
-        throw new Error("User not found.");
+    if (!userSession || userSession.expires < Date.now()) {
+        return null;
     }
 
-    // Check if user already has an open battle
+    return await ctx.db.get(userSession.userId);
+}
+
+export const create = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const user = await getUserFromToken(ctx, token);
+    if (!user) {
+      throw new Error("User not authenticated or session expired.");
+    }
+
     const existingBattle = await ctx.db
       .query("battles")
       .withIndex("by_hostId_and_status", (q) =>
@@ -71,19 +74,11 @@ export const listAll = query({
 });
 
 export const join = mutation({
-  args: { battleId: v.id("battles") },
-  handler: async (ctx, { battleId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("User not authenticated.");
-    }
-    const user = await ctx.db
-        .query("users")
-        .withIndex("email", (q) => q.eq("email", identity.email!))
-        .unique();
-
+  args: { battleId: v.id("battles"), token: v.string() },
+  handler: async (ctx, { battleId, token }) => {
+    const user = await getUserFromToken(ctx, token);
     if (!user) {
-        throw new Error("User not found.");
+      throw new Error("User not authenticated or session expired.");
     }
 
     const battle = await ctx.db.get(battleId);
