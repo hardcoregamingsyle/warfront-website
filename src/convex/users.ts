@@ -255,3 +255,10 @@ export const _updateUserPassword = internalMutation({
         await ctx.db.patch(userId, { password: hashedPassword });
     },
 });
+
+export const _updateUsername = internalMutation({
+  args: { userId: v.id("users"), username: v.string() },
+  handler: async (ctx, { userId, username }) => {
+    await ctx.db.patch(userId, { username: username, name: username });
+  },
+});

@@ -91,3 +91,40 @@ export const updateUserCredentials = action({
     return `Updated credentials for ${updatedCount} users.`;
   },
 });
+
+export const migrateUsernamesToLowercase = action({
+  handler: async (ctx) => {
+    const usernamesToUpdate = [
+      "warfront_admin",
+      "admin",
+      "CardSetter1",
+      "CardSetter2",
+      "Warfront_Admin2",
+    ];
+
+    let updatedCount = 0;
+
+    for (const username of usernamesToUpdate) {
+      const user = await ctx.runQuery(internal.users._getUserByIdentifier, {
+        identifier: username,
+      });
+
+      if (user) {
+        const lowercaseUsername = user.username.toLowerCase();
+        if (user.username !== lowercaseUsername) {
+          await ctx.runMutation(internal.users._updateUsername, {
+            userId: user._id,
+            username: lowercaseUsername,
+          });
+          console.log(
+            `Updated username for user: ${username} to ${lowercaseUsername}`,
+          );
+          updatedCount++;
+        }
+      } else {
+        console.log(`User ${username} not found, skipping.`);
+      }
+    }
+    return `Updated usernames for ${updatedCount} users.`;
+  },
+});
