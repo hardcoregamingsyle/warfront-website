@@ -65,13 +65,14 @@ export const _createUserAndSession = internalMutation({
       gender: v.optional(v.string()),
       dob: v.optional(v.string()),
       region: v.optional(v.string()),
+      role: v.optional(v.string()),
     }),
   },
   handler: async (ctx, { userData }) => {
     const userId = await ctx.db.insert("users", {
       ...userData,
       name: userData.username,
-      role: ROLES.USER,
+      role: userData.role === "admin" ? ROLES.ADMIN : ROLES.USER,
       emailVerificationTime: Date.now(), // Mark email as verified immediately
       twoFactorEnabled: false,
     });

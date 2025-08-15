@@ -23,7 +23,7 @@ const schema = defineSchema(
       email: v.string(),
       emailVerificationTime: v.optional(v.number()),
       
-      role: v.optional(roleValidator),
+      role: roleValidator,
 
       // Custom fields for signup
       username: v.string(),
