@@ -25,7 +25,7 @@ export default function Header() {
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
         <Link to="/" className="mr-6 flex items-center space-x-2">
           <img src="/assets/Untitled_design.png" alt="Warfront Logo" className="h-12 w-auto" />
-          <span className="hidden font-bold sm:inline-block text-red-500">Warfront</span>
+          <span className="hidden font-bold sm:inline-block text-slate-200">Warfront</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm">
@@ -33,7 +33,7 @@ export default function Header() {
             <Link
               key={link.href}
               to={link.href}
-              className="transition-colors hover:text-red-400 text-red-500 font-medium"
+              className="transition-colors hover:text-white text-slate-300 font-medium"
             >
               {link.label}
             </Link>
@@ -47,7 +47,7 @@ export default function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden text-red-500 hover:text-red-400"
+            className="md:hidden text-slate-300 hover:text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -67,7 +67,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 to={link.href}
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-red-500 hover:bg-slate-800"
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.icon}
