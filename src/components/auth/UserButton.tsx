@@ -90,7 +90,7 @@ export function UserButton({ className, size = 8 }: UserButtonProps) {
       >
         <Button
           variant="ghost"
-          className={`p-0 rounded-full shadow-sm border border-primary/20`}
+          className={`p-0 rounded-full shadow-sm border-2 border-white/80 hover:border-white`}
           style={{ height: `${sizeInPixels}px`, width: `${sizeInPixels}px` }}
         >
           <Avatar
@@ -124,7 +124,7 @@ export function UserButton({ className, size = 8 }: UserButtonProps) {
           >
             <Button
               variant="ghost"
-              className={`p-0 rounded-full shadow-sm border border-primary/20`}
+              className={`p-0 rounded-full shadow-sm border-2 border-white/80 hover:border-white`}
               style={{
                 height: `${sizeInPixels}px`,
                 width: `${sizeInPixels}px`,
