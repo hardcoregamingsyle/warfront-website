@@ -168,7 +168,7 @@ export default function Dashboard() {
                     Start Tutorial
                   </Button>
                   <Button size="lg" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10 px-8">
-                    Browse Arsenal
+                    View Inventory
                   </Button>
                 </div>
               </CardContent>
