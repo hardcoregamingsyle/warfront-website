@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 const loginSchema = z.object({
   identifier: z.string().min(1, "Please enter your email or username"),
@@ -34,6 +35,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn } = useAuth();
+  const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -44,6 +46,7 @@ export default function Login() {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
+    setFormError(null);
     try {
       await signIn({ email: values.identifier, password: values.password });
       toast.success("Logged in successfully!");
@@ -51,7 +54,7 @@ export default function Login() {
       navigate(redirect || "/dashboard");
     } catch (error: any) {
       console.error("Login failed:", error);
-      toast.error(error.message || "Login failed. Please check your credentials.");
+      setFormError(error.message || "Login failed. Please check your credentials.");
     }
   };
 
