@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMemo, useState, useEffect } from "react";
 
 const countryNames = Object.values(countries).map((country: any) => country.name);
 
@@ -56,6 +57,13 @@ export default function Signup() {
   const navigate = useNavigate();
   const signupAndLogin = useAction(api.users.signupAndLogin);
   const { setToken } = useAuth();
+  const [countryNames, setCountryNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    import("countries-list").then((module) => {
+      setCountryNames(Object.values(module.countries).map((c: any) => c.name));
+    });
+  }, []);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
