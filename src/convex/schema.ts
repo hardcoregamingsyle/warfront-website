@@ -20,21 +20,11 @@ const schema = defineSchema(
     users: defineTable({
       name: v.optional(v.string()),
       image: v.optional(v.string()),
-      email: v.string(),
+      email: v.optional(v.string()),
       emailVerificationTime: v.optional(v.number()),
-      
-      role: roleValidator,
-
-      // Custom fields for signup
-      username: v.string(),
-      password: v.string(), // This will be a hashed password
-      twoFactorEnabled: v.optional(v.boolean()),
-      gender: v.optional(v.string()),
-      dob: v.optional(v.string()),
-      region: v.optional(v.string()),
-    })
-      .index("email", ["email"])
-      .index("username", ["username"]),
+      isAnonymous: v.optional(v.boolean()),
+      role: v.optional(roleValidator),
+    }).index("email", ["email"]),
 
     battles: defineTable({
       hostId: v.id("users"),
