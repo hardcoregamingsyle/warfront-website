@@ -48,6 +48,17 @@ const schema = defineSchema(
     }).index("by_status", ["status"])
     .index("by_hostId_and_status", ["hostId", "status"]),
 
+    multiplayerBattles: defineTable({
+      hostId: v.id("users"),
+      playerIds: v.array(v.id("users")),
+      maxPlayers: v.number(),
+      status: v.union(
+        v.literal("Waiting"),
+        v.literal("In Progress"),
+        v.literal("Finished"),
+      ),
+    }).index("by_status", ["status"]),
+
     sessions: defineTable({
       userId: v.id("users"),
       token: v.string(),
