@@ -40,7 +40,7 @@ export default function JoinBattle() {
       await createBattle({ token });
       toast.success("Battle created successfully!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to create battle.");
+      toast.error(error.data || "Failed to create battle.");
     }
   };
 
@@ -54,7 +54,7 @@ export default function JoinBattle() {
       toast.success("Joined battle successfully! Redirecting...");
       navigate(`/battle/${battleId}`);
     } catch (error: any) {
-      toast.error(error.message || "Failed to join battle.");
+      toast.error(error.data || "Failed to join battle.");
     }
   };
 
@@ -67,7 +67,7 @@ export default function JoinBattle() {
       await cancelBattle({ battleId, token });
       toast.success("Your battle has been canceled.");
     } catch (error: any) {
-      toast.error(error.message || "Failed to cancel battle.");
+      toast.error(error.data || "Failed to cancel battle.");
     }
   };
 

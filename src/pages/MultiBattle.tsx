@@ -42,7 +42,7 @@ export default function MultiBattle() {
       toast.success("Multiplayer battle created successfully!");
       setCreateDialogOpen(false);
     } catch (error: any) {
-      toast.error(error.message || "Failed to create battle.");
+      toast.error(error.data || "Failed to create battle.");
     }
   };
 
@@ -55,7 +55,7 @@ export default function MultiBattle() {
       await joinBattle({ battleId, token });
       toast.success("Joined multiplayer battle successfully!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to join battle.");
+      toast.error(error.data || "Failed to join battle.");
     }
   };
 
@@ -68,7 +68,7 @@ export default function MultiBattle() {
       await leaveBattle({ battleId, token });
       toast.success("You have left the battle.");
     } catch (error: any) {
-      toast.error(error.message || "Failed to leave battle.");
+      toast.error(error.data || "Failed to leave battle.");
     }
   };
 
@@ -81,7 +81,7 @@ export default function MultiBattle() {
       await startBattle({ battleId, token });
       toast.success("Battle started!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to start battle.");
+      toast.error(error.data || "Failed to start battle.");
     }
   };
 
