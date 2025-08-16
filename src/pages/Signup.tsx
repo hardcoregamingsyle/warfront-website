@@ -72,13 +72,10 @@ export default function Signup() {
 
   const onSubmit = async (values: SignupFormValues) => {
     try {
-      const { token } = await signupAndLogin({
-        username: values.username,
+      const token = await signupAndLogin({
+        name: values.username,
         email: values.email,
         password: values.password,
-        gender: values.gender,
-        dob: values.dob,
-        region: values.region,
       });
       setToken(token);
       toast.success("Account created successfully!");

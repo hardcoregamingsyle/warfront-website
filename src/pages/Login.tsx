@@ -45,7 +45,7 @@ export default function Login() {
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      await signIn(values);
+      await signIn({ email: values.identifier, password: values.password });
       toast.success("Logged in successfully!");
       const redirect = new URLSearchParams(location.search).get("redirect");
       navigate(redirect || "/dashboard");
