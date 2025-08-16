@@ -15,12 +15,24 @@ async function getUserFromToken(ctx: any, token: string) {
     return await ctx.db.get(userSession.userId);
 }
 
+async function isUserInBattle(ctx: any, userId: Id<"users">) {
+    const existingBattle = await ctx.db
+        .query("multiplayerBattles")
+        .withIndex("by_playerIds", (q: any) => q.eq("playerIds", userId))
+        .first();
+    return existingBattle !== null;
+}
+
 export const create = mutation({
   args: { token: v.string(), maxPlayers: v.number() },
   handler: async (ctx, { token, maxPlayers }) => {
     const user = await getUserFromToken(ctx, token);
     if (!user) {
       throw new Error("User not authenticated or session expired.");
+    }
+
+    if (await isUserInBattle(ctx, user._id)) {
+        throw new Error("You are already in a battle.");
     }
 
     if (maxPlayers < 3 || maxPlayers > 10) {
@@ -69,6 +81,10 @@ export const join = mutation({
       throw new Error("User not authenticated or session expired.");
     }
 
+    if (await isUserInBattle(ctx, user._id)) {
+        throw new Error("You are already in a battle.");
+    }
+
     const battle = await ctx.db.get(battleId);
 
     if (!battle) {
@@ -91,6 +107,46 @@ export const join = mutation({
       playerIds: [...battle.playerIds, user._id],
     });
   },
+});
+
+export const leave = mutation({
+    args: { battleId: v.id("multiplayerBattles"), token: v.string() },
+    handler: async (ctx, { battleId, token }) => {
+        const user = await getUserFromToken(ctx, token);
+        if (!user) {
+            throw new Error("User not authenticated or session expired.");
+        }
+
+        const battle = await ctx.db.get(battleId);
+        if (!battle) {
+            throw new Error("Battle not found.");
+        }
+
+        if (!battle.playerIds.includes(user._id)) {
+            throw new Error("You are not in this battle.");
+        }
+
+        const updatedPlayerIds = battle.playerIds.filter(id => id !== user._id);
+
+        if (updatedPlayerIds.length === 0) {
+            await ctx.db.delete(battleId);
+            return;
+        }
+
+        if (battle.hostId === user._id) {
+            // Host is leaving, assign a new host
+            const newHostId = updatedPlayerIds[0];
+            await ctx.db.patch(battleId, {
+                playerIds: updatedPlayerIds,
+                hostId: newHostId,
+            });
+        } else {
+            // A player is leaving
+            await ctx.db.patch(battleId, {
+                playerIds: updatedPlayerIds,
+            });
+        }
+    },
 });
 
 export const start = mutation({

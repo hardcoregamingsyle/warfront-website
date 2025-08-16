@@ -57,7 +57,8 @@ const schema = defineSchema(
         v.literal("In Progress"),
         v.literal("Finished"),
       ),
-    }).index("by_status", ["status"]),
+    }).index("by_status", ["status"])
+    .index("by_playerIds", ["playerIds"]),
 
     sessions: defineTable({
       userId: v.id("users"),

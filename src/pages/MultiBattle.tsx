@@ -24,10 +24,13 @@ export default function MultiBattle() {
   const battles = useQuery(api.multiplayerBattles.list);
   const createBattle = useMutation(api.multiplayerBattles.create);
   const joinBattle = useMutation(api.multiplayerBattles.join);
+  const leaveBattle = useMutation(api.multiplayerBattles.leave);
   const startBattle = useMutation(api.multiplayerBattles.start);
   const { user, token } = useAuth();
   const [maxPlayers, setMaxPlayers] = useState(3);
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
+
+  const userInBattle = battles?.some(battle => user && battle.playerIds.includes(user._id));
 
   const handleCreateBattle = async () => {
     if (!token) {
@@ -53,6 +56,19 @@ export default function MultiBattle() {
       toast.success("Joined multiplayer battle successfully!");
     } catch (error: any) {
       toast.error(error.message || "Failed to join battle.");
+    }
+  };
+
+  const handleLeaveBattle = async (battleId: Id<"multiplayerBattles">) => {
+    if (!token) {
+      toast.error("You must be logged in to leave a battle.");
+      return;
+    }
+    try {
+      await leaveBattle({ battleId, token });
+      toast.success("You have left the battle.");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to leave battle.");
     }
   };
 
@@ -85,7 +101,7 @@ export default function MultiBattle() {
           <div className="max-w-4xl mx-auto mb-4 flex justify-center">
             <Dialog open={isCreateDialogOpen} onOpenChange={setCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white" disabled={userInBattle}>
                   Create Multiplayer Battle
                 </Button>
               </DialogTrigger>
@@ -142,13 +158,25 @@ export default function MultiBattle() {
                     ))}
                   </div>
                   <div className="flex justify-end gap-2">
-                    {user && battle.hostId === user._id && battle.playerIds.length >= 3 && (
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleStartBattle(battle._id)}>
-                        Start Battle
-                      </Button>
+                    {user && battle.hostId === user._id && (
+                        <>
+                            {battle.playerIds.length >= 3 && (
+                                <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleStartBattle(battle._id)}>
+                                    Start Battle
+                                </Button>
+                            )}
+                            <Button size="sm" variant="destructive" onClick={() => handleLeaveBattle(battle._id)}>
+                                Cancel
+                            </Button>
+                        </>
+                    )}
+                    {user && battle.playerIds.includes(user._id) && battle.hostId !== user._id && (
+                         <Button size="sm" variant="destructive" onClick={() => handleLeaveBattle(battle._id)}>
+                            Leave
+                        </Button>
                     )}
                     {user && !battle.playerIds.includes(user._id) && battle.playerIds.length < battle.maxPlayers && (
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => handleJoinBattle(battle._id)}>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => handleJoinBattle(battle._id)} disabled={userInBattle}>
                         Join
                       </Button>
                     )}
