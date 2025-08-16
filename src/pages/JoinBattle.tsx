@@ -117,53 +117,39 @@ export default function JoinBattle() {
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 <Card className="bg-slate-800 border border-slate-700 hover:border-red-500/50 transition-colors">
-                  <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                      <Avatar>
-                        <AvatarImage
-                          src={battle.host?.image}
-                          alt={battle.host?.name}
-                        />
-                        <AvatarFallback>
-                          {battle.host?.name?.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-semibold text-slate-200 truncate">
-                        {battle.host?.name}
-                      </span>
-                    </div>
+                  <CardContent className="p-4">
+                    <div className="grid grid-cols-3 sm:grid-cols-5 items-center gap-4">
+                      {/* Host */}
+                      <div className="col-span-1 sm:col-span-2 flex items-center gap-2 min-w-0">
+                        <Avatar>
+                          <AvatarImage src={battle.host?.image} alt={battle.host?.name} />
+                          <AvatarFallback>{battle.host?.name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-semibold text-slate-200 truncate">{battle.host?.name}</span>
+                      </div>
 
-                    <div className="flex items-center gap-4">
-                      <span className="text-slate-500 text-2xl font-thin">
-                        VS
-                      </span>
-                    </div>
+                      {/* VS */}
+                      <div className="col-span-1 flex justify-center">
+                        <span className="text-slate-500 text-2xl font-thin">VS</span>
+                      </div>
 
-                    <div className="flex items-center gap-4 w-full sm:w-auto justify-center">
-                      {battle.opponent ? (
-                        <>
-                          <Avatar>
-                            <AvatarImage
-                              src={battle.opponent?.image}
-                              alt={battle.opponent?.name}
-                            />
-                            <AvatarFallback>
-                              {battle.opponent?.name?.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-semibold text-slate-200 truncate">
-                            {battle.opponent?.name}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-green-400 font-bold">
-                          Waiting for Opponent...
-                        </span>
-                      )}
+                      {/* Opponent */}
+                      <div className="col-span-1 sm:col-span-2 flex items-center justify-end gap-2 min-w-0 text-right">
+                        {battle.opponent ? (
+                          <>
+                            <span className="font-semibold text-slate-200 truncate">{battle.opponent?.name}</span>
+                            <Avatar>
+                              <AvatarImage src={battle.opponent?.image} alt={battle.opponent?.name} />
+                              <AvatarFallback>{battle.opponent?.name?.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                          </>
+                        ) : (
+                          <span className="text-green-400 font-bold">Waiting...</span>
+                        )}
+                      </div>
                     </div>
-
-                    <div className="w-full sm:w-auto sm:text-right">
-                      {battle.status === "Open" &&
+                    <div className="mt-4 flex justify-end">
+                       {battle.status === "Open" &&
                         user?._id !== battle.hostId && (
                           <Button
                             className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"

@@ -149,13 +149,19 @@ export default function MultiBattle() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {battle.players.map((player) => (
-                      <Avatar key={player?._id} className="h-8 w-8">
-                        <AvatarImage src={player?.image} alt={player?.name ?? ""} />
-                        <AvatarFallback>{player?.name?.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    ))}
+                  <div className="space-y-2 mb-4">
+                    <p className="text-sm font-medium text-slate-400">Players:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {battle.players.map((player) => (
+                        <div key={player?._id} className="flex items-center gap-2 bg-slate-700/50 px-2 py-1 rounded-full text-xs">
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage src={player?.image} alt={player?.name ?? ""} />
+                            <AvatarFallback>{player?.name?.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium truncate">{player?.name}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="flex justify-end gap-2">
                     {user && battle.hostId === user._id && (
