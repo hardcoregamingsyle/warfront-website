@@ -10,7 +10,7 @@ export function useAuth() {
   );
 
   const user = useQuery(api.users.currentUser, token ? { token } : { token: undefined });
-  const login = useAction(api.users.login);
+  const login = useMutation(api.users.login);
   const logoutMutation = useMutation(api.users.logout);
 
   const isAuthenticated = !!user;

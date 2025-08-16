@@ -1,32 +1,45 @@
-"use node";
-
-import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  mutation,
+  query,
+} from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
-// Helper function to get user from token
-async function getUserFromToken(ctx: any, token: string) {
-  const userSession = await ctx.db
-    .query("sessions")
-    .withIndex("by_token", (q: any) => q.eq("token", token))
-    .unique();
-
-  if (!userSession || userSession.expires < Date.now()) {
-    return null;
+// Simple hash function for demo purposes - not secure for production
+const FAKE_HASH_SALT = "this-is-not-secure-and-should-be-in-an-env-var";
+const hashPassword = (password: string) => {
+  // Simple string hash for demo - use proper bcrypt in production
+  let hash = 0;
+  const str = password + FAKE_HASH_SALT;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
   }
+  return hash.toString(36);
+};
 
-  return await ctx.db.get(userSession.userId);
-}
-
-// Helper function to generate a random token
-function generateToken(): string {
+const generateToken = () => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
-}
+};
 
+// Get user from session token
 export const currentUser = query({
   args: { token: v.optional(v.string()) },
   handler: async (ctx, { token }) => {
-    if (!token) return null;
-    return await getUserFromToken(ctx, token);
+    if (!token) {
+      return null;
+    }
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session || session.expires < Date.now()) {
+      return null;
+    }
+
+    return await ctx.db.get(session.userId);
   },
 });
 
@@ -35,14 +48,18 @@ export const login = mutation({
   handler: async (ctx, { email, password }) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("email", (q: any) => q.eq("email", email))
+      .withIndex("by_email", (q) => q.eq("email", email))
       .unique();
 
     if (!user) {
-      throw new Error("Invalid email or password");
+      throw new Error("User not found");
     }
 
-    // For demo purposes, accept any password
+    const passwordHash = hashPassword(password);
+    if (user.passwordHash !== passwordHash) {
+      throw new Error("Incorrect password");
+    }
+
     const token = generateToken();
     const expires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -61,7 +78,7 @@ export const signupAndLogin = mutation({
   handler: async (ctx, { name, email, password }) => {
     const existingUser = await ctx.db
       .query("users")
-      .withIndex("email", (q: any) => q.eq("email", email))
+      .withIndex("by_email", (q) => q.eq("email", email))
       .unique();
 
     if (existingUser) {
@@ -71,7 +88,7 @@ export const signupAndLogin = mutation({
     const userId = await ctx.db.insert("users", {
       name,
       email,
-      passwordHash: "demo", // For demo purposes
+      passwordHash: hashPassword(password),
       role: "user" as const,
     });
 
@@ -93,7 +110,7 @@ export const logout = mutation({
   handler: async (ctx, { token }) => {
     const session = await ctx.db
       .query("sessions")
-      .withIndex("by_token", (q: any) => q.eq("token", token))
+      .withIndex("by_token", (q) => q.eq("token", token))
       .unique();
 
     if (session) {

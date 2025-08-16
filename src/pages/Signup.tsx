@@ -52,7 +52,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function Signup() {
   const navigate = useNavigate();
-  const signupAndLogin = useAction(api.users.signupAndLogin);
+  const signupAndLogin = useMutation(api.users.signupAndLogin);
   const { setToken } = useAuth();
   const [countryNames, setCountryNames] = useState<string[]>([]);
 
