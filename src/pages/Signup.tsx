@@ -33,8 +33,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const countryNames = Object.values(countries).map((country) => country.name);
-
 const signupSchema = z
   .object({
     username: z.string().min(3, "Username must be at least 3 characters"),
@@ -190,23 +188,9 @@ export default function Signup() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Region</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select your region" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {countryNames.map((country) => (
-                            <SelectItem key={country} value={country}>
-                              {country}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input placeholder="Your region" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
