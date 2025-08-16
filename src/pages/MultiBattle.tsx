@@ -90,10 +90,10 @@ export default function MultiBattle() {
       <div className="bg-slate-900 text-white -m-8 p-8 min-h-screen">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold tracking-tight text-blue-500">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-blue-500">
               Multiplayer Battles
             </h1>
-            <p className="text-xl text-slate-300 mt-4 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-slate-300 mt-4 max-w-2xl mx-auto">
               Create or join a battle with up to 10 players.
             </p>
           </div>

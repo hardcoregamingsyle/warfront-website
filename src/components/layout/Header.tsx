@@ -24,7 +24,7 @@ export default function Header() {
     >
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
         <Link to="/" className="mr-6 flex items-center space-x-2">
-          <img src="/assets/Untitled_design.png" alt="Warfront Logo" className="h-12 w-auto" />
+          <img src="/assets/Untitled_design.png" alt="Warfront Logo" className="h-10 sm:h-12 w-auto" />
           <span className="hidden font-bold sm:inline-block text-slate-200">Warfront</span>
         </Link>
 

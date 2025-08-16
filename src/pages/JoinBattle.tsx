@@ -103,8 +103,8 @@ export default function JoinBattle() {
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 <Card className="bg-slate-800 border border-slate-700 hover:border-red-500/50 transition-colors">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4 w-1/3">
+                  <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
                       <Avatar>
                         <AvatarImage
                           src={battle.host?.image}
@@ -125,7 +125,7 @@ export default function JoinBattle() {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-4 w-1/3 justify-center">
+                    <div className="flex items-center gap-4 w-full sm:w-auto justify-center">
                       {battle.opponent ? (
                         <>
                           <Avatar>
@@ -148,24 +148,24 @@ export default function JoinBattle() {
                       )}
                     </div>
 
-                    <div className="w-1/4 text-right">
+                    <div className="w-full sm:w-auto sm:text-right">
                       {battle.status === "Open" &&
                         user?._id !== battle.hostId && (
                           <Button
-                            className="bg-green-600 hover:bg-green-700 text-white"
+                            className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
                             onClick={() => handleJoinBattle(battle._id)}
                           >
                             Join Battle
                           </Button>
                         )}
                       {battle.status === "Full" && (
-                        <Button variant="destructive" disabled>
+                        <Button variant="destructive" disabled className="w-full sm:w-auto">
                           Full
                         </Button>
                       )}
                       {battle.status === "Open" &&
                         user?._id === battle.hostId && (
-                          <Button variant="ghost" disabled>
+                          <Button variant="ghost" disabled className="w-full sm:w-auto">
                             Your Battle
                           </Button>
                         )}
