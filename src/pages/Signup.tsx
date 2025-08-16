@@ -82,9 +82,16 @@ export default function Signup() {
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Signup failed:", error);
-      toast.error(
-        error.message || "Failed to create account. Please try again.",
-      );
+      if (error.message?.includes("email already exists")) {
+        form.setError("email", {
+          type: "manual",
+          message: "An account with this email already exists.",
+        });
+      } else {
+        toast.error(
+          error.message || "Failed to create account. Please try again.",
+        );
+      }
     }
   };
 
