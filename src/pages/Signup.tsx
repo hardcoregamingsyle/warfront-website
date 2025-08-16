@@ -6,7 +6,6 @@ import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { countries } from "countries-list";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,8 +33,6 @@ import {
 } from "@/components/ui/select";
 import { useMemo, useState, useEffect } from "react";
 
-const countryNames = Object.values(countries).map((country: any) => country.name);
-
 const signupSchema = z
   .object({
     username: z.string().min(3, "Username must be at least 3 characters"),
@@ -58,12 +55,6 @@ export default function Signup() {
   const signupAndLogin = useAction(api.users.signupAndLogin);
   const { setToken } = useAuth();
   const [countryNames, setCountryNames] = useState<string[]>([]);
-
-  useEffect(() => {
-    import("countries-list").then((module) => {
-      setCountryNames(Object.values(module.countries).map((c: any) => c.name));
-    });
-  }, []);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -208,7 +199,7 @@ export default function Signup() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {countryNames.map((country: any) => (
+                          {countryNames.map((country) => (
                             <SelectItem key={country} value={country}>
                               {country}
                             </SelectItem>
