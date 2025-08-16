@@ -15,6 +15,26 @@ async function getUserFromToken(ctx: any, token: string) {
     return await ctx.db.get(userSession.userId);
 }
 
+async function isUserInAnyBattle(ctx: any, userId: Id<"users">) {
+    // Check multiplayer battles
+    const inMultiplayer = await ctx.db
+        .query("multiplayerBattles")
+        .withIndex("by_playerIds", (q: any) => q.eq("playerIds", userId))
+        .filter((q: any) => q.neq(q.field("status"), "Finished"))
+        .first();
+    if (inMultiplayer) return true;
+
+    // Check 1v1 battles
+    const in1v1 = await ctx.db
+        .query("battles")
+        .filter((q: any) => q.or(q.eq(q.field("hostId"), userId), q.eq(q.field("opponentId"), userId)))
+        .filter((q: any) => q.neq(q.field("status"), "Finished"))
+        .first();
+    if (in1v1) return true;
+
+    return false;
+}
+
 export const create = mutation({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
@@ -23,15 +43,8 @@ export const create = mutation({
       throw new Error("User not authenticated or session expired.");
     }
 
-    const existingBattle = await ctx.db
-      .query("battles")
-      .withIndex("by_hostId_and_status", (q) =>
-        q.eq("hostId", user._id).eq("status", "Open"),
-      )
-      .first();
-
-    if (existingBattle) {
-      throw new Error("You already have an open battle.");
+    if (await isUserInAnyBattle(ctx, user._id)) {
+      throw new Error("You are already in a battle.");
     }
 
     const battleId = await ctx.db.insert("battles", {
@@ -80,6 +93,10 @@ export const join = mutation({
     if (!user) {
       throw new Error("User not authenticated or session expired.");
     }
+    
+    if (await isUserInAnyBattle(ctx, user._id)) {
+      throw new Error("You are already in a battle.");
+    }
 
     const battle = await ctx.db.get(battleId);
 
@@ -100,4 +117,29 @@ export const join = mutation({
       status: "Full",
     });
   },
+});
+
+export const cancel = mutation({
+    args: { battleId: v.id("battles"), token: v.string() },
+    handler: async (ctx, { battleId, token }) => {
+        const user = await getUserFromToken(ctx, token);
+        if (!user) {
+            throw new Error("User not authenticated or session expired.");
+        }
+
+        const battle = await ctx.db.get(battleId);
+        if (!battle) {
+            throw new Error("Battle not found.");
+        }
+
+        if (battle.hostId !== user._id) {
+            throw new Error("Only the host can cancel the battle.");
+        }
+
+        if (battle.status !== "Open") {
+            throw new Error("Cannot cancel a battle that is not open.");
+        }
+
+        await ctx.db.delete(battleId);
+    },
 });

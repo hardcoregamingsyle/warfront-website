@@ -16,6 +16,7 @@ export default function JoinBattle() {
   const battles = useQuery(api.battles.listAll);
   const createBattle = useMutation(api.battles.create);
   const joinBattle = useMutation(api.battles.join);
+  const cancelBattle = useMutation(api.battles.cancel);
   const { user, token } = useAuth();
   const navigate = useNavigate();
 
@@ -54,6 +55,19 @@ export default function JoinBattle() {
       navigate(`/battle/${battleId}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to join battle.");
+    }
+  };
+
+  const handleCancelBattle = async (battleId: Id<"battles">) => {
+    if (!token) {
+      toast.error("Authentication error.");
+      return;
+    }
+    try {
+      await cancelBattle({ battleId, token });
+      toast.success("Your battle has been canceled.");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to cancel battle.");
     }
   };
 
@@ -114,7 +128,7 @@ export default function JoinBattle() {
                           {battle.host?.name?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-semibold text-slate-200">
+                      <span className="font-semibold text-slate-200 truncate">
                         {battle.host?.name}
                       </span>
                     </div>
@@ -137,7 +151,7 @@ export default function JoinBattle() {
                               {battle.opponent?.name?.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="font-semibold text-slate-200">
+                          <span className="font-semibold text-slate-200 truncate">
                             {battle.opponent?.name}
                           </span>
                         </>
@@ -165,8 +179,8 @@ export default function JoinBattle() {
                       )}
                       {battle.status === "Open" &&
                         user?._id === battle.hostId && (
-                          <Button variant="ghost" disabled className="w-full sm:w-auto">
-                            Your Battle
+                          <Button variant="destructive" onClick={() => handleCancelBattle(battle._id)} className="w-full sm:w-auto">
+                            Cancel
                           </Button>
                         )}
                     </div>

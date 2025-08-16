@@ -46,7 +46,8 @@ const schema = defineSchema(
         v.literal("Finished"),
       ),
     }).index("by_status", ["status"])
-    .index("by_hostId_and_status", ["hostId", "status"]),
+    .index("by_hostId_and_status", ["hostId", "status"])
+    .index("by_opponentId", ["opponentId"]),
 
     multiplayerBattles: defineTable({
       hostId: v.id("users"),

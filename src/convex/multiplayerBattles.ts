@@ -15,12 +15,24 @@ async function getUserFromToken(ctx: any, token: string) {
     return await ctx.db.get(userSession.userId);
 }
 
-async function isUserInBattle(ctx: any, userId: Id<"users">) {
-    const existingBattle = await ctx.db
+async function isUserInAnyBattle(ctx: any, userId: Id<"users">) {
+    // Check multiplayer battles
+    const inMultiplayer = await ctx.db
         .query("multiplayerBattles")
         .withIndex("by_playerIds", (q: any) => q.eq("playerIds", userId))
+        .filter((q: any) => q.neq(q.field("status"), "Finished"))
         .first();
-    return existingBattle !== null;
+    if (inMultiplayer) return true;
+
+    // Check 1v1 battles
+    const in1v1 = await ctx.db
+        .query("battles")
+        .filter((q: any) => q.or(q.eq(q.field("hostId"), userId), q.eq(q.field("opponentId"), userId)))
+        .filter((q: any) => q.neq(q.field("status"), "Finished"))
+        .first();
+    if (in1v1) return true;
+
+    return false;
 }
 
 export const create = mutation({
@@ -31,7 +43,7 @@ export const create = mutation({
       throw new Error("User not authenticated or session expired.");
     }
 
-    if (await isUserInBattle(ctx, user._id)) {
+    if (await isUserInAnyBattle(ctx, user._id)) {
         throw new Error("You are already in a battle.");
     }
 
@@ -81,7 +93,7 @@ export const join = mutation({
       throw new Error("User not authenticated or session expired.");
     }
 
-    if (await isUserInBattle(ctx, user._id)) {
+    if (await isUserInAnyBattle(ctx, user._id)) {
         throw new Error("You are already in a battle.");
     }
 
