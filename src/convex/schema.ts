@@ -11,20 +11,27 @@ export const ROLES = {
 export const roleValidator = v.union(
   v.literal(ROLES.ADMIN),
   v.literal(ROLES.USER),
-  v.literal(ROLES.MEMBER),
+  v.literal(ROLES.MEMBER)
 );
 export type Role = Infer<typeof roleValidator>;
 
 const schema = defineSchema(
   {
     users: defineTable({
-      name: v.optional(v.string()),
+      name: v.string(),
+      email: v.string(),
+      passwordHash: v.string(), // For custom auth
       image: v.optional(v.string()),
-      email: v.optional(v.string()),
-      emailVerificationTime: v.optional(v.number()),
-      isAnonymous: v.optional(v.boolean()),
       role: v.optional(roleValidator),
-    }).index("email", ["email"]),
+    })
+      .index("by_email", ["email"])
+      .index("by_name", ["name"]),
+
+    sessions: defineTable({
+      userId: v.id("users"),
+      token: v.string(),
+      expires: v.number(), // Expiration timestamp
+    }).index("by_token", ["token"]),
 
     battles: defineTable({
       hostId: v.id("users"),
@@ -33,11 +40,12 @@ const schema = defineSchema(
         v.literal("Open"),
         v.literal("Full"),
         v.literal("In Progress"),
-        v.literal("Finished"),
+        v.literal("Finished")
       ),
-    }).index("by_status", ["status"])
-    .index("by_hostId_and_status", ["hostId", "status"])
-    .index("by_opponentId", ["opponentId"]),
+    })
+      .index("by_status", ["status"])
+      .index("by_hostId_and_status", ["hostId", "status"])
+      .index("by_opponentId", ["opponentId"]),
 
     multiplayerBattles: defineTable({
       hostId: v.id("users"),
@@ -46,20 +54,15 @@ const schema = defineSchema(
       status: v.union(
         v.literal("Waiting"),
         v.literal("In Progress"),
-        v.literal("Finished"),
+        v.literal("Finished")
       ),
-    }).index("by_status", ["status"])
-    .index("by_playerIds", ["playerIds"]),
-
-    sessions: defineTable({
-      userId: v.id("users"),
-      token: v.string(),
-      expires: v.number(),
-    }).index("by_token", ["token"]),
+    })
+      .index("by_status", ["status"])
+      .index("by_playerIds", ["playerIds"]),
   },
   {
     schemaValidation: false,
-  },
+  }
 );
 
 export default schema;
