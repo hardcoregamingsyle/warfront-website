@@ -26,6 +26,10 @@ import Competitive from "./pages/Competitive.tsx";
 import BattleRoom from "./pages/BattleRoom.tsx";
 import Users from "./pages/Users.tsx";
 import ProfileRedirect from "./pages/ProfileRedirect.tsx";
+import AccountSettings from "./pages/settings/Account.tsx";
+import SecuritySettings from "./pages/settings/Security.tsx";
+import VisibilitySettings from "./pages/settings/Visibility.tsx";
+import SocialMediaSettings from "./pages/settings/SocialMedia.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -71,6 +75,10 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/profile" element={<ProfileRedirect />} />
               <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/settings/account" element={<AccountSettings />} />
+              <Route path="/settings/security" element={<SecuritySettings />} />
+              <Route path="/settings/visibility" element={<VisibilitySettings />} />
+              <Route path="/settings/socialmedia" element={<SocialMediaSettings />} />
               <Route path="/history" element={<History />} />
               <Route path="/trade-history" element={<TradeHistory />} />
               <Route path="/battle-history" element={<BattleHistory />} />
