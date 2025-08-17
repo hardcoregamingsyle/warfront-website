@@ -173,6 +173,7 @@ export const getUserProfile = query({
     return {
       _id: user._id,
       name: user.name,
+      displayName: user.displayName,
       image: user.image,
     };
   },

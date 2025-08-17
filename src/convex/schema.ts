@@ -82,6 +82,19 @@ const schema = defineSchema(
     })
       .index("by_status", ["status"])
       .index("by_playerIds", ["playerIds"]),
+
+    friendships: defineTable({
+      requesterId: v.id("users"),
+      requesteeId: v.id("users"),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("accepted"),
+        v.literal("declined")
+      ),
+    })
+      .index("by_requesteeId_status", ["requesteeId", "status"])
+      .index("by_requesterId_status", ["requesterId", "status"])
+      .index("by_requestee_and_requester", ["requesteeId", "requesterId"]),
   },
   {
     schemaValidation: false,

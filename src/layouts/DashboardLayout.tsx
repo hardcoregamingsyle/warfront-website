@@ -36,6 +36,7 @@ const navItems = [
   { href: "/join-battle", icon: Swords, label: "Join Battle" },
   { href: "/inventory", icon: Package, label: "Inventory" },
   { href: "/how-to-play", icon: BookOpen, label: "How to Play" },
+  { href: "/friends", icon: Users, label: "Friends" },
   { href: "/history", icon: History, label: "History" },
   { href: "/users", icon: Users2, label: "Users" },
 ];

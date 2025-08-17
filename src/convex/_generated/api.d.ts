@@ -17,6 +17,8 @@ import type * as auth from "../auth.js";
 import type * as battles from "../battles.js";
 import type * as crons from "../crons.js";
 import type * as dev from "../dev.js";
+import type * as friends from "../friends.js";
+import type * as friendsActions from "../friendsActions.js";
 import type * as generators_deleteAllUsers from "../generators/deleteAllUsers.js";
 import type * as generators_deleteAllUsersAndAuthData from "../generators/deleteAllUsersAndAuthData.js";
 import type * as generators_nuclearCleanup from "../generators/nuclearCleanup.js";
@@ -38,6 +40,8 @@ declare const fullApi: ApiFromModules<{
   battles: typeof battles;
   crons: typeof crons;
   dev: typeof dev;
+  friends: typeof friends;
+  friendsActions: typeof friendsActions;
   "generators/deleteAllUsers": typeof generators_deleteAllUsers;
   "generators/deleteAllUsersAndAuthData": typeof generators_deleteAllUsersAndAuthData;
   "generators/nuclearCleanup": typeof generators_nuclearCleanup;
