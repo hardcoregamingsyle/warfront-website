@@ -167,7 +167,6 @@ export default function JoinBattle() {
 
           <div className="max-w-4xl mx-auto mb-4 flex justify-center gap-4">
             <Button
-              className="bg-red-600 hover:bg-red-700 text-white"
               onClick={handleCreateBattle}
             >
               Create 1v1 Battle
