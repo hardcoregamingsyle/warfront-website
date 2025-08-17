@@ -89,7 +89,8 @@ const schema = defineSchema(
       lastActivity: v.optional(v.number()),
     })
       .index("by_status", ["status"])
-      .index("by_playerIds", ["playerIds"]),
+      .index("by_playerIds", ["playerIds"])
+      .index("by_status_and_lastActivity", ["status", "lastActivity"]),
 
     friendships: defineTable({
       requesterId: v.id("users"),
