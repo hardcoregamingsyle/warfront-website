@@ -1,9 +1,70 @@
-import { action } from "./_generated/server";
+import { mutation } from "./_generated/server";
+import { ROLES } from "./schema";
 
-// Simple seed function that can be used if needed later
-export const createTestData = action({
-  args: {},
+// Simple hash function for demo purposes - not secure for production
+const FAKE_HASH_SALT = "this-is-not-secure-and-should-be-in-an-env-var";
+const hashPassword = (password: string) => {
+  // Simple string hash for demo - use proper bcrypt in production
+  let hash = 0;
+  const str = password + FAKE_HASH_SALT;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash.toString(36);
+};
+
+export const createSeedUsers = mutation({
   handler: async (ctx) => {
-    return "Seed functionality removed - use the auth system to create accounts";
+    const usersToCreate = [
+      {
+        name: "Warfront_Owner",
+        email: "hardcorgamingstyle@gmail.com",
+        password: "Belive*8",
+        role: ROLES.OWNER,
+      },
+      {
+        name: "Warfront_Admin",
+        email: "hardcorgamingstyle@gmail.com",
+        password: "Belive*8",
+        role: ROLES.ADMIN,
+      },
+      {
+        name: "cardsetter1",
+        email: "hardcorgamingstyle@gmail.com",
+        password: "Belive*8",
+        role: ROLES.CARDSETTER,
+      },
+      {
+        name: "Cardsetter2",
+        email: "hardcorgamingstyle@gmail.com",
+        password: "Belive*8",
+        role: ROLES.CARDSETTER,
+      },
+      {
+        name: "Testaccount123",
+        email: "hardcorgamingstyle@gmail.com",
+        password: "Belive*8",
+        role: ROLES.TEST,
+      },
+    ];
+
+    for (const userData of usersToCreate) {
+      const existingUser = await ctx.db
+        .query("users")
+        .withIndex("by_name_for_uniqueness", (q) => q.eq("name", userData.name))
+        .first();
+
+      if (!existingUser) {
+        await ctx.db.insert("users", {
+          name: userData.name,
+          email: userData.email,
+          passwordHash: hashPassword(userData.password),
+          role: userData.role,
+        });
+      }
+    }
+    return "Seed users created successfully (if they didn't already exist).";
   },
 });
