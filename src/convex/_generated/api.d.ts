@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as auth from "../auth.js";
 import type * as battles from "../battles.js";
+import type * as crons from "../crons.js";
 import type * as dev from "../dev.js";
 import type * as generators_deleteAllUsers from "../generators/deleteAllUsers.js";
 import type * as generators_deleteAllUsersAndAuthData from "../generators/deleteAllUsersAndAuthData.js";
@@ -35,6 +36,7 @@ import type * as users from "../users.js";
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   battles: typeof battles;
+  crons: typeof crons;
   dev: typeof dev;
   "generators/deleteAllUsers": typeof generators_deleteAllUsers;
   "generators/deleteAllUsersAndAuthData": typeof generators_deleteAllUsersAndAuthData;

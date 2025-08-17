@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
 async function getUserFromToken(ctx: any, token: string) {
@@ -44,7 +45,7 @@ export const create = mutation({
     }
 
     if (await isUserInAnyBattle(ctx, user._id)) {
-        throw new Error("You are already in a battle.");
+        throw new Error("You are already in a Battle.");
     }
 
     if (maxPlayers < 3 || maxPlayers > 10) {
@@ -56,6 +57,7 @@ export const create = mutation({
       playerIds: [user._id],
       maxPlayers,
       status: "Waiting",
+      lastActivity: Date.now(),
     });
 
     return battleId;
@@ -94,7 +96,7 @@ export const join = mutation({
     }
 
     if (await isUserInAnyBattle(ctx, user._id)) {
-        throw new Error("You are already in a battle.");
+        throw new Error("You are already in a Battle.");
     }
 
     const battle = await ctx.db.get(battleId);
@@ -117,6 +119,7 @@ export const join = mutation({
 
     await ctx.db.patch(battleId, {
       playerIds: [...battle.playerIds, user._id],
+      lastActivity: Date.now(),
     });
   },
 });
@@ -151,11 +154,13 @@ export const leave = mutation({
             await ctx.db.patch(battleId, {
                 playerIds: updatedPlayerIds,
                 hostId: newHostId,
+                lastActivity: Date.now(),
             });
         } else {
             // A player is leaving
             await ctx.db.patch(battleId, {
                 playerIds: updatedPlayerIds,
+                lastActivity: Date.now(),
             });
         }
     },
@@ -185,6 +190,44 @@ export const start = mutation({
 
         await ctx.db.patch(battleId, {
             status: "In Progress",
+            lastActivity: Date.now(),
         });
+    },
+});
+
+// Internal functions for cron job
+export const cleanupInactiveBattles = internalAction({
+    handler: async (ctx) => {
+        const twentyMinutesAgo = Date.now() - 20 * 60 * 1000;
+
+        const inactiveBattles = await ctx.runQuery(internal.multiplayerBattles.getInactiveWaitingBattles, {
+            threshold: twentyMinutesAgo,
+        });
+
+        for (const battle of inactiveBattles) {
+            await ctx.runMutation(internal.multiplayerBattles.deleteBattleForCleanup, { battleId: battle._id });
+        }
+    },
+});
+
+export const getInactiveWaitingBattles = internalQuery({
+    args: { threshold: v.number() },
+    handler: async (ctx, { threshold }) => {
+        return await ctx.db
+            .query("multiplayerBattles")
+            .withIndex("by_status", (q) => q.eq("status", "Waiting"))
+            .filter((q) => q.lt(q.field("lastActivity"), threshold))
+            .collect();
+    },
+});
+
+export const deleteBattleForCleanup = internalMutation({
+    args: { battleId: v.id("multiplayerBattles") },
+    handler: async (ctx, { battleId }) => {
+        // Make sure the battle still exists before trying to delete
+        const battle = await ctx.db.get(battleId);
+        if (battle) {
+            await ctx.db.delete(battleId);
+        }
     },
 });

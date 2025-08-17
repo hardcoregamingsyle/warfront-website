@@ -56,6 +56,7 @@ const schema = defineSchema(
         v.literal("In Progress"),
         v.literal("Finished")
       ),
+      lastActivity: v.optional(v.number()),
     })
       .index("by_status", ["status"])
       .index("by_playerIds", ["playerIds"]),
