@@ -16,7 +16,7 @@ export default function Dashboard() {
         <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Your personal Warfront dashboard. View your card collection, track your player stats, manage your account, and jump into a match." />
       </Helmet>
-      <div className="bg-slate-900 text-white -m-8 p-8 min-h-screen">
+      <div className="text-white -m-8 p-8 min-h-screen">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

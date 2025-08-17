@@ -21,7 +21,7 @@ export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen">
       <Helmet>
         <title>Combat for the Digital Age – Warfront</title>
         <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
