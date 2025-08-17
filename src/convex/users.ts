@@ -171,27 +171,21 @@ export const searchUsers = query({
   },
 });
 
-export const findDuplicateUsers = query({
-  args: {},
-  handler: async (ctx) => {
-    const allUsers = await ctx.db.query("users").collect();
-    const usersByName = new Map<string, (typeof allUsers[0])[]>();
+export const deleteUser = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    // First, find and delete any sessions associated with the user
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .collect();
 
-    for (const user of allUsers) {
-      const lowerCaseName = user.name.toLowerCase();
-      if (!usersByName.has(lowerCaseName)) {
-        usersByName.set(lowerCaseName, []);
-      }
-      usersByName.get(lowerCaseName)!.push(user);
+    for (const session of sessions) {
+      await ctx.db.delete(session._id);
     }
 
-    const duplicates: (typeof allUsers[0])[][] = [];
-    for (const [name, users] of usersByName.entries()) {
-      if (users.length > 1) {
-        duplicates.push(users);
-      }
-    }
-
-    return duplicates;
+    // Now, delete the user
+    await ctx.db.delete(userId);
+    return "User deleted successfully";
   },
 });

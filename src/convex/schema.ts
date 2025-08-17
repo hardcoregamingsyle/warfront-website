@@ -34,7 +34,9 @@ const schema = defineSchema(
       userId: v.id("users"),
       token: v.string(),
       expires: v.number(), // Expiration timestamp
-    }).index("by_token", ["token"]),
+    })
+      .index("by_token", ["token"])
+      .index("by_userId", ["userId"]),
 
     battles: defineTable({
       hostId: v.id("users"),

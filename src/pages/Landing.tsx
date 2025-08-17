@@ -15,12 +15,18 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
+import { Helmet } from "react-helmet-async";
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      <Helmet>
+        <title>Warfront | Combat for The Digital Age</title>
+        <meta name="description" content="Experience Warfront, the family-friendly military TCG & CCG. Battle online with friends or play offline with physical cards. A perfect mix of combat, strategy, and fun for all ages." />
+        <meta name="keywords" content="Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, familiy, family friendly, familiy friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards" />
+      </Helmet>
       {/* Navigation */}
       <motion.nav 
         className="fixed top-0 w-full z-50 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700"

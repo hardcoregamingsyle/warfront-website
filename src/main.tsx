@@ -6,6 +6,7 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
+import { HelmetProvider } from "react-helmet-async";
 import "./index.css";
 import Dashboard from "./pages/Dashboard.tsx";
 import Landing from "./pages/Landing.tsx";
@@ -57,30 +58,32 @@ createRoot(document.getElementById("root")!).render(
     <VlyToolbar />
     <InstrumentationProvider>
       <ConvexProvider client={convex}>
-        <BrowserRouter>
-          <RouteSyncer />
-          <Routes>
-            <Route path="*" element={<NotFound />} />
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/join-battle" element={<JoinBattle />} />
-            <Route path="/how-to-play" element={<HowToPlay />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/profile" element={<ProfileRedirect />} />
-            <Route path="/profile/:userId" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/trade-history" element={<TradeHistory />} />
-            <Route path="/battle-history" element={<BattleHistory />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/battle/:battleId" element={<BattleRoom />} />
-            <Route path="/multi_battle" element={<MultiBattle />} />
-            <Route path="/competetive" element={<Competitive />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
+        <HelmetProvider>
+          <BrowserRouter>
+            <RouteSyncer />
+            <Routes>
+              <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/join-battle" element={<JoinBattle />} />
+              <Route path="/how-to-play" element={<HowToPlay />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/profile" element={<ProfileRedirect />} />
+              <Route path="/profile/:userId" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/trade-history" element={<TradeHistory />} />
+              <Route path="/battle-history" element={<BattleHistory />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/battle/:battleId" element={<BattleRoom />} />
+              <Route path="/multi_battle" element={<MultiBattle />} />
+              <Route path="/competetive" element={<Competitive />} />
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+        </HelmetProvider>
       </ConvexProvider>
     </InstrumentationProvider>
   </StrictMode>,
