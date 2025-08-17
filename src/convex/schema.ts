@@ -39,6 +39,7 @@ const schema = defineSchema(
       // Account settings fields
       displayName: v.optional(v.string()),
       region: v.optional(v.string()),
+      dob: v.optional(v.string()), // Date of Birth
       emailVerified: v.optional(v.boolean()),
     })
       .index("by_email_normalized", ["email_normalized"])

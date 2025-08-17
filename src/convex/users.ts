@@ -328,9 +328,11 @@ export const updateAccountSettings = mutation({
     username: v.optional(v.string()),
     displayName: v.optional(v.string()),
     region: v.optional(v.string()),
+    dob: v.optional(v.string()),
+    image: v.optional(v.string()),
     password: v.string(),
   },
-  handler: async (ctx, { token, username, displayName, region, password }) => {
+  handler: async (ctx, { token, username, displayName, region, dob, image, password }) => {
     // Get current user from token
     const session = await ctx.db
       .query("sessions")
@@ -378,6 +380,12 @@ export const updateAccountSettings = mutation({
     if (region !== undefined) {
       updates.region = region;
     }
+    if (dob !== undefined) {
+      updates.dob = dob;
+    }
+    if (image !== undefined) {
+      updates.image = image;
+    }
 
     await ctx.db.patch(user._id, updates);
     return "Account settings updated successfully";
@@ -411,6 +419,8 @@ export const getCurrentUserSettings = query({
       displayName: user.displayName,
       region: user.region,
       email: user.email,
+      image: user.image,
+      dob: user.dob,
     };
   },
 });

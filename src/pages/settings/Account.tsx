@@ -3,62 +3,59 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import EditFieldDialog from "@/components/settings/EditFieldDialog";
+
+type EditableField = "Username" | "Display Name" | "Region" | "Date of Birth" | "Profile Picture";
 
 export default function AccountSettings() {
   const { token } = useAuth();
   const userSettings = useQuery(api.users.getCurrentUserSettings, token ? { token } : "skip");
   const updateSettings = useMutation(api.users.updateAccountSettings);
+
+  const [editingField, setEditingField] = useState<EditableField | null>(null);
   
-  const [username, setUsername] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [region, setRegion] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  // Update form when user data loads
-  useState(() => {
-    if (userSettings) {
-      setUsername(userSettings.name || "");
-      setDisplayName(userSettings.displayName || "");
-      setRegion(userSettings.region || "");
-    }
-  });
-
-  const handleSave = async () => {
-    if (!password) {
+  const handleSave = async (field: EditableField, newValue: string, password_confirmation: string) => {
+    if (!password_confirmation) {
       toast.error("Please enter your password to confirm changes");
       return;
     }
-
     if (!token) {
       toast.error("Not authenticated");
       return;
     }
 
-    setLoading(true);
+    const payload: any = { token, password: password_confirmation };
+    if (field === "Username") payload.username = newValue;
+    if (field === "Display Name") payload.displayName = newValue;
+    if (field === "Region") payload.region = newValue;
+    if (field === "Date of Birth") payload.dob = newValue;
+    if (field === "Profile Picture") payload.image = newValue;
+
     try {
-      await updateSettings({
-        token,
-        username: username || undefined,
-        displayName: displayName || undefined,
-        region: region || undefined,
-        password,
-      });
-      toast.success("Account settings updated successfully");
-      setPassword(""); // Clear password field
+      await updateSettings(payload);
+      toast.success(`${field} updated successfully`);
     } catch (error: any) {
-      toast.error(error.data || "Failed to update settings");
-    } finally {
-      setLoading(false);
+      toast.error(error.data || `Failed to update ${field}`);
     }
   };
+
+  const renderField = (label: EditableField, value: string | undefined, inputType: string = "text") => (
+    <div className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+      <div>
+        <p className="text-sm text-slate-400">{label}</p>
+        <p className="text-white font-medium">{value || "Not set"}</p>
+      </div>
+      <Button variant="ghost" size="icon" onClick={() => setEditingField(label)}>
+        <Pencil className="h-4 w-4 text-slate-400" />
+      </Button>
+    </div>
+  );
 
   if (userSettings === undefined) {
     return (
@@ -81,65 +78,51 @@ export default function AccountSettings() {
           
           <Card className="bg-slate-900 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-white">Account Information</CardTitle>
+              <CardTitle className="text-white">Your Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-slate-300">Username</Label>
-                <Input
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="bg-slate-800 border-slate-600 text-white"
-                />
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={userSettings?.image || undefined} alt={userSettings?.name || ""} />
+                    <AvatarFallback>{userSettings?.name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm text-slate-400">Profile Picture</p>
+                    <p className="text-white font-medium">Update your avatar</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setEditingField("Profile Picture")}>
+                  <Pencil className="h-4 w-4 text-slate-400" />
+                </Button>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="displayName" className="text-slate-300">Display Name</Label>
-                <Input
-                  id="displayName"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="bg-slate-800 border-slate-600 text-white"
-                  placeholder="Optional display name"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="region" className="text-slate-300">Region</Label>
-                <Input
-                  id="region"
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
-                  className="bg-slate-800 border-slate-600 text-white"
-                  placeholder="e.g., North America, Europe, Asia"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-300">Confirm Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-slate-800 border-slate-600 text-white"
-                  placeholder="Enter your password to save changes"
-                />
-              </div>
-
-              <Button 
-                onClick={handleSave}
-                disabled={loading}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
-              </Button>
+              {renderField("Username", userSettings?.name)}
+              {renderField("Display Name", userSettings?.displayName)}
+              {renderField("Region", userSettings?.region)}
+              {renderField("Date of Birth", userSettings?.dob, "date")}
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {editingField && (
+        <EditFieldDialog
+          isOpen={!!editingField}
+          onClose={() => setEditingField(null)}
+          fieldName={editingField}
+          currentValue={
+            (editingField === "Username" ? userSettings?.name :
+            editingField === "Display Name" ? userSettings?.displayName :
+            editingField === "Region" ? userSettings?.region :
+            editingField === "Date of Birth" ? userSettings?.dob :
+            editingField === "Profile Picture" ? userSettings?.image :
+            "") || ""
+          }
+          onSave={(newValue, password) => handleSave(editingField, newValue, password)}
+          inputType={editingField === "Date of Birth" ? "date" : "text"}
+        />
+      )}
     </DashboardLayout>
   );
 }
