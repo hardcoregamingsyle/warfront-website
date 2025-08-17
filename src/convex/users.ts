@@ -60,14 +60,14 @@ export const login = mutation({
         .withIndex("by_email_normalized", (q) =>
           q.eq("email_normalized", lowerIdentifier),
         )
-        .unique();
+        .first();
     } else {
       user = await ctx.db
         .query("users")
         .withIndex("by_name_normalized", (q) =>
           q.eq("name_normalized", lowerIdentifier),
         )
-        .unique();
+        .first();
     }
 
     if (!user) {

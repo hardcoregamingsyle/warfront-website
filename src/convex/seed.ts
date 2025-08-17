@@ -59,6 +59,14 @@ export const createSeedUsers = mutation({
         .first();
 
       if (existingUser) {
+        // Also delete associated sessions
+        const sessions = await ctx.db
+            .query("sessions")
+            .withIndex("by_userId", (q) => q.eq("userId", existingUser._id))
+            .collect();
+        for (const session of sessions) {
+            await ctx.db.delete(session._id);
+        }
         await ctx.db.delete(existingUser._id);
       }
 
