@@ -39,13 +39,14 @@ const schema = defineSchema(
       status: v.union(
         v.literal("Open"),
         v.literal("Full"),
-        v.literal("In Progress"),
-        v.literal("Finished")
+        v.literal("InProgress"),
+        v.literal("Complete"),
       ),
+      winnerId: v.optional(v.id("users")),
+      lastActivity: v.optional(v.number()),
     })
-      .index("by_status", ["status"])
-      .index("by_hostId_and_status", ["hostId", "status"])
-      .index("by_opponentId", ["opponentId"]),
+      .index("by_hostId", ["hostId"])
+      .index("by_status", ["status"]),
 
     multiplayerBattles: defineTable({
       hostId: v.id("users"),

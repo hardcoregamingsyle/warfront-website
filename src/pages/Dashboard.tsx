@@ -36,7 +36,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-300 text-sm mb-4">Jump into combat immediately</p>
-                <Link to="/battle">
+                <Link to="/join-battle">
                   <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
                     Deploy Now
                   </Button>
@@ -108,9 +108,9 @@ export default function Dashboard() {
                   <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8">
                     Start Tutorial
                   </Button>
-                  <Link to="/inventory">
+                  <Link to="/join-battle">
                     <Button size="lg" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10 px-8">
-                      View Inventory
+                      Join Battle
                     </Button>
                   </Link>
                 </div>

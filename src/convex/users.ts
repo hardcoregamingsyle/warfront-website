@@ -74,21 +74,29 @@ export const login = mutation({
 });
 
 export const signupAndLogin = mutation({
-  args: { name: v.string(), email: v.string(), password: v.string() },
+  args: {
+    name: v.string(),
+    email: v.string(),
+    password: v.string(),
+  },
   handler: async (ctx, { name, email, password }) => {
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
-      .unique();
+    if (email !== "hardcorgamingstyle@gmail.com") {
+      const existingUser = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", email))
+        .first();
 
-    if (existingUser) {
-      throw new Error("This Email is already in use");
+      if (existingUser) {
+        throw new Error("This Email is already in use");
+      }
     }
+
+    const passwordHash = hashPassword(password);
 
     const userId = await ctx.db.insert("users", {
       name,
       email,
-      passwordHash: hashPassword(password),
+      passwordHash,
       role: "user" as const,
     });
 

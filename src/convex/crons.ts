@@ -4,9 +4,15 @@ import { internal } from "./_generated/api";
 const crons = cronJobs();
 
 crons.interval(
-  "cleanup inactive multiplayer battles",
-  { minutes: 5 }, // This will run every 5 minutes
-  internal.multiplayerBattles.cleanupInactiveBattles
+  "Clean up inactive multiplayer battles",
+  { minutes: 5 },
+  internal.multiplayerBattles.cleanupInactiveBattles,
+);
+
+crons.interval(
+  "Clean up inactive 1v1 battles",
+  { minutes: 5 },
+  internal.battles.cleanupInactiveBattles,
 );
 
 export default crons;
