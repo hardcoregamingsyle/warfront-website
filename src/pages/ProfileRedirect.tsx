@@ -12,7 +12,7 @@ export default function ProfileRedirect() {
       navigate(`/profile/${user._id}`);
     }
     if (!isLoading && !user) {
-      navigate("/auth");
+      navigate("/");
     }
   }, [user, isLoading, navigate]);
 

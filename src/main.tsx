@@ -1,7 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { VlyToolbar } from "@/components/VlyToolbar";
 import { InstrumentationProvider } from "@/instrumentation.tsx";
-import Auth from "@/pages/Auth.tsx";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
@@ -64,7 +63,6 @@ createRoot(document.getElementById("root")!).render(
             <Routes>
               <Route path="*" element={<NotFound />} />
               <Route path="/" element={<Landing />} />
-              <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/join-battle" element={<JoinBattle />} />
