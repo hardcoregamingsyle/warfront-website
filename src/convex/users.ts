@@ -234,8 +234,8 @@ export const deleteDuplicateUsers = mutation({
         seenNames.set(user.name_normalized, user._id);
       }
 
-      // Check for duplicate emails, excluding the shared one
-      if (user.email_normalized && user.email_normalized !== "hardcorgamingstyle@gmail.com") {
+      // Check for duplicate emails
+      if (user.email_normalized) {
         if (seenEmails.has(user.email_normalized)) {
           usersToDelete.push(user._id);
           continue;
