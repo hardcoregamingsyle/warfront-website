@@ -42,7 +42,12 @@ export default function MultiBattle() {
       toast.success("Multiplayer battle created successfully!");
       setCreateDialogOpen(false);
     } catch (error: any) {
-      toast.error(error.data || "Failed to create battle.");
+      const errorMessage = error.data;
+      if (errorMessage === "You are already in a Battle. You cannot Create or Join another Battle") {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An Unexpected Error Occurred. Please try again Later");
+      }
     }
   };
 
@@ -73,9 +78,8 @@ export default function MultiBattle() {
       await leaveBattle({ battleId, token });
       toast.success("You have left the battle.");
     } catch (error: any) {
-      toast.error(
-        error.data || "An unexpected error occurred while leaving the battle.",
-      );
+      console.error("Failed to leave battle:", error);
+      toast.error("An Unexpected Error Occurred. Please try again Later");
     }
   };
 
@@ -88,7 +92,8 @@ export default function MultiBattle() {
       await startBattle({ battleId, token });
       toast.success("Battle started!");
     } catch (error: any) {
-      toast.error(error.data || "Failed to start battle.");
+      console.error("Failed to start battle:", error);
+      toast.error("An Unexpected Error Occurred. Please try again Later");
     }
   };
 

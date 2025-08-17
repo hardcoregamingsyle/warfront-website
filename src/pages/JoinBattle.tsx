@@ -40,7 +40,12 @@ export default function JoinBattle() {
       await createBattle({ token });
       toast.success("Battle created successfully!");
     } catch (error: any) {
-      toast.error(error.data || "Failed to create battle.");
+      const errorMessage = error.data;
+      if (errorMessage === "You are already in a Battle. You cannot Create or Join another Battle") {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An Unexpected Error Occurred. Please try again Later");
+      }
     }
   };
 
@@ -54,7 +59,12 @@ export default function JoinBattle() {
       toast.success("Joined battle successfully! Redirecting...");
       navigate(`/battle/${battleId}`);
     } catch (error: any) {
-      toast.error(error.data || "Failed to join battle.");
+      const errorMessage = error.data;
+      if (errorMessage === "You are already in a Battle. You cannot Create or Join another Battle") {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An Unexpected Error Occurred. Please try again Later");
+      }
     }
   };
 
@@ -67,9 +77,9 @@ export default function JoinBattle() {
       await cancelBattle({ battleId, token });
       toast.success("Your battle has been canceled.");
     } catch (error: any) {
+      console.error("Failed to cancel battle:", error);
       toast.error(
-        error.data ||
-          "An unexpected error occurred while canceling the battle.",
+        "An Unexpected Error Occurred. Please try again Later",
       );
     }
   };

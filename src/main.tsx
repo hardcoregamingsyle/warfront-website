@@ -70,7 +70,6 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/battle-history" element={<BattleHistory />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/battle" element={<Battle />} />
             <Route path="/battle/:battleId" element={<BattleRoom />} />
             <Route path="/multi_battle" element={<MultiBattle />} />
             <Route path="/competetive" element={<Competitive />} />
