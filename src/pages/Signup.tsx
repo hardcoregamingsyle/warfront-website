@@ -81,16 +81,14 @@ export default function Signup() {
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Signup failed:", error);
-      const errorMessage = error.data?.message || error.message;
-      if (errorMessage?.includes("email already exists")) {
+      const errorMessage = error.data;
+      if (errorMessage === "This Email is already in use") {
         form.setError("email", {
           type: "manual",
-          message: "An account with this email already exists.",
+          message: errorMessage,
         });
       } else {
-        toast.error(
-          errorMessage || "Failed to create account. Please try again.",
-        );
+        toast.error("An Unexpected Error Occurred. Please try again Later");
       }
     }
   };

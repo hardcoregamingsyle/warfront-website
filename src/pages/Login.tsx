@@ -54,11 +54,12 @@ export default function Login() {
       navigate(redirect || "/dashboard");
     } catch (error: any) {
       console.error("Login failed:", error);
-      setFormError(
-        error.data?.message ||
-          error.message ||
-          "Login failed. Please check your credentials and try again.",
-      );
+      const errorMessage = error.data;
+      if (errorMessage === "Incorrect Username or Password") {
+        setFormError(errorMessage);
+      } else {
+        setFormError("An Unexpected Error Occurred. Please try again Later");
+      }
     }
   };
 

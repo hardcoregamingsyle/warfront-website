@@ -52,12 +52,12 @@ export const login = mutation({
       .unique();
 
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("Incorrect Username or Password");
     }
 
     const passwordHash = hashPassword(password);
     if (user.passwordHash !== passwordHash) {
-      throw new Error("Incorrect password");
+      throw new Error("Incorrect Username or Password");
     }
 
     const token = generateToken();
@@ -82,7 +82,7 @@ export const signupAndLogin = mutation({
       .unique();
 
     if (existingUser) {
-      throw new Error("User with this email already exists");
+      throw new Error("This Email is already in use");
     }
 
     const userId = await ctx.db.insert("users", {

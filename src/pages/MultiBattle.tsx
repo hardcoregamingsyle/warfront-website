@@ -55,9 +55,12 @@ export default function MultiBattle() {
       await joinBattle({ battleId, token });
       toast.success("Joined multiplayer battle successfully!");
     } catch (error: any) {
-      toast.error(
-        error.data || "An unexpected error occurred while joining the battle.",
-      );
+      const errorMessage = error.data;
+      if (errorMessage === "You are already in a Battle. You cannot Create or Join another Battle") {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An Unexpected Error Occurred. Please try again Later");
+      }
     }
   };
 

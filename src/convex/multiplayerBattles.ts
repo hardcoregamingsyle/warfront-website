@@ -45,7 +45,7 @@ export const create = mutation({
     }
 
     if (await isUserInAnyBattle(ctx, user._id)) {
-        throw new Error("You are already in a Battle.");
+        throw new Error("You are already in a Battle. You cannot Create or Join another Battle");
     }
 
     if (maxPlayers < 3 || maxPlayers > 10) {
@@ -96,7 +96,7 @@ export const join = mutation({
     }
 
     if (await isUserInAnyBattle(ctx, user._id)) {
-        throw new Error("You are already in a Battle.");
+        throw new Error("You are already in a Battle. You cannot Create or Join another Battle");
     }
 
     const battle = await ctx.db.get(battleId);
