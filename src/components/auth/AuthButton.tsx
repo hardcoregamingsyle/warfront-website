@@ -2,6 +2,12 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { AuthCard } from "./AuthCard";
 
 interface AuthButtonProps {
   trigger?: React.ReactNode;
@@ -31,9 +37,14 @@ export function AuthButton({ trigger, dashboardTrigger }: AuthButtonProps) {
     );
   }
 
-  return trigger ? (
-    <div onClick={() => navigate("/login")}>{trigger}</div>
-  ) : (
-    <Button onClick={() => navigate("/login")}>Get Started</Button>
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        {trigger ? <div>{trigger}</div> : <Button>Get Started</Button>}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <AuthCard />
+      </DialogContent>
+    </Dialog>
   );
 }
