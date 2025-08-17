@@ -36,6 +36,9 @@ const schema = defineSchema(
       // New fields for case-insensitivity
       name_normalized: v.string(),
       email_normalized: v.string(),
+      // Account settings fields
+      displayName: v.optional(v.string()),
+      region: v.optional(v.string()),
     })
       .index("by_email_normalized", ["email_normalized"])
       .index("by_name_normalized", ["name_normalized"])

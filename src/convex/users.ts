@@ -215,3 +215,143 @@ export const deleteUser = mutation({
     return "User deleted successfully";
   },
 });
+
+export const deleteDuplicateUsers = mutation({
+  handler: async (ctx) => {
+    const allUsers = await ctx.db.query("users").order("asc").collect();
+    const seenNames = new Map<string, Id<"users">>();
+    const seenEmails = new Map<string, Id<"users">>();
+    const usersToDelete: Id<"users">[] = [];
+    let deletedCount = 0;
+
+    for (const user of allUsers) {
+      // Check for duplicate names
+      if (user.name_normalized) {
+        if (seenNames.has(user.name_normalized)) {
+          usersToDelete.push(user._id);
+          continue; // Skip to next user, as this one is marked for deletion
+        }
+        seenNames.set(user.name_normalized, user._id);
+      }
+
+      // Check for duplicate emails, excluding the shared one
+      if (user.email_normalized && user.email_normalized !== "hardcorgamingstyle@gmail.com") {
+        if (seenEmails.has(user.email_normalized)) {
+          usersToDelete.push(user._id);
+          continue;
+        }
+        seenEmails.set(user.email_normalized, user._id);
+      }
+    }
+
+    const uniqueUsersToDelete = [...new Set(usersToDelete)];
+
+    for (const userId of uniqueUsersToDelete) {
+        // Also delete associated sessions
+        const sessions = await ctx.db
+            .query("sessions")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .collect();
+        for (const session of sessions) {
+            await ctx.db.delete(session._id);
+        }
+        await ctx.db.delete(userId);
+        deletedCount++;
+    }
+
+    return `Deleted ${deletedCount} duplicate users.`;
+  },
+});
+
+export const updateAccountSettings = mutation({
+  args: {
+    token: v.string(),
+    username: v.optional(v.string()),
+    displayName: v.optional(v.string()),
+    region: v.optional(v.string()),
+    password: v.string(),
+  },
+  handler: async (ctx, { token, username, displayName, region, password }) => {
+    // Get current user from token
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session || session.expires < Date.now()) {
+      throw new Error("Invalid or expired session");
+    }
+
+    const user = await ctx.db.get(session.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Verify password
+    const passwordHash = hashPassword(password);
+    if (user.passwordHash !== passwordHash) {
+      throw new Error("Incorrect password");
+    }
+
+    // Check if username is already taken (if changing username)
+    if (username && username.toLowerCase() !== user.name_normalized) {
+      const existingUser = await ctx.db
+        .query("users")
+        .withIndex("by_name_normalized", (q) => 
+          q.eq("name_normalized", username.toLowerCase())
+        )
+        .first();
+
+      if (existingUser) {
+        throw new Error("Username is already taken");
+      }
+    }
+
+    // Update user
+    const updates: any = {};
+    if (username) {
+      updates.name = username;
+      updates.name_normalized = username.toLowerCase();
+    }
+    if (displayName !== undefined) {
+      updates.displayName = displayName;
+    }
+    if (region !== undefined) {
+      updates.region = region;
+    }
+
+    await ctx.db.patch(user._id, updates);
+    return "Account settings updated successfully";
+  },
+});
+
+export const getCurrentUserSettings = query({
+  args: { token: v.optional(v.string()) },
+  handler: async (ctx, { token }) => {
+    if (!token) {
+      return null;
+    }
+    
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session || session.expires < Date.now()) {
+      return null;
+    }
+
+    const user = await ctx.db.get(session.userId);
+    if (!user) {
+      return null;
+    }
+
+    return {
+      _id: user._id,
+      name: user.name,
+      displayName: user.displayName,
+      region: user.region,
+      email: user.email,
+    };
+  },
+});
