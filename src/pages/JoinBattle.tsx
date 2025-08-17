@@ -79,7 +79,7 @@ export default function JoinBattle() {
     }
     setIsCreatingMultiplayer(true);
     try {
-      const battleId = await createMultiplayerBattle({ token, maxPlayers });
+      const battleId = await createMultiplayerBattle({ maxPlayers, token });
       toast.success("Multiplayer battle created successfully! Redirecting...");
       navigate(`/multi-battle/${battleId}`);
     } catch (error: any) {

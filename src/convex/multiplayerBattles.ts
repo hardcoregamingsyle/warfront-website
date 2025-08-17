@@ -1,45 +1,37 @@
 "use node";
 import { v } from "convex/values";
-import {
-  action,
-  internalMutation,
-  internalQuery,
-  mutation,
-  query,
-} from "./_generated/server";
-import { internal } from "./_generated/api";
+import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-
-// Get user from session token
-const getUserFromToken = async (ctx: any, token: string) => {
-  const session = await ctx.db
-    .query("sessions")
-    .withIndex("by_token", (q: any) => q.eq("token", token))
-    .unique();
-
-  if (!session || session.expires < Date.now()) {
-    throw new Error("Invalid or expired session");
-  }
-
-  return await ctx.db.get(session.userId);
-};
 
 export const create = mutation({
   args: {
-    token: v.string(),
     maxPlayers: v.number(),
+    token: v.string(),
   },
-  handler: async (ctx, { token, maxPlayers }) => {
-    const user = await getUserFromToken(ctx, token);
-    if (!user) {
-      throw new Error("User not found");
+  handler: async (ctx, { maxPlayers, token }) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session || session.expires < Date.now()) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = session.userId;
+    if (!userId) {
+      throw new Error("Not authenticated");
     }
 
     // Check if user is already in a battle
     const existingBattle = await ctx.db
       .query("multiplayerBattles")
-      .withIndex("by_playerIds", (q) => q.eq("playerIds", user._id))
-      .filter((q) => q.neq(q.field("status"), "Finished"))
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("hostId"), userId),
+          q.neq(q.field("status"), "Finished")
+        )
+      )
       .first();
 
     if (existingBattle) {
@@ -47,8 +39,8 @@ export const create = mutation({
     }
 
     const battleId = await ctx.db.insert("multiplayerBattles", {
-      hostId: user._id,
-      playerIds: [user._id],
+      hostId: userId,
+      playerIds: [userId],
       maxPlayers,
       status: "Waiting",
       lastActivity: Date.now(),
@@ -60,13 +52,22 @@ export const create = mutation({
 
 export const join = mutation({
   args: {
-    token: v.string(),
     battleId: v.id("multiplayerBattles"),
+    token: v.string(),
   },
-  handler: async (ctx, { token, battleId }) => {
-    const user = await getUserFromToken(ctx, token);
-    if (!user) {
-      throw new Error("User not found");
+  handler: async (ctx, { battleId, token }) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session || session.expires < Date.now()) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = session.userId;
+    if (!userId) {
+      throw new Error("Not authenticated");
     }
 
     const battle = await ctx.db.get(battleId);
@@ -74,7 +75,7 @@ export const join = mutation({
       throw new Error("Battle not found");
     }
 
-    if (battle.playerIds.includes(user._id)) {
+    if (battle.playerIds.includes(userId)) {
       throw new Error("You are already in this battle.");
     }
     
@@ -86,8 +87,8 @@ export const join = mutation({
       throw new Error("This battle is full.");
     }
 
-    const newPlayerIds = [...battle.playerIds, user._id];
-    let newStatus = battle.status;
+    const newPlayerIds = [...battle.playerIds, userId];
+    let newStatus: "Waiting" | "In Progress" | "Finished" = battle.status;
     if (newPlayerIds.length === battle.maxPlayers) {
         newStatus = "In Progress";
     }
@@ -107,54 +108,52 @@ export const list = query({
     const battles = await ctx.db
       .query("multiplayerBattles")
       .withIndex("by_status", (q) => q.eq("status", "Waiting"))
-      .order("desc")
       .collect();
 
-    const battlesWithDetails = await Promise.all(
+    const battlesWithPlayers = await Promise.all(
       battles.map(async (battle) => {
         const players = await Promise.all(
           battle.playerIds.map(async (playerId) => {
             const player = await ctx.db.get(playerId);
-            return {
-              _id: player?._id,
-              name: player?.name,
-              image: player?.image,
-            };
+            return player ? {
+              _id: player._id,
+              name: player.name,
+              image: player.image,
+            } : null;
           })
         );
+        
         return {
           ...battle,
-          players,
+          players: players.filter(Boolean),
         };
       })
     );
 
-    return battlesWithDetails;
+    return battlesWithPlayers;
   },
 });
 
 export const get = query({
-    args: { battleId: v.id("multiplayerBattles") },
-    handler: async (ctx, { battleId }) => {
-        const battle = await ctx.db.get(battleId);
-        if (!battle) {
-            return null;
-        }
+  args: { battleId: v.id("multiplayerBattles") },
+  handler: async (ctx, { battleId }) => {
+    const battle = await ctx.db.get(battleId);
+    if (!battle) return null;
 
-        const players = await Promise.all(
-            battle.playerIds.map(async (playerId) => {
-                const player = await ctx.db.get(playerId);
-                return {
-                    _id: player?._id,
-                    name: player?.name,
-                    image: player?.image,
-                };
-            })
-        );
+    const players = await Promise.all(
+      battle.playerIds.map(async (playerId) => {
+        const player = await ctx.db.get(playerId);
+        return player ? {
+          _id: player._id,
+          name: player.name,
+          image: player.image,
+        } : null;
+      })
+    );
 
-        return {
-            ...battle,
-            players,
-        };
-    },
+    return {
+      ...battle,
+      players: players.filter(Boolean),
+    };
+  },
 });
