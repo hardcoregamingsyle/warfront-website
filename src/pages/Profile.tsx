@@ -13,7 +13,9 @@ export default function Profile() {
   // Validate userId before passing to the query
   const profile = useQuery(
     api.users.getUserProfile,
-    userId ? { userId: userId as Id<"users"> } : "skip"
+    userId && userId !== "undefined"
+      ? { userId: userId as Id<"users"> }
+      : "skip"
   );
 
   if (profile === undefined) {

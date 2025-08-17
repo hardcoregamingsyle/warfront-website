@@ -132,7 +132,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Link to={`/profile/${user?._id}`}>
+            <Link to="/profile">
               <User className="h-6 w-6 text-slate-300 hover:text-red-400" />
             </Link>
             <Link to="/settings">
@@ -180,7 +180,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Link to={`/profile/${user?._id}`}>
+              <Link to="/profile">
                 <User className="h-6 w-6 text-slate-300 hover:text-red-400" />
               </Link>
               <Link to="/settings">
