@@ -18,6 +18,7 @@ import type * as auth_actions from "../auth_actions.js";
 import type * as battles from "../battles.js";
 import type * as crons from "../crons.js";
 import type * as dev from "../dev.js";
+import type * as files from "../files.js";
 import type * as friends from "../friends.js";
 import type * as friendsActions from "../friendsActions.js";
 import type * as generators_deleteAllUsers from "../generators/deleteAllUsers.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   battles: typeof battles;
   crons: typeof crons;
   dev: typeof dev;
+  files: typeof files;
   friends: typeof friends;
   friendsActions: typeof friendsActions;
   "generators/deleteAllUsers": typeof generators_deleteAllUsers;

@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +21,7 @@ export default function AccountSettings() {
 
   const [editingField, setEditingField] = useState<EditableField | null>(null);
   
-  const handleSave = async (field: EditableField, newValue: string, password_confirmation: string) => {
+  const handleSave = async (field: EditableField, newValue: string | { storageId: Id<"_storage"> }, password_confirmation: string) => {
     if (!password_confirmation) {
       toast.error("Please enter your password to confirm changes");
       return;
@@ -119,7 +120,7 @@ export default function AccountSettings() {
             editingField === "Profile Picture" ? userSettings?.image :
             "") || ""
           }
-          onSave={(newValue, password) => handleSave(editingField, newValue, password)}
+          onSave={(value, password) => handleSave(editingField, value, password)}
           inputType={editingField === "Date of Birth" ? "date" : "text"}
         />
       )}

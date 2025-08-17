@@ -330,9 +330,10 @@ export const updateAccountSettings = mutation({
     region: v.optional(v.string()),
     dob: v.optional(v.string()),
     image: v.optional(v.string()),
+    storageId: v.optional(v.id("_storage")),
     password: v.string(),
   },
-  handler: async (ctx, { token, username, displayName, region, dob, image, password }) => {
+  handler: async (ctx, { token, username, displayName, region, dob, image, storageId, password }) => {
     // Get current user from token
     const session = await ctx.db
       .query("sessions")
@@ -385,6 +386,11 @@ export const updateAccountSettings = mutation({
     }
     if (image !== undefined) {
       updates.image = image;
+    }
+
+    if (storageId) {
+      const imageUrl = await ctx.storage.getUrl(storageId);
+      updates.image = imageUrl;
     }
 
     await ctx.db.patch(user._id, updates);
