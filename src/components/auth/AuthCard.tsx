@@ -27,7 +27,7 @@ export function AuthCard() {
     }
     setLoading(true);
     try {
-      await signIn({ email, password });
+      await signIn({ identifier: email, password });
       toast.success("Logged in successfully!");
       // The dialog should close automatically on success if it's part of a Dialog component
     } catch (error: any) {

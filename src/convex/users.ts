@@ -44,12 +44,22 @@ export const currentUser = query({
 });
 
 export const login = mutation({
-  args: { email: v.string(), password: v.string() },
-  handler: async (ctx, { email, password }) => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
-      .unique();
+  args: { identifier: v.string(), password: v.string() },
+  handler: async (ctx, { identifier, password }) => {
+    let user;
+    // Check if identifier is an email
+    if (identifier.includes("@")) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", identifier))
+        .unique();
+    } else {
+      // Assume it's a username
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_name_for_uniqueness", (q) => q.eq("name", identifier))
+        .unique();
+    }
 
     if (!user) {
       throw new Error("Incorrect Username or Password");

@@ -24,7 +24,7 @@ export function useAuth() {
     }
   }, [token]);
 
-  const signIn = async (args: { email: string; password: string }) => {
+  const signIn = async (args: { identifier: string; password: string }) => {
     const newToken = await login(args);
     setToken(newToken);
     return newToken;

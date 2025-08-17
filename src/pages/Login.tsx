@@ -49,7 +49,7 @@ export default function Login() {
   const onSubmit = async (values: LoginFormValues) => {
     setFormError(null);
     try {
-      await signIn({ email: values.identifier, password: values.password });
+      await signIn({ identifier: values.identifier, password: values.password });
       toast.success("Logged in successfully!");
       const redirect = new URLSearchParams(location.search).get("redirect");
       navigate(redirect || "/dashboard");
