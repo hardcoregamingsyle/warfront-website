@@ -32,11 +32,21 @@ export default function AccountSettings() {
     }
 
     const payload: any = { token, password: password_confirmation };
-    if (field === "Username") payload.username = newValue;
-    if (field === "Display Name") payload.displayName = newValue;
-    if (field === "Region") payload.region = newValue;
-    if (field === "Date of Birth") payload.dob = newValue;
-    if (field === "Profile Picture") payload.image = newValue;
+    if (field === "Username") {
+      payload.username = newValue as string;
+    } else if (field === "Display Name") {
+      payload.displayName = newValue as string;
+    } else if (field === "Region") {
+      payload.region = newValue as string;
+    } else if (field === "Date of Birth") {
+      payload.dob = newValue as string;
+    } else if (field === "Profile Picture") {
+      if (typeof newValue === "object" && "storageId" in newValue) {
+        payload.storageId = newValue.storageId;
+      } else {
+        payload.image = newValue as string;
+      }
+    }
 
     try {
       await updateSettings(payload);
