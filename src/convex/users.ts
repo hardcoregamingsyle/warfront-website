@@ -46,18 +46,22 @@ export const currentUser = query({
 export const login = mutation({
   args: { identifier: v.string(), password: v.string() },
   handler: async (ctx, { identifier, password }) => {
+    const lowerIdentifier = identifier.toLowerCase();
     let user;
-    // Check if identifier is an email
-    if (identifier.includes("@")) {
+
+    if (lowerIdentifier.includes("@")) {
       user = await ctx.db
         .query("users")
-        .withIndex("by_email", (q) => q.eq("email", identifier))
+        .withIndex("by_email_normalized", (q) =>
+          q.eq("email_normalized", lowerIdentifier),
+        )
         .unique();
     } else {
-      // Assume it's a username
       user = await ctx.db
         .query("users")
-        .withIndex("by_name_for_uniqueness", (q) => q.eq("name", identifier))
+        .withIndex("by_name_normalized", (q) =>
+          q.eq("name_normalized", lowerIdentifier),
+        )
         .unique();
     }
 
@@ -90,19 +94,24 @@ export const signupAndLogin = mutation({
     password: v.string(),
   },
   handler: async (ctx, { name, email, password }) => {
+    const lowerName = name.toLowerCase();
+    const lowerEmail = email.toLowerCase();
+
     const existingUserByName = await ctx.db
       .query("users")
-      .withIndex("by_name_for_uniqueness", (q) => q.eq("name", name))
+      .withIndex("by_name_normalized", (q) => q.eq("name_normalized", lowerName))
       .first();
 
     if (existingUserByName) {
       throw new Error("This Username is already in use");
     }
 
-    if (email !== "hardcorgamingstyle@gmail.com") {
+    if (lowerEmail !== "hardcorgamingstyle@gmail.com") {
       const existingUser = await ctx.db
         .query("users")
-        .withIndex("by_email", (q) => q.eq("email", email))
+        .withIndex("by_email_normalized", (q) =>
+          q.eq("email_normalized", lowerEmail),
+        )
         .first();
 
       if (existingUser) {
@@ -117,6 +126,8 @@ export const signupAndLogin = mutation({
       email,
       passwordHash,
       role: "user" as const,
+      name_normalized: lowerName,
+      email_normalized: lowerEmail,
     });
 
     const token = generateToken();

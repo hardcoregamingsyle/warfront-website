@@ -51,9 +51,10 @@ export const createSeedUsers = mutation({
     ];
 
     for (const userData of usersToCreate) {
+      const lowerName = userData.name.toLowerCase();
       const existingUser = await ctx.db
         .query("users")
-        .withIndex("by_name_for_uniqueness", (q) => q.eq("name", userData.name))
+        .withIndex("by_name_normalized", (q) => q.eq("name_normalized", lowerName))
         .first();
 
       if (!existingUser) {
@@ -62,6 +63,8 @@ export const createSeedUsers = mutation({
           email: userData.email,
           passwordHash: hashPassword(userData.password),
           role: userData.role,
+          name_normalized: lowerName,
+          email_normalized: userData.email.toLowerCase(),
         });
       }
     }

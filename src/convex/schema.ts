@@ -33,9 +33,12 @@ const schema = defineSchema(
       passwordHash: v.string(), // For custom auth
       image: v.optional(v.string()),
       role: v.optional(roleValidator),
+      // New fields for case-insensitivity
+      name_normalized: v.string(),
+      email_normalized: v.string(),
     })
-      .index("by_email", ["email"])
-      .index("by_name_for_uniqueness", ["name"])
+      .index("by_email_normalized", ["email_normalized"])
+      .index("by_name_normalized", ["name_normalized"])
       .searchIndex("by_name", {
         searchField: "name",
       }),
