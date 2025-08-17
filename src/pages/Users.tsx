@@ -8,13 +8,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { Loader2, Search } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 export default function Users() {
   const [searchQuery, setSearchQuery] = useState("");
   const users = useQuery(api.users.searchUsers, { search: searchQuery });
+  const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
+  const pageKeywords = "Warfront users, find players, Warfront friends, search players, player directory, TCG community";
 
   return (
     <DashboardLayout>
+      <Helmet>
+        <title>Warfront | Player Search</title>
+        <meta name="description" content="Search for Warfront players by name to add friends, challenge to a battle, and view their public profile. Find your next opponent or teammate." />
+        <meta name="keywords" content={`${baseKeywords}, ${pageKeywords}`} />
+        <meta property="og:title" content="Find Warfront Players" />
+        <meta property="og:description" content="Search for other players to battle and connect with on Warfront." />
+        <meta property="og:image" content="https://www.istockphoto.com/illustrations/diverse-group-of-people-icon" />
+      </Helmet>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

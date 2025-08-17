@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Id } from "@/convex/_generated/dataModel";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 
 export default function JoinBattle() {
   const battles = useQuery(api.battles.listAll);
@@ -19,6 +20,8 @@ export default function JoinBattle() {
   const cancelBattle = useMutation(api.battles.cancel);
   const { user, token } = useAuth();
   const navigate = useNavigate();
+  const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
+  const pageKeywords = "Warfront, 1v1, online battle, PvP, card game, join match";
 
   useEffect(() => {
     if (battles && user) {
@@ -86,6 +89,14 @@ export default function JoinBattle() {
 
   return (
     <DashboardLayout>
+      <Helmet>
+        <title>Warfront | Join a 1v1 Battle</title>
+        <meta name="description" content="Find and join a 1v1 match against players from around the world. Test your deck and strategy in the Warfront digital arena." />
+        <meta name="keywords" content={`${baseKeywords}, ${pageKeywords}`} />
+        <meta property="og:title" content="Warfront 1v1 Match" />
+        <meta property="og:description" content="Challenge players from around the world in a head-to-head battle." />
+        <meta property="og:image" content="https://www.reddit.com/r/MemeTemplatesOfficial/comments/l25ks2/2_guys_fighting_1_guy_vibing/" />
+      </Helmet>
       <div className="bg-slate-900 text-white -m-8 p-8 min-h-screen">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

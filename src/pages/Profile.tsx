@@ -7,10 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 
 export default function Profile() {
   const { userId } = useParams<{ userId: Id<"users"> }>();
   const userProfile = useQuery(api.users.getUserProfile, userId ? { userId } : "skip");
+  const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
+  const pageKeywords = `${userProfile?.name}, Warfront player, ${userProfile?.name} Warfront, Warfront profile, player stats`;
 
   if (userProfile === undefined) {
     return (
@@ -34,6 +37,14 @@ export default function Profile() {
 
   return (
     <DashboardLayout>
+      <Helmet>
+        <title>{`${userProfile.name}'s Warfront Profile`}</title>
+        <meta name="description" content="User's Bio" />
+        <meta name="keywords" content={`${baseKeywords}, ${pageKeywords}`} />
+        <meta property="og:title" content={`${userProfile.name}'s Warfront Profile`} />
+        <meta property="og:description" content="User's Bio" />
+        <meta property="og:image" content={userProfile.image} />
+      </Helmet>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
