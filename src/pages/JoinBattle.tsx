@@ -12,16 +12,36 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 export default function JoinBattle() {
+  const [maxPlayers, setMaxPlayers] = useState(4);
+  const [isCreatingMultiplayer, setIsCreatingMultiplayer] = useState(false);
+
   const battles = useQuery(api.battles.listAll);
+  const multiBattles = useQuery(api.multiplayerBattles.list);
+
   const createBattle = useMutation(api.battles.create);
+  const createMultiplayerBattle = useMutation(api.multiplayerBattles.create);
+  const joinMultiplayerBattle = useMutation(api.multiplayerBattles.join);
+
   const joinBattle = useMutation(api.battles.join);
   const cancelBattle = useMutation(api.battles.cancel);
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
-  const pageKeywords = "Warfront, 1v1, online battle, PvP, card game, join match";
+  const pageKeywords = "Warfront, 1v1, online battle, PvP, card game, join match, multiplayer, lobby";
 
   useEffect(() => {
     if (battles && user) {
@@ -49,6 +69,37 @@ export default function JoinBattle() {
       } else {
         toast.error("An Unexpected Error Occurred. Please try again Later");
       }
+    }
+  };
+
+  const handleCreateMultiplayerBattle = async () => {
+    if (!token) {
+      toast.error("You must be logged in to create a battle.");
+      return;
+    }
+    setIsCreatingMultiplayer(true);
+    try {
+      const battleId = await createMultiplayerBattle({ token, maxPlayers });
+      toast.success("Multiplayer battle created successfully! Redirecting...");
+      navigate(`/multi-battle/${battleId}`);
+    } catch (error: any) {
+      toast.error(error.data || "Failed to create multiplayer battle.");
+    } finally {
+      setIsCreatingMultiplayer(false);
+    }
+  };
+
+  const handleJoinMultiplayerBattle = async (battleId: Id<"multiplayerBattles">) => {
+    if (!token) {
+      toast.error("You must be logged in to join a battle.");
+      return;
+    }
+    try {
+      await joinMultiplayerBattle({ battleId, token });
+      toast.success("Joined multiplayer battle successfully! Redirecting...");
+      navigate(`/multi-battle/${battleId}`);
+    } catch (error: any) {
+      toast.error(error.data || "Failed to join multiplayer battle.");
     }
   };
 
@@ -114,91 +165,189 @@ export default function JoinBattle() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto mb-4 flex justify-center">
+          <div className="max-w-4xl mx-auto mb-4 flex justify-center gap-4">
             <Button
               className="bg-red-600 hover:bg-red-700 text-white"
               onClick={handleCreateBattle}
             >
-              Create Battle
+              Create 1v1 Battle
             </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                  Create Multiplayer Battle
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-slate-900 border-slate-700 text-white">
+                <DialogHeader>
+                  <DialogTitle>Create Multiplayer Lobby</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="maxPlayers" className="text-right">
+                      Max Players
+                    </Label>
+                    <Input
+                      id="maxPlayers"
+                      type="number"
+                      value={maxPlayers}
+                      onChange={(e) => setMaxPlayers(Number(e.target.value))}
+                      className="col-span-3 bg-slate-800 border-slate-600"
+                      min={2}
+                      max={8}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="ghost">Cancel</Button>
+                  </DialogClose>
+                  <Button
+                    type="submit"
+                    onClick={handleCreateMultiplayerBattle}
+                    disabled={isCreatingMultiplayer}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isCreatingMultiplayer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
-          <div className="max-w-4xl mx-auto space-y-4">
-            {battles === undefined && (
-              <div className="flex justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
-              </div>
-            )}
-            {battles && battles.length === 0 && (
-              <p className="text-center text-slate-400">
-                No open battles. Be the first to create one!
-              </p>
-            )}
-            {battles?.map((battle, index) => (
-              <motion.div
-                key={battle._id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <Card className="bg-slate-800 border border-slate-700 hover:border-red-500/50 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="grid grid-cols-3 sm:grid-cols-5 items-center gap-4">
-                      {/* Host */}
-                      <div className="col-span-1 sm:col-span-2 flex items-center gap-2 min-w-0">
-                        <Avatar>
-                          <AvatarImage src={battle.host?.image} alt={battle.host?.name} />
-                          <AvatarFallback>{battle.host?.name?.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-semibold text-slate-200 truncate">{battle.host?.name}</span>
-                      </div>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center text-white my-8">1v1 Open Battles</h2>
+            <div className="space-y-4">
+              {battles === undefined && (
+                <div className="flex justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-white" />
+                </div>
+              )}
+              {battles && battles.length === 0 && (
+                <p className="text-center text-slate-400">
+                  No open 1v1 battles. Be the first to create one!
+                </p>
+              )}
+              {battles?.map((battle, index) => (
+                <motion.div
+                  key={battle._id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <Card className="bg-slate-800 border border-slate-700 hover:border-red-500/50 transition-colors">
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-3 sm:grid-cols-5 items-center gap-4">
+                        {/* Host */}
+                        <div className="col-span-1 sm:col-span-2 flex items-center gap-2 min-w-0">
+                          <Avatar>
+                            <AvatarImage src={battle.host?.image} alt={battle.host?.name} />
+                            <AvatarFallback>{battle.host?.name?.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-semibold text-slate-200 truncate">{battle.host?.name}</span>
+                        </div>
 
-                      {/* VS */}
-                      <div className="col-span-1 flex justify-center">
-                        <span className="text-slate-500 text-2xl font-thin">VS</span>
-                      </div>
+                        {/* VS */}
+                        <div className="col-span-1 flex justify-center">
+                          <span className="text-slate-500 text-2xl font-thin">VS</span>
+                        </div>
 
-                      {/* Opponent */}
-                      <div className="col-span-1 sm:col-span-2 flex items-center justify-end gap-2 min-w-0 text-right">
-                        {battle.opponent ? (
-                          <>
-                            <span className="font-semibold text-slate-200 truncate">{battle.opponent?.name}</span>
-                            <Avatar>
-                              <AvatarImage src={battle.opponent?.image} alt={battle.opponent?.name} />
-                              <AvatarFallback>{battle.opponent?.name?.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                          </>
-                        ) : (
-                          <span className="text-green-400 font-bold">Waiting...</span>
+                        {/* Opponent */}
+                        <div className="col-span-1 sm:col-span-2 flex items-center justify-end gap-2 min-w-0 text-right">
+                          {battle.opponent ? (
+                            <>
+                              <span className="font-semibold text-slate-200 truncate">{battle.opponent?.name}</span>
+                              <Avatar>
+                                <AvatarImage src={battle.opponent?.image} alt={battle.opponent?.name} />
+                                <AvatarFallback>{battle.opponent?.name?.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                            </>
+                          ) : (
+                            <span className="text-green-400 font-bold">Waiting...</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="mt-4 flex justify-end">
+                        {battle.status === "Open" &&
+                          user?._id !== battle.hostId && (
+                            <Button
+                              className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
+                              onClick={() => handleJoinBattle(battle._id)}
+                            >
+                              Join Battle
+                            </Button>
+                          )}
+                        {battle.status === "Full" && (
+                          <Button variant="destructive" disabled className="w-full sm:w-auto">
+                            Full
+                          </Button>
                         )}
+                        {battle.status === "Open" &&
+                          user?._id === battle.hostId && (
+                            <Button variant="destructive" onClick={() => handleCancelBattle(battle._id)} className="w-full sm:w-auto">
+                              Cancel
+                            </Button>
+                          )}
                       </div>
-                    </div>
-                    <div className="mt-4 flex justify-end">
-                       {battle.status === "Open" &&
-                        user?._id !== battle.hostId && (
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto mt-12">
+            <h2 className="text-3xl font-bold text-center text-white my-8">Multiplayer Lobbies</h2>
+            <div className="space-y-4">
+              {multiBattles === undefined && (
+                <div className="flex justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-white" />
+                </div>
+              )}
+              {multiBattles && multiBattles.length === 0 && (
+                <p className="text-center text-slate-400">
+                  No open multiplayer lobbies. Be the first to create one!
+                </p>
+              )}
+              {multiBattles?.map((battle, index) => (
+                <motion.div
+                  key={battle._id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <Card className="bg-slate-800 border border-slate-700 hover:border-blue-500/50 transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-lg font-bold text-white">Lobby by {battle.players[0]?.name}</p>
+                          <p className="text-sm text-slate-400">
+                            Players: {battle.playerIds.length} / {battle.maxPlayers}
+                          </p>
+                        </div>
+                        {user && !battle.playerIds.includes(user._id) && (
                           <Button
-                            className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
-                            onClick={() => handleJoinBattle(battle._id)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={() => handleJoinMultiplayerBattle(battle._id)}
                           >
-                            Join Battle
+                            Join Lobby
                           </Button>
                         )}
-                      {battle.status === "Full" && (
-                        <Button variant="destructive" disabled className="w-full sm:w-auto">
-                          Full
-                        </Button>
-                      )}
-                      {battle.status === "Open" &&
-                        user?._id === battle.hostId && (
-                          <Button variant="destructive" onClick={() => handleCancelBattle(battle._id)} className="w-full sm:w-auto">
-                            Cancel
-                          </Button>
-                        )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                      </div>
+                      <div className="flex items-center gap-2 mt-4">
+                        {battle.players.map(p => (
+                          <Avatar key={p._id} className="h-8 w-8">
+                            <AvatarImage src={p.image || undefined} />
+                            <AvatarFallback>{p.name?.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </motion.div>
       </div>
