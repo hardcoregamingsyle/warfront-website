@@ -15,9 +15,10 @@ export const sendVerificationEmail = internalAction({
      },
     handler: async (ctx, { email, name, token }) => {
         const verificationUrl = `${domain}/verify-email?token=${token}`;
+        console.log(`Sending verification email to ${email}`);
 
         try {
-            await resend.emails.send({
+            const { data, error } = await resend.emails.send({
                 from: 'Warfront Verification <onboarding@resend.dev>',
                 to: [email],
                 subject: 'Verify your email address',
@@ -27,9 +28,15 @@ export const sendVerificationEmail = internalAction({
                     <a href="${verificationUrl}">Verify Email</a>
                 `,
             });
+
+            if (error) {
+                console.error(`Failed to send verification email to ${email}:`, JSON.stringify(error, null, 2));
+                return;
+            }
+
+            console.log(`Successfully sent verification email to ${email}. Message ID: ${data?.id}`);
         } catch (error) {
-            console.error("Failed to send verification email:", error);
-            // Optionally, you could add more robust error handling here
+            console.error(`Caught an exception while sending verification email to ${email}:`, error);
         }
     },
 });
