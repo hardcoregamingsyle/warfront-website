@@ -61,6 +61,15 @@ export const sendFriendRequest = mutation({
       status: "pending"
     });
 
+    // Create a notification for the requestee
+    await ctx.db.insert("notifications", {
+      userId: requesteeId,
+      type: "friend_request",
+      message: `${requester.displayName || requester.name} sent you a friend request.`,
+      href: "/friends",
+      read: false,
+    });
+
     // Schedule email notification
     await ctx.scheduler.runAfter(0, internal.friendsActions.sendFriendRequestEmail, {
       friendshipId,

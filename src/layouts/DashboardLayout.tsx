@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,7 @@ import {
   LogOut,
   Users2,
   Swords,
+  Mail,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -26,6 +27,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -42,8 +54,26 @@ const navItems = [
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, token } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const notifications = useQuery(
+    api.notifications.getUnread,
+    token ? { token } : "skip"
+  );
+  const markAsRead = useMutation(api.notifications.markAsRead);
+  const markAllAsRead = useMutation(api.notifications.markAllAsRead);
+
+  const handleNotificationClick = async (notification: { _id: Id<"notifications">, href: string }) => {
+    await markAsRead({ notificationId: notification._id });
+    navigate(notification.href);
+  };
+
+  const handleMarkAllRead = async () => {
+    if (!token) return;
+    await markAllAsRead({ token });
+  };
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] bg-slate-950 text-white">
@@ -72,18 +102,45 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               ))}
             </nav>
           </div>
-          <div className="mt-auto p-4 border-t border-slate-800">
-            <div className="flex items-center gap-4">
-              <Link to={`/profile/${user?._id}`}>
-                <User className="h-6 w-6 text-slate-300 hover:text-red-400" />
-              </Link>
-              <Link to="/settings">
-                <Settings className="h-6 w-6 text-slate-300 hover:text-red-400" />
-              </Link>
-              <Button onClick={signOut} variant="ghost" size="icon" className="ml-auto">
-                <LogOut className="h-6 w-6 text-slate-300 hover:text-red-400" />
-              </Button>
-            </div>
+          <div className="mt-auto p-4 border-t border-slate-800 flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-6 w-6 text-slate-300 hover:text-red-400" />
+                  {notifications && notifications.length > 0 && (
+                    <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 bg-slate-800 border-slate-700 text-white">
+                <DropdownMenuLabel className="flex justify-between items-center">
+                  <span>Notifications</span>
+                  {notifications && notifications.length > 0 && (
+                    <Button variant="link" size="sm" onClick={handleMarkAllRead}>Mark all as read</Button>
+                  )}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-slate-700" />
+                {notifications && notifications.length > 0 ? (
+                  notifications.map((n) => (
+                    <DropdownMenuItem key={n._id} onSelect={() => handleNotificationClick(n)} className="cursor-pointer hover:bg-slate-700">
+                      <Mail className="mr-2 h-4 w-4" />
+                      <span>{n.message}</span>
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <p className="p-4 text-center text-sm text-slate-400">No new notifications</p>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Link to={`/profile/${user?._id}`}>
+              <User className="h-6 w-6 text-slate-300 hover:text-red-400" />
+            </Link>
+            <Link to="/settings">
+              <Settings className="h-6 w-6 text-slate-300 hover:text-red-400" />
+            </Link>
+            <Button onClick={signOut} variant="ghost" size="icon" className="ml-auto">
+              <LogOut className="h-6 w-6 text-slate-300 hover:text-red-400" />
+            </Button>
           </div>
         </div>
       </div>
@@ -94,7 +151,36 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <span className="">Warfront</span>
             </Link>
             <div className="ml-auto flex items-center gap-4">
-               <Link to={`/profile/${user?._id}`}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-6 w-6 text-slate-300 hover:text-red-400" />
+                    {notifications && notifications.length > 0 && (
+                      <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 bg-slate-800 border-slate-700 text-white">
+                  <DropdownMenuLabel className="flex justify-between items-center">
+                    <span>Notifications</span>
+                    {notifications && notifications.length > 0 && (
+                      <Button variant="link" size="sm" onClick={handleMarkAllRead}>Mark all as read</Button>
+                    )}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-slate-700" />
+                  {notifications && notifications.length > 0 ? (
+                    notifications.map((n) => (
+                      <DropdownMenuItem key={n._id} onSelect={() => handleNotificationClick(n)} className="cursor-pointer hover:bg-slate-700">
+                        <Mail className="mr-2 h-4 w-4" />
+                        <span>{n.message}</span>
+                      </DropdownMenuItem>
+                    ))
+                  ) : (
+                    <p className="p-4 text-center text-sm text-slate-400">No new notifications</p>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Link to={`/profile/${user?._id}`}>
                 <User className="h-6 w-6 text-slate-300 hover:text-red-400" />
               </Link>
               <Link to="/settings">

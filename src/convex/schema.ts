@@ -95,6 +95,15 @@ const schema = defineSchema(
       .index("by_requesteeId_status", ["requesteeId", "status"])
       .index("by_requesterId_status", ["requesterId", "status"])
       .index("by_requestee_and_requester", ["requesteeId", "requesterId"]),
+
+    notifications: defineTable({
+      userId: v.id("users"),
+      type: v.string(),
+      message: v.string(),
+      href: v.string(),
+      read: v.boolean(),
+    })
+      .index("by_userId", ["userId"]),
   },
   {
     schemaValidation: false,

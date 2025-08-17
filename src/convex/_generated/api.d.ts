@@ -24,6 +24,7 @@ import type * as generators_deleteAllUsersAndAuthData from "../generators/delete
 import type * as generators_nuclearCleanup from "../generators/nuclearCleanup.js";
 import type * as http from "../http.js";
 import type * as multiplayerBattles from "../multiplayerBattles.js";
+import type * as notifications from "../notifications.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   "generators/nuclearCleanup": typeof generators_nuclearCleanup;
   http: typeof http;
   multiplayerBattles: typeof multiplayerBattles;
+  notifications: typeof notifications;
   seed: typeof seed;
   users: typeof users;
 }>;
