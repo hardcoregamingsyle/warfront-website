@@ -355,3 +355,51 @@ export const getCurrentUserSettings = query({
     };
   },
 });
+
+export const migrateAndCleanUserDuplicates = mutation({
+  handler: async (ctx) => {
+    const allUsers = await ctx.db.query("users").collect();
+    let patchedCount = 0;
+
+    // Step 1: Ensure all users have a correct `name_normalized` field.
+    for (const user of allUsers) {
+      const expectedNormalized = user.name.toLowerCase();
+      if (user.name_normalized !== expectedNormalized) {
+        await ctx.db.patch(user._id, { name_normalized: expectedNormalized });
+        patchedCount++;
+      }
+    }
+
+    // Step 2: Now that data is consistent, run duplicate deletion.
+    const freshUsers = await ctx.db.query("users").order("asc").collect();
+    const seenNames = new Map<string, Id<"users">>();
+    const usersToDelete: Id<"users">[] = [];
+    let deletedCount = 0;
+
+    for (const user of freshUsers) {
+      if (user.name_normalized) {
+        if (seenNames.has(user.name_normalized)) {
+          usersToDelete.push(user._id);
+        } else {
+          seenNames.set(user.name_normalized, user._id);
+        }
+      }
+    }
+    
+    const uniqueUsersToDelete = [...new Set(usersToDelete)];
+
+    for (const userId of uniqueUsersToDelete) {
+        const sessions = await ctx.db
+            .query("sessions")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .collect();
+        for (const session of sessions) {
+            await ctx.db.delete(session._id);
+        }
+        await ctx.db.delete(userId);
+        deletedCount++;
+    }
+
+    return `Patched ${patchedCount} users. Deleted ${deletedCount} duplicate users.`;
+  },
+});
