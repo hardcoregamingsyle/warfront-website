@@ -25,7 +25,9 @@ const schema = defineSchema(
       role: v.optional(roleValidator),
     })
       .index("by_email", ["email"])
-      .index("by_name", ["name"]),
+      .searchIndex("by_name", {
+        searchField: "name",
+      }),
 
     sessions: defineTable({
       userId: v.id("users"),

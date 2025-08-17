@@ -126,3 +126,38 @@ export const logout = mutation({
     }
   },
 });
+
+export const getUserProfile = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) {
+      return null;
+    }
+    // Return a public-safe user object
+    return {
+      _id: user._id,
+      name: user.name,
+      image: user.image,
+    };
+  },
+});
+
+export const searchUsers = query({
+  args: { search: v.string() },
+  handler: async (ctx, { search }) => {
+    if (!search) {
+      return [];
+    }
+    const users = await ctx.db
+      .query("users")
+      .withSearchIndex("by_name", (q) => q.search("name", search))
+      .take(10); // Limit to 10 results
+
+    return users.map((user) => ({
+      _id: user._id,
+      name: user.name,
+      image: user.image,
+    }));
+  },
+});

@@ -24,6 +24,8 @@ import Battle from "./pages/Battle.tsx";
 import MultiBattle from "./pages/MultiBattle.tsx";
 import Competitive from "./pages/Competitive.tsx";
 import BattleRoom from "./pages/BattleRoom.tsx";
+import Users from "./pages/Users.tsx";
+import ProfileRedirect from "./pages/ProfileRedirect.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -65,7 +67,9 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/join-battle" element={<JoinBattle />} />
             <Route path="/how-to-play" element={<HowToPlay />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/profile" element={<ProfileRedirect />} />
+            <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/trade-history" element={<TradeHistory />} />
             <Route path="/battle-history" element={<BattleHistory />} />
