@@ -307,7 +307,7 @@ export default function Landing() {
             <div>
               <h3 className="text-white font-bold mb-4">Community</h3>
               <ul className="space-y-2 text-slate-400">
-                <li><a href="#" className="hover:text-white transition-colors">Discord</a></li>
+                <li><a href="https://discord.gg/BjH5NSWYGM" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Discord</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Forums</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Tournaments</a></li>
               </ul>
