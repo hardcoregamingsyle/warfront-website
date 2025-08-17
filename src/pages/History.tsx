@@ -24,7 +24,7 @@ export default function History() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Link to="/history/battle">
+            <Link to="/battle-history">
               <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
                 <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer h-full">
                   <CardHeader>
@@ -46,7 +46,7 @@ export default function History() {
               </motion.div>
             </Link>
 
-            <Link to="/history/trade">
+            <Link to="/trade-history">
               <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
                 <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer h-full">
                   <CardHeader>

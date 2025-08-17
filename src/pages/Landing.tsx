@@ -230,9 +230,11 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button className="bg-red-600 hover:bg-red-700 text-white">
-                Learn How to Play
-              </Button>
+              <Link to="/how-to-play">
+                <Button className="bg-red-600 hover:bg-red-700 text-white">
+                  Learn How to Play
+                </Button>
+              </Link>
             </motion.div>
 
             <motion.div

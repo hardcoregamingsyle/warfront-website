@@ -95,7 +95,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-300 text-sm mb-4">Compete for glory and rewards</p>
-                <Link to="/competetive">
+                <Link to="/competitive">
                   <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
                     Enter Arena
                   </Button>
@@ -113,9 +113,11 @@ export default function Dashboard() {
                   Your military campaign awaits. Choose your strategy, deploy your forces, and claim victory on the battlefield.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8">
-                    Start Tutorial
-                  </Button>
+                  <Link to="/how-to-play">
+                    <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8">
+                      Start Tutorial
+                    </Button>
+                  </Link>
                   <Link to="/join-battle">
                     <Button size="lg" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10 px-8">
                       Join Battle

@@ -71,13 +71,14 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/profile" element={<ProfileRedirect />} />
               <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/history" element={<History />} />
               <Route path="/trade-history" element={<TradeHistory />} />
               <Route path="/battle-history" element={<BattleHistory />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/battle/:battleId" element={<BattleRoom />} />
               <Route path="/multi_battle" element={<MultiBattle />} />
-              <Route path="/competetive" element={<Competitive />} />
+              <Route path="/competitive" element={<Competitive />} />
             </Routes>
           </BrowserRouter>
           <Toaster />

@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@/components/auth/UserButton";
 import { motion } from "framer-motion";
-import { Swords, Shield, Gamepad2, HelpCircle, Menu, X, Users } from "lucide-react";
+import { Swords, Shield, Gamepad2, HelpCircle, Menu, X, Users, History } from "lucide-react";
 import { useState } from "react";
 
 export default function Header() {
@@ -14,7 +14,7 @@ export default function Header() {
     { href: "/join-battle", label: "Join a Battle", icon: <Gamepad2 className="h-5 w-5" /> },
     { href: "/users", label: "Users", icon: <Users className="h-5 w-5" /> },
     { href: "/how-to-play", label: "How to Play", icon: <HelpCircle className="h-5 w-5" /> },
-    { href: "/history", label: "History", icon: <HelpCircle className="h-5 w-5" /> },
+    { href: "/history", label: "History", icon: <History className="h-5 w-5" /> },
   ];
 
   return (
