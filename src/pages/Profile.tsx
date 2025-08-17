@@ -39,6 +39,7 @@ export default function Profile() {
     <DashboardLayout>
       <Helmet>
         <title>{`${userProfile.name}'s Warfront Profile`}</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="User's Bio" />
         <meta name="keywords" content={`${userProfile.name}, Warfront player, ${userProfile.name} Warfront, Warfront profile, player stats`} />
         <meta property="og:title" content={`${userProfile.name}'s Warfront Profile`} />

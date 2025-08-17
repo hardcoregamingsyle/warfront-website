@@ -8,6 +8,7 @@ export default function Settings() {
     <DashboardLayout>
       <Helmet>
         <title>Warfront Account Settings</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Manage your Warfront account settings, including profile information, privacy preferences, and notification options." />
       </Helmet>
       <div className="flex items-center justify-center h-full">

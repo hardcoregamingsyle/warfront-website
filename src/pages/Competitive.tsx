@@ -9,6 +9,7 @@ export default function Competitive() {
     <DashboardLayout>
       <Helmet>
         <title>Warfront Competitive Tournaments & Leagues</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Join official Warfront tournaments, compete in ranked leagues, and climb the global leaderboards. Host your own custom tournaments and prove your skills in Combat for the Digital Age." />
         <meta name="keywords" content="Warfront tournaments, competitive card game, TCG leagues, Warfront rankings, online tournaments, esports, competitive play" />
         <meta property="og:title" content="Warfront Competitive Tournaments" />

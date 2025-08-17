@@ -10,6 +10,7 @@ export default function BattleRoom() {
     <DashboardLayout>
       <Helmet>
         <title>Warfront Battle in Progress</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="You are currently in a live Warfront battle. The match is in progress" />
       </Helmet>
       <div className="container mx-auto text-center py-12">

@@ -8,6 +8,7 @@ export default function TradeHistory() {
     <DashboardLayout>
       <Helmet>
         <title>Warfront Trade History</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Review the full history of your card transfers. This ledger details every card that has moved in and out of your digital inventory." />
       </Helmet>
       <div className="flex items-center justify-center h-full">

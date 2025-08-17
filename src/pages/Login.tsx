@@ -68,6 +68,7 @@ export default function Login() {
     <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
       <Helmet>
         <title>Login to Warfront</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Log in to your Warfront account to access your physical card collection, play online, and manage your profile." />
       </Helmet>
       <Card className="w-full max-w-md bg-slate-800 border-red-500/20">

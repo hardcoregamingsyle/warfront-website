@@ -8,6 +8,7 @@ export default function Inventory() {
     <DashboardLayout>
       <Helmet>
         <title>Warfront Inventory</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Your Warfront digital inventory. View and manage your collection of physical cards, track card play counts and see their unique metadate." />
       </Helmet>
       <div className="flex items-center justify-center h-full">

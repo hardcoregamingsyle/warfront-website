@@ -91,6 +91,7 @@ export default function JoinBattle() {
     <DashboardLayout>
       <Helmet>
         <title>Warfront | Join a 1v1 Battle</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Find and join a 1v1 match against players from around the world. Test your deck and strategy in the Warfront digital arena." />
         <meta name="keywords" content="Warfront, 1v1, online battle, PvP, card game, join match" />
         <meta property="og:title" content="Warfront 1v1 Match" />

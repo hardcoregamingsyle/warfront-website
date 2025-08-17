@@ -98,6 +98,7 @@ export default function Signup() {
     <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
       <Helmet>
         <title>Sign Up for Warfront</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Create your free Warfront account to start your journey. Build your card collection, connect your physical cards, and compete in the digital arena." />
       </Helmet>
       <Card className="w-full max-w-md bg-slate-800 border-red-500/20">

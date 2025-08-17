@@ -20,6 +20,7 @@ export default function Users() {
     <DashboardLayout>
       <Helmet>
         <title>Warfront | Player Search</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Search for Warfront players by name to add friends, challenge to a battle, and view their public profile. Find your next opponent or teammate." />
         <meta name="keywords" content="Warfront users, find players, Warfront friends, search players, player directory, TCG community" />
         <meta property="og:title" content="Find Warfront Players" />

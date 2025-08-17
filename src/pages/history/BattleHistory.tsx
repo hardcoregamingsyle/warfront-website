@@ -8,6 +8,7 @@ export default function BattleHistory() {
     <DashboardLayout>
       <Helmet>
         <title>Warfront Battle History</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Analize your past Warfront matches. Your battle log records every opponent, outcome, and match type to help you track your progress and perfect your strategy." />
       </Helmet>
       <div className="flex items-center justify-center h-full">

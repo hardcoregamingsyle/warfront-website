@@ -9,6 +9,7 @@ export default function HowToPlay() {
     <DashboardLayout>
       <Helmet>
         <title>How to Play - Official Rules & Strategy Guide</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Learn the official rules of Warfront and master the battlefield. Our guide covers both online and offline gameplay, deck building, and strategic tips for new and veteran players." />
         <meta name="keywords" content="Warfront rules, how to play, card game rules, online gameplay, offline gameplay, Warfront guide, deck building, strategy tips" />
         <meta property="og:title" content="How to Play Warfront" />

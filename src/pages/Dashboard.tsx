@@ -13,6 +13,7 @@ export default function Dashboard() {
     <DashboardLayout>
       <Helmet>
         <title>Warfront Dashboard</title>
+        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Your personal Warfront dashboard. View your card collection, track your player stats, manage your account, and jump into a match." />
       </Helmet>
       <div className="bg-slate-900 text-white -m-8 p-8 min-h-screen">
