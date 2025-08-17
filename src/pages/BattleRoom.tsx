@@ -11,7 +11,6 @@ export default function BattleRoom() {
       <Helmet>
         <title>Warfront Battle in Progress</title>
         <meta name="description" content="You are currently in a live Warfront battle. The match is in progress" />
-        <meta name="keywords" content={baseKeywords} />
       </Helmet>
       <div className="container mx-auto text-center py-12">
         <h1 className="text-5xl font-bold text-red-500">Battle Room</h1>

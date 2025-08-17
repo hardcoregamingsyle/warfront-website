@@ -9,7 +9,6 @@ export default function TradeHistory() {
       <Helmet>
         <title>Warfront Trade History</title>
         <meta name="description" content="Review the full history of your card transfers. This ledger details every card that has moved in and out of your digital inventory." />
-        <meta name="keywords" content={baseKeywords} />
       </Helmet>
       <div className="flex items-center justify-center h-full">
         <h1 className="text-4xl font-bold text-red-400">Trade History</h1>

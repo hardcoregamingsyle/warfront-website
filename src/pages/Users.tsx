@@ -21,7 +21,7 @@ export default function Users() {
       <Helmet>
         <title>Warfront | Player Search</title>
         <meta name="description" content="Search for Warfront players by name to add friends, challenge to a battle, and view their public profile. Find your next opponent or teammate." />
-        <meta name="keywords" content={`${baseKeywords}, ${pageKeywords}`} />
+        <meta name="keywords" content="Warfront users, find players, Warfront friends, search players, player directory, TCG community" />
         <meta property="og:title" content="Find Warfront Players" />
         <meta property="og:description" content="Search for other players to battle and connect with on Warfront." />
         <meta property="og:image" content="https://www.istockphoto.com/illustrations/diverse-group-of-people-icon" />

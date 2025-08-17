@@ -14,7 +14,6 @@ export default function Dashboard() {
       <Helmet>
         <title>Warfront Dashboard</title>
         <meta name="description" content="Your personal Warfront dashboard. View your card collection, track your player stats, manage your account, and jump into a match." />
-        <meta name="keywords" content="Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards, Warfront dashboard, player stats, card collection, account management, user dashboard" />
       </Helmet>
       <div className="bg-slate-900 text-white -m-8 p-8 min-h-screen">
         <motion.div

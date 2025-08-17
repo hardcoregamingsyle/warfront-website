@@ -10,7 +10,7 @@ export default function HowToPlay() {
       <Helmet>
         <title>How to Play - Official Rules & Strategy Guide</title>
         <meta name="description" content="Learn the official rules of Warfront and master the battlefield. Our guide covers both online and offline gameplay, deck building, and strategic tips for new and veteran players." />
-        <meta name="keywords" content={`${baseKeywords}, ${pageKeywords}`} />
+        <meta name="keywords" content="Warfront rules, how to play, card game rules, online gameplay, offline gameplay, Warfront guide, deck building, strategy tips" />
         <meta property="og:title" content="How to Play Warfront" />
         <meta property="og:description" content="Learn the official rules and strategies for the Warfront TCG and CCG." />
         <meta property="og:image" content="https://www.youtube.com/watch?v=Jfr6HnXXw_c" />

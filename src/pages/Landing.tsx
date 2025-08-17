@@ -23,9 +23,14 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
       <Helmet>
-        <title>Warfront | Combat for The Digital Age</title>
+        <title>Combat for the Digital Age – Warfront</title>
         <meta name="description" content="Experience Warfront, the family-friendly military TCG & CCG. Battle online with friends or play offline with physical cards. A perfect mix of combat, strategy, and fun for all ages." />
         <meta name="keywords" content="Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards" />
+        <meta property="og:title" content="Warfront: A Family-Friendly TCG for the Digital Age" />
+        <meta property="og:description" content="Build your deck and dominate the battlefield in this new military-themed card game you can play both online and offline with family and friends." />
+        <meta property="og:image" content="https://www.reddit.com/r/letsplay/comments/12vghll/any_one_knows_where_do_people_get_highres_game/" />
+        <meta property="og:url" content="https://warfront.vly.site/" />
+        <meta property="og:type" content="website" />
       </Helmet>
       {/* Navigation */}
       <motion.nav 

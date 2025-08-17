@@ -9,7 +9,6 @@ export default function Settings() {
       <Helmet>
         <title>Warfront Account Settings</title>
         <meta name="description" content="Manage your Warfront account settings, including profile information, privacy preferences, and notification options." />
-        <meta name="keywords" content={baseKeywords} />
       </Helmet>
       <div className="flex items-center justify-center h-full">
         <h1 className="text-4xl font-bold text-red-400">Settings Page</h1>

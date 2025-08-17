@@ -40,7 +40,7 @@ export default function Profile() {
       <Helmet>
         <title>{`${userProfile.name}'s Warfront Profile`}</title>
         <meta name="description" content="User's Bio" />
-        <meta name="keywords" content="Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards, ${userProfile?.name}, Warfront player, ${userProfile?.name} Warfront, Warfront profile, player stats" />
+        <meta name="keywords" content={`${userProfile.name}, Warfront player, ${userProfile.name} Warfront, Warfront profile, player stats`} />
         <meta property="og:title" content={`${userProfile.name}'s Warfront Profile`} />
         <meta property="og:description" content="User's Bio" />
         <meta property="og:image" content={userProfile.image} />

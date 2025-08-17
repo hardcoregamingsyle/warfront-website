@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMemo, useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 
 const signupSchema = z
   .object({
@@ -95,6 +96,10 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
+      <Helmet>
+        <title>Sign Up for Warfront</title>
+        <meta name="description" content="Create your free Warfront account to start your journey. Build your card collection, connect your physical cards, and compete in the digital arena." />
+      </Helmet>
       <Card className="w-full max-w-md bg-slate-800 border-red-500/20">
         <>
           <CardHeader>

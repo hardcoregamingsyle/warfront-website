@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 
 const loginSchema = z.object({
   identifier: z.string().min(1, "Please enter your email or username"),
@@ -65,6 +66,10 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
+      <Helmet>
+        <title>Login to Warfront</title>
+        <meta name="description" content="Log in to your Warfront account to access your physical card collection, play online, and manage your profile." />
+      </Helmet>
       <Card className="w-full max-w-md bg-slate-800 border-red-500/20">
         <CardHeader>
           <CardTitle className="text-red-400">Welcome Back, Commander</CardTitle>

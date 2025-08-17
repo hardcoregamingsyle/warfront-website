@@ -92,7 +92,7 @@ export default function JoinBattle() {
       <Helmet>
         <title>Warfront | Join a 1v1 Battle</title>
         <meta name="description" content="Find and join a 1v1 match against players from around the world. Test your deck and strategy in the Warfront digital arena." />
-        <meta name="keywords" content={`${baseKeywords}, ${pageKeywords}`} />
+        <meta name="keywords" content="Warfront, 1v1, online battle, PvP, card game, join match" />
         <meta property="og:title" content="Warfront 1v1 Match" />
         <meta property="og:description" content="Challenge players from around the world in a head-to-head battle." />
         <meta property="og:image" content="https://www.reddit.com/r/MemeTemplatesOfficial/comments/l25ks2/2_guys_fighting_1_guy_vibing/" />
