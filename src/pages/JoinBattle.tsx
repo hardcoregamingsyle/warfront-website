@@ -67,7 +67,10 @@ export default function JoinBattle() {
       await cancelBattle({ battleId, token });
       toast.success("Your battle has been canceled.");
     } catch (error: any) {
-      toast.error(error.data || "Failed to cancel battle.");
+      toast.error(
+        error.data ||
+          "An unexpected error occurred while canceling the battle.",
+      );
     }
   };
 

@@ -39,7 +39,10 @@ export default function Battle() {
       await createBattle({ token });
       toast.success("Battle created successfully!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to create battle.");
+      toast.error(
+        error.data ||
+          "An unexpected error occurred while creating the battle.",
+      );
     }
   };
 

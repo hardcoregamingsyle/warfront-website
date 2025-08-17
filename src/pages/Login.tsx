@@ -54,7 +54,11 @@ export default function Login() {
       navigate(redirect || "/dashboard");
     } catch (error: any) {
       console.error("Login failed:", error);
-      setFormError(error.message || "Login failed. Please check your credentials.");
+      setFormError(
+        error.data?.message ||
+          error.message ||
+          "Login failed. Please check your credentials and try again.",
+      );
     }
   };
 

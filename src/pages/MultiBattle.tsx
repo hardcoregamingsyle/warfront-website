@@ -55,7 +55,9 @@ export default function MultiBattle() {
       await joinBattle({ battleId, token });
       toast.success("Joined multiplayer battle successfully!");
     } catch (error: any) {
-      toast.error(error.data || "Failed to join battle.");
+      toast.error(
+        error.data || "An unexpected error occurred while joining the battle.",
+      );
     }
   };
 
@@ -68,7 +70,9 @@ export default function MultiBattle() {
       await leaveBattle({ battleId, token });
       toast.success("You have left the battle.");
     } catch (error: any) {
-      toast.error(error.data || "Failed to leave battle.");
+      toast.error(
+        error.data || "An unexpected error occurred while leaving the battle.",
+      );
     }
   };
 
