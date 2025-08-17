@@ -13,6 +13,7 @@ export default function Header() {
     { href: "/inventory", label: "Inventory", icon: <Swords className="h-5 w-5" /> },
     { href: "/join-battle", label: "Join a Battle", icon: <Gamepad2 className="h-5 w-5" /> },
     { href: "/how-to-play", label: "How to Play", icon: <HelpCircle className="h-5 w-5" /> },
+    { href: "/history", label: "History", icon: <HelpCircle className="h-5 w-5" /> },
   ];
 
   return (
