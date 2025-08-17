@@ -309,6 +309,7 @@ export default function Landing() {
               <ul className="space-y-2 text-slate-400">
                 <li><a href="https://discord.gg/BjH5NSWYGM" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Discord</a></li>
                 <li><a href="https://www.youtube.com/channel/UCAoKv9QSWtPZkxGA97kVfvw?subscribe" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">YouTube</a></li>
+                <li><a href="https://www.facebook.com/profile.php?id=61579598579273" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Facebook</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Forums</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Tournaments</a></li>
               </ul>
