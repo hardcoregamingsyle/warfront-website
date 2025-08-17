@@ -1,9 +1,12 @@
 import { v } from "convex/values";
 import {
+  internalMutation,
+  internalQuery,
   mutation,
   query,
 } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { roleValidator } from "./schema";
 
 // Simple hash function for demo purposes - not secure for production
 const FAKE_HASH_SALT = "this-is-not-secure-and-should-be-in-an-env-var";
@@ -18,6 +21,24 @@ const hashPassword = (password: string) => {
   }
   return hash.toString(36);
 };
+
+export const getVerificationToken = internalQuery({
+    args: { token: v.string() },
+    handler: async (ctx, { token }) => {
+        return await ctx.db
+            .query("verificationTokens")
+            .withIndex("by_token", (q) => q.eq("token", token))
+            .unique();
+    },
+});
+
+export const verifyEmail = internalMutation({
+    args: { userId: v.id("users"), tokenId: v.id("verificationTokens") },
+    handler: async (ctx, { userId, tokenId }) => {
+        await ctx.db.patch(userId, { emailVerified: true });
+        await ctx.db.delete(tokenId);
+    },
+});
 
 const generateToken = () => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -402,5 +423,32 @@ export const migrateAndCleanUserDuplicates = mutation({
     }
 
     return `Patched ${patchedCount} users. Deleted ${deletedCount} duplicate users.`;
+  },
+});
+
+export const setUserRole = mutation({
+  args: { token: v.string(), role: roleValidator },
+  handler: async (ctx, { token, role }) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session || session.expires < Date.now()) {
+      throw new Error("Invalid or expired session");
+    }
+
+    const user = await ctx.db.get(session.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Only allow role assignment for admin email
+    if (user.email_normalized !== "hardcorgamingstyle@gmail.com") {
+      throw new Error("Role assignment not allowed for this account");
+    }
+
+    await ctx.db.patch(user._id, { role });
+    return "Role assigned successfully";
   },
 });

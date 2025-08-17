@@ -39,6 +39,7 @@ const schema = defineSchema(
       // Account settings fields
       displayName: v.optional(v.string()),
       region: v.optional(v.string()),
+      emailVerified: v.optional(v.boolean()),
     })
       .index("by_email_normalized", ["email_normalized"])
       .index("by_name_normalized", ["name_normalized"])
@@ -53,6 +54,12 @@ const schema = defineSchema(
     })
       .index("by_token", ["token"])
       .index("by_userId", ["userId"]),
+
+    verificationTokens: defineTable({
+      userId: v.id("users"),
+      token: v.string(),
+      expires: v.number(),
+    }).index("by_token", ["token"]),
 
     battles: defineTable({
       hostId: v.id("users"),

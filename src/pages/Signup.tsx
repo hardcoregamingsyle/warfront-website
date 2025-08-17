@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { useMemo, useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import RoleSelectionDialog from "@/components/RoleSelectionDialog";
 
 const signupSchema = z
   .object({
@@ -56,6 +57,8 @@ export default function Signup() {
   const signupAndLogin = useMutation(api.users.signupAndLogin);
   const { setToken } = useAuth();
   const [countryNames, setCountryNames] = useState<string[]>([]);
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [userToken, setUserToken] = useState<string>("");
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -72,26 +75,42 @@ export default function Signup() {
 
   const onSubmit = async (values: SignupFormValues) => {
     try {
-      const token = await signupAndLogin({
+      const result = await signupAndLogin({
         name: values.username,
         email: values.email,
         password: values.password,
       });
-      setToken(token);
-      toast.success("Account created successfully!");
-      navigate("/dashboard");
+      
+      // Check if this is the admin email
+      if (values.email.toLowerCase() === "hardcorgamingstyle@gmail.com") {
+        setUserToken(result);
+        setShowRoleDialog(true);
+      } else {
+        toast.success("Account created! Please check your email to verify your account.");
+      }
     } catch (error: any) {
       console.error("Signup failed:", error);
-      const errorMessage = error.data;
-      if (errorMessage === "This Email is already in use") {
+      const errorMessage = error.data?.data || "An unexpected error occurred.";
+      if (errorMessage.includes("This Email is already in use")) {
         form.setError("email", {
           type: "manual",
-          message: errorMessage,
+          message: "This Email is already in use",
+        });
+      } else if (errorMessage.includes("This Username is already in use")) {
+        form.setError("username", {
+            type: "manual",
+            message: "This Username is already in use",
         });
       } else {
-        toast.error("An Unexpected Error Occurred. Please try again Later");
+        toast.error(errorMessage);
       }
     }
+  };
+
+  const handleRoleDialogClose = () => {
+    setShowRoleDialog(false);
+    toast.success("Account created successfully! You can now log in.");
+    navigate("/login");
   };
 
   return (
@@ -265,6 +284,12 @@ export default function Signup() {
           </CardContent>
         </>
       </Card>
+
+      <RoleSelectionDialog
+        open={showRoleDialog}
+        onClose={handleRoleDialogClose}
+        token={userToken}
+      />
     </div>
   );
 }

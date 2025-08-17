@@ -31,6 +31,7 @@ import SecuritySettings from "./pages/settings/Security.tsx";
 import VisibilitySettings from "./pages/settings/Visibility.tsx";
 import SocialMediaSettings from "./pages/settings/SocialMedia.tsx";
 import Friends from "./pages/Friends.tsx";
+import EmailVerified from "./pages/EmailVerified.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -86,6 +87,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/battle-history" element={<BattleHistory />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/email-verified" element={<EmailVerified />} />
               <Route path="/battle/:battleId" element={<BattleRoom />} />
               <Route path="/multi_battle" element={<MultiBattle />} />
               <Route path="/competitive" element={<Competitive />} />
