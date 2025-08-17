@@ -107,6 +107,9 @@ export default function Login() {
                   </FormItem>
                 )}
               />
+              {formError && (
+                <p className="text-sm font-medium text-destructive">{formError}</p>
+              )}
               <Button
                 type="submit"
                 className="w-full bg-red-600 hover:bg-red-700"
