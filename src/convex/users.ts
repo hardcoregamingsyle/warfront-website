@@ -7,6 +7,7 @@ import {
 } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { roleValidator } from "./schema";
+import { internal } from "./_generated/api";
 
 // Simple hash function for demo purposes - not secure for production
 const FAKE_HASH_SALT = "this-is-not-secure-and-should-be-in-an-env-var";

@@ -98,13 +98,15 @@ export default function Signup() {
         password: values.password,
         region: values.region,
       });
-      
-      // Check if this is the admin email
-      if (values.email.toLowerCase() === "hardcorgamingstyle@gmail.com") {
+
+      // Check if this is the admin email that gets a token for role selection
+      if (values.email.toLowerCase() === "hardcorgamingstyle@gmail.com" && typeof result === "string") {
         setUserToken(result);
         setShowRoleDialog(true);
       } else {
-        toast.success("Account created! Please check your email to verify your account.");
+        toast.success(
+          "Account created! Please check your email to verify your account.",
+        );
       }
     } catch (error: any) {
       console.error("Signup failed:", error);
