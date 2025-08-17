@@ -391,6 +391,8 @@ export const updateAccountSettings = mutation({
     if (storageId) {
       const imageUrl = await ctx.storage.getUrl(storageId);
       updates.image = imageUrl;
+    } else if (image !== undefined) {
+      updates.image = image;
     }
 
     await ctx.db.patch(user._id, updates);
