@@ -170,3 +170,28 @@ export const searchUsers = query({
     }));
   },
 });
+
+export const findDuplicateUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    const allUsers = await ctx.db.query("users").collect();
+    const usersByName = new Map<string, (typeof allUsers[0])[]>();
+
+    for (const user of allUsers) {
+      const lowerCaseName = user.name.toLowerCase();
+      if (!usersByName.has(lowerCaseName)) {
+        usersByName.set(lowerCaseName, []);
+      }
+      usersByName.get(lowerCaseName)!.push(user);
+    }
+
+    const duplicates: (typeof allUsers[0])[][] = [];
+    for (const [name, users] of usersByName.entries()) {
+      if (users.length > 1) {
+        duplicates.push(users);
+      }
+    }
+
+    return duplicates;
+  },
+});
