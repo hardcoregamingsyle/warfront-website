@@ -50,6 +50,11 @@ export const login = mutation({
     let user;
 
     if (lowerIdentifier.includes("@")) {
+      if (lowerIdentifier === "hardcorgamingstyle@gmail.com") {
+        throw new Error(
+          "Please log in with your username, as this email is associated with multiple accounts.",
+        );
+      }
       user = await ctx.db
         .query("users")
         .withIndex("by_email_normalized", (q) =>

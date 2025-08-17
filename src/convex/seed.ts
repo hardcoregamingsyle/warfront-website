@@ -50,6 +50,7 @@ export const createSeedUsers = mutation({
       },
     ];
 
+    // To fix any potential password hash issues, we will delete and recreate the seed users.
     for (const userData of usersToCreate) {
       const lowerName = userData.name.toLowerCase();
       const existingUser = await ctx.db
@@ -57,17 +58,20 @@ export const createSeedUsers = mutation({
         .withIndex("by_name_normalized", (q) => q.eq("name_normalized", lowerName))
         .first();
 
-      if (!existingUser) {
-        await ctx.db.insert("users", {
-          name: userData.name,
-          email: userData.email,
-          passwordHash: hashPassword(userData.password),
-          role: userData.role,
-          name_normalized: lowerName,
-          email_normalized: userData.email.toLowerCase(),
-        });
+      if (existingUser) {
+        await ctx.db.delete(existingUser._id);
       }
+
+      // Create the user with a fresh password hash.
+      await ctx.db.insert("users", {
+        name: userData.name,
+        email: userData.email,
+        passwordHash: hashPassword(userData.password),
+        role: userData.role,
+        name_normalized: lowerName,
+        email_normalized: userData.email.toLowerCase(),
+      });
     }
-    return "Seed users created successfully (if they didn't already exist).";
+    return "Seed users have been reset successfully.";
   },
 });
