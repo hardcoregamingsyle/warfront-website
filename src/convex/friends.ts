@@ -1,4 +1,3 @@
-
 import { v } from "convex/values";
 import { mutation, query, action, internalQuery } from "./_generated/server";
 import { internalAction } from "./_generated/server";
@@ -106,7 +105,7 @@ export const respondToFriendRequest = mutation({
     await ctx.db.patch(friendshipId, { status: response });
 
     // Schedule email notification to requester
-    await ctx.scheduler.runAfter(0, api.friends.sendFriendResponseEmail, {
+    await ctx.scheduler.runAfter(0, api.friendsActions.sendFriendResponseEmail, {
       friendshipId,
       response,
     });

@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,11 +17,11 @@ export default function Friends() {
   const friends = useQuery(api.friends.getFriends, token ? { token } : "skip");
   const respondToRequest = useMutation(api.friends.respondToFriendRequest);
 
-  const handleResponse = async (friendshipId: string, response: "accepted" | "declined") => {
+  const handleResponse = async (friendshipId: Id<"friendships">, response: "accepted" | "declined") => {
     if (!token) return;
     
     try {
-      await respondToRequest({ token, friendshipId, response });
+      await respondToRequest({ token, friendshipId: friendshipId as Id<"friendships">, response });
       toast.success(`Friend request ${response}!`);
     } catch (error: any) {
       toast.error(error.data || "Failed to respond to friend request");
