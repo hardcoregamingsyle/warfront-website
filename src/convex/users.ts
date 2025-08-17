@@ -80,6 +80,15 @@ export const signupAndLogin = mutation({
     password: v.string(),
   },
   handler: async (ctx, { name, email, password }) => {
+    const existingUserByName = await ctx.db
+      .query("users")
+      .withIndex("by_name_for_uniqueness", (q) => q.eq("name", name))
+      .first();
+
+    if (existingUserByName) {
+      throw new Error("This Username is already in use");
+    }
+
     if (email !== "hardcorgamingstyle@gmail.com") {
       const existingUser = await ctx.db
         .query("users")

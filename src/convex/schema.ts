@@ -25,6 +25,7 @@ const schema = defineSchema(
       role: v.optional(roleValidator),
     })
       .index("by_email", ["email"])
+      .index("by_name_for_uniqueness", ["name"])
       .searchIndex("by_name", {
         searchField: "name",
       }),
