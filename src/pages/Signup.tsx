@@ -35,6 +35,19 @@ import { useMemo, useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import RoleSelectionDialog from "@/components/RoleSelectionDialog";
 
+const countryList = [
+  "United States",
+  "Canada",
+  "Mexico",
+  "United Kingdom",
+  "Germany",
+  "France",
+  "Japan",
+  "Australia",
+  "Brazil",
+  "India",
+];
+
 const signupSchema = z
   .object({
     username: z.string().min(3, "Username must be at least 3 characters"),
@@ -60,6 +73,10 @@ export default function Signup() {
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [userToken, setUserToken] = useState<string>("");
 
+  useEffect(() => {
+    setCountryNames(countryList);
+  }, []);
+
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -79,6 +96,7 @@ export default function Signup() {
         name: values.username,
         email: values.email,
         password: values.password,
+        region: values.region,
       });
       
       // Check if this is the admin email

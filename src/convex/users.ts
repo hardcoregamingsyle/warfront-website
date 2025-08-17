@@ -118,8 +118,9 @@ export const signupAndLogin = mutation({
     name: v.string(),
     email: v.string(),
     password: v.string(),
+    region: v.string(),
   },
-  handler: async (ctx, { name, email, password }) => {
+  handler: async (ctx, { name, email, password, region }) => {
     const lowerName = name.toLowerCase();
     const lowerEmail = email.toLowerCase();
 
@@ -154,6 +155,7 @@ export const signupAndLogin = mutation({
       role: "user" as const,
       name_normalized: lowerName,
       email_normalized: lowerEmail,
+      region,
     });
 
     const token = generateToken();
