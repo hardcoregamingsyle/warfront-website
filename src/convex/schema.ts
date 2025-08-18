@@ -119,6 +119,13 @@ const schema = defineSchema(
       cardName: v.string(),
       imageUrl: v.optional(v.string()),
     }),
+
+    userCards: defineTable({
+      userId: v.id("users"),
+      cardId: v.id("cards"),
+    })
+      .index("by_user_card", ["userId", "cardId"])
+      .index("by_userId", ["userId"]),
   },
   {
     schemaValidation: false,
