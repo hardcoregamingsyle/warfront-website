@@ -32,6 +32,8 @@ import VisibilitySettings from "./pages/settings/Visibility.tsx";
 import SocialMediaSettings from "./pages/settings/SocialMedia.tsx";
 import Friends from "./pages/Friends.tsx";
 import EmailVerified from "./pages/EmailVerified.tsx";
+import CardsRedirect from "./pages/CardsRedirect.tsx";
+import CardEditor from "./pages/CardEditor.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -91,6 +93,8 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/battle/:battleId" element={<BattleRoom />} />
               <Route path="/multi_battle" element={<MultiBattle />} />
               <Route path="/competitive" element={<Competitive />} />
+              <Route path="/cards" element={<CardsRedirect />} />
+              <Route path="/cards/:cardId" element={<CardEditor />} />
             </Routes>
           </BrowserRouter>
           <Toaster />

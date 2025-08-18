@@ -113,6 +113,12 @@ const schema = defineSchema(
       read: v.boolean(),
     })
       .index("by_userId", ["userId"]),
+
+    cards: defineTable({
+      cardType: v.string(),
+      cardName: v.string(),
+      imageUrl: v.optional(v.string()),
+    }),
   },
   {
     schemaValidation: false,
