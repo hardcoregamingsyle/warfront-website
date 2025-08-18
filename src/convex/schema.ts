@@ -132,6 +132,16 @@ const schema = defineSchema(
     })
       .index("by_user_card", ["userId", "cardId"])
       .index("by_userId", ["userId"]),
+      
+    blogs: defineTable({
+      title: v.string(),
+      slug: v.string(),
+      content: v.string(), // Will use markdown
+      authorId: v.id("users"),
+      imageUrl: v.optional(v.string()),
+      metaDescription: v.optional(v.string()),
+      metaKeywords: v.optional(v.string()),
+    }).index("by_slug", ["slug"]),
   },
   {
     schemaValidation: false,

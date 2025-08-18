@@ -35,6 +35,9 @@ import EmailVerified from "./pages/EmailVerified.tsx";
 import CardsRedirect from "./pages/CardsRedirect.tsx";
 import CardEditor from "./pages/CardEditor.tsx";
 import CardViewer from "./pages/CardViewer.tsx";
+import BlogList from "./pages/BlogList.tsx";
+import BlogViewer from "./pages/BlogViewer.tsx";
+import BlogEditor from "./pages/BlogEditor.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -97,6 +100,9 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/cards" element={<CardsRedirect />} />
               <Route path="/cards/:cardId" element={<CardViewer />} />
               <Route path="/editor/card/:cardId" element={<CardEditor />} />
+              <Route path="/blog" element={<BlogList />} />
+              <Route path="/blog/:slug" element={<BlogViewer />} />
+              <Route path="/editor/blog/:blogId" element={<BlogEditor />} />
             </Routes>
           </BrowserRouter>
           <Toaster />
