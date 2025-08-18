@@ -3,21 +3,30 @@ import { query, mutation } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
 export const get = query({
-  args: { cardId: v.id("cards") },
+  args: { cardId: v.string() },
   handler: async (ctx, { cardId }) => {
-    return await ctx.db.get(cardId);
+    const normalizedId = ctx.db.normalizeId("cards", cardId);
+    if (normalizedId === null) {
+      return null;
+    }
+    return await ctx.db.get(normalizedId);
   },
 });
 
 export const update = mutation({
   args: {
-    cardId: v.id("cards"),
+    cardId: v.string(),
     cardType: v.string(),
     cardName: v.string(),
     imageUrl: v.optional(v.string()),
     token: v.string(),
   },
   handler: async (ctx, { cardId, cardType, cardName, imageUrl, token }) => {
+    const normalizedId = ctx.db.normalizeId("cards", cardId);
+    if (normalizedId === null) {
+      throw new Error("Invalid card ID.");
+    }
+
     const session = await ctx.db
       .query("sessions")
       .withIndex("by_token", (q) => q.eq("token", token))
@@ -32,7 +41,7 @@ export const update = mutation({
         throw new Error("Unauthorized");
     }
 
-    await ctx.db.patch(cardId, {
+    await ctx.db.patch(normalizedId, {
       cardType,
       cardName,
       imageUrl,

@@ -144,10 +144,14 @@ export default function CardEditor() {
       toast.error("Please select a card type and name.");
       return;
     }
+    if (!cardId) {
+      toast.error("Cannot save, card ID is missing.");
+      return;
+    }
     setIsSaving(true);
     try {
       await updateCard({
-        cardId: cardId as Id<"cards">,
+        cardId: cardId,
         cardType: selectedCardType,
         cardName: selectedCardName,
         imageUrl: imageUrl,
