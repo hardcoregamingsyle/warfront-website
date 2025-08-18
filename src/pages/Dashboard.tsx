@@ -1,13 +1,36 @@
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { motion } from "framer-motion";
-import { Swords, Shield, Users, Trophy, Target, Clock } from "lucide-react";
+import { Swords, Shield, Users, Trophy, FilePlus2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Helmet } from "react-helmet-async";
+import { useAuth } from "@/hooks/use-auth";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
+  const { user, token } = useAuth();
+  const createCard = useMutation(api.cards.createBlankCard);
+  const navigate = useNavigate();
+
+  const handleCreateCard = async () => {
+    if (!token) {
+      toast.error("You must be logged in to create a card.");
+      return;
+    }
+    const toastId = toast.loading("Creating new card...");
+    try {
+      const cardId = await createCard({ token });
+      toast.success("New card created! Redirecting to editor...", { id: toastId });
+      navigate(`/cards/${cardId}`);
+    } catch (error) {
+      toast.error("Failed to create new card.", { id: toastId });
+      console.error(error);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -102,6 +125,26 @@ export default function Dashboard() {
                 </Link>
               </CardContent>
             </Card>
+            
+            {user && ["admin", "owner", "cardsetter"].includes(user.role!) && (
+              <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-red-400">
+                    <FilePlus2 className="h-5 w-5" />
+                    Create Card
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-slate-300 text-sm mb-4">Design a new digital card</p>
+                  <Button
+                    onClick={handleCreateCard}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Create New
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Call to Action */}

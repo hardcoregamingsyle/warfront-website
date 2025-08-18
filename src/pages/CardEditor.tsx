@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -81,17 +81,29 @@ export default function CardEditor() {
   const card = useQuery(api.cards.get, { cardId: cardId as Id<"cards"> });
   const updateCard = useMutation(api.cards.update);
 
-  const [selectedCardType, setSelectedCardType] = useState<string | undefined>(
-    card?.cardType
-  );
-  const [selectedCardName, setSelectedCardName] = useState<string | undefined>(
-    card?.cardName
-  );
+  const [selectedCardType, setSelectedCardType] = useState<string | undefined>();
+  const [selectedCardName, setSelectedCardName] = useState<string | undefined>();
   const [imageUrl, setImageUrl] = useState<string | undefined>(card?.imageUrl);
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  if (user === undefined) {
+  useEffect(() => {
+    if (card) {
+      setSelectedCardType(card.cardType);
+      setSelectedCardName(card.cardName);
+      setImageUrl(card.imageUrl);
+    }
+  }, [card]);
+
+  useEffect(() => {
+    // If the query finishes and the card is null, it means it doesn't exist.
+    if (card === null) {
+      toast.error("Card not found.");
+      navigate("/dashboard");
+    }
+  }, [card, navigate]);
+
+  if (user === undefined || card === undefined) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
