@@ -104,6 +104,28 @@ export default function CardViewer() {
                     <h3 className="font-bold">Card Details</h3>
                     <p>Some placeholder text about the card's abilities, history, or stats would go here.</p>
                 </div>
+                <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p className="font-semibold text-slate-500">Rarity</p>
+                        <p>{card.rarity}</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-slate-500">Frame</p>
+                        <p>{card.frame}</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-slate-500">Batch</p>
+                        <p>{card.batch}</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-slate-500">Numbering</p>
+                        <p>{card.numberingA}/{card.numberingB}</p>
+                    </div>
+                    <div className="col-span-2">
+                        <p className="font-semibold text-slate-500">Signed</p>
+                        <p>{card.signed}</p>
+                    </div>
+                </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                 {user && (

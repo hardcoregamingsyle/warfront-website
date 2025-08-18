@@ -118,6 +118,12 @@ const schema = defineSchema(
       cardType: v.string(),
       cardName: v.string(),
       imageUrl: v.optional(v.string()),
+      rarity: v.optional(v.string()),
+      frame: v.optional(v.string()),
+      batch: v.optional(v.string()),
+      numberingA: v.optional(v.number()),
+      numberingB: v.optional(v.number()),
+      signed: v.optional(v.string()),
     }),
 
     userCards: defineTable({

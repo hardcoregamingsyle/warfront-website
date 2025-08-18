@@ -19,9 +19,15 @@ export const update = mutation({
     cardType: v.string(),
     cardName: v.string(),
     imageUrl: v.optional(v.string()),
+    rarity: v.optional(v.string()),
+    frame: v.optional(v.string()),
+    batch: v.optional(v.string()),
+    numberingA: v.optional(v.number()),
+    numberingB: v.optional(v.number()),
+    signed: v.optional(v.string()),
     token: v.string(),
   },
-  handler: async (ctx, { cardId, cardType, cardName, imageUrl, token }) => {
+  handler: async (ctx, { cardId, cardType, cardName, imageUrl, rarity, frame, batch, numberingA, numberingB, signed, token }) => {
     const normalizedId = ctx.db.normalizeId("cards", cardId);
     if (normalizedId === null) {
       throw new Error("Invalid card ID.");
@@ -45,6 +51,12 @@ export const update = mutation({
       cardType,
       cardName,
       imageUrl,
+      rarity,
+      frame,
+      batch,
+      numberingA,
+      numberingB,
+      signed,
     });
   },
 });

@@ -73,6 +73,11 @@ const cardTypes = {
   ],
 };
 
+const rarities = ["Common", "Uncommon", "EX", "Rare", "Legendary", "GX", "VMax", "Mythical", "VStar", "Secret"];
+const frames = ["Plain", "Silver", "Gold", "Rainbow"];
+const batches = ["A", "B", "C", "D", "F", "L(Limited Time)", "E(Exclusive)"];
+const signedOptions = ["No", "Nitish", "Aditya", "Both"];
+
 export default function CardEditor() {
   const { cardId } = useParams<{ cardId: string }>();
   const navigate = useNavigate();
@@ -84,6 +89,12 @@ export default function CardEditor() {
   const [selectedCardType, setSelectedCardType] = useState<string | undefined>();
   const [selectedCardName, setSelectedCardName] = useState<string | undefined>();
   const [imageUrl, setImageUrl] = useState<string | undefined>(card?.imageUrl);
+  const [rarity, setRarity] = useState<string | undefined>(card?.rarity);
+  const [frame, setFrame] = useState<string | undefined>(card?.frame);
+  const [batch, setBatch] = useState<string | undefined>(card?.batch);
+  const [numberingA, setNumberingA] = useState<number | undefined>(card?.numberingA);
+  const [numberingB, setNumberingB] = useState<number | undefined>(card?.numberingB);
+  const [signed, setSigned] = useState<string | undefined>(card?.signed);
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -92,6 +103,12 @@ export default function CardEditor() {
       setSelectedCardType(card.cardType);
       setSelectedCardName(card.cardName);
       setImageUrl(card.imageUrl);
+      setRarity(card.rarity);
+      setFrame(card.frame);
+      setBatch(card.batch);
+      setNumberingA(card.numberingA);
+      setNumberingB(card.numberingB);
+      setSigned(card.signed);
     }
   }, [card]);
 
@@ -155,6 +172,12 @@ export default function CardEditor() {
         cardType: selectedCardType,
         cardName: selectedCardName,
         imageUrl: imageUrl,
+        rarity: rarity,
+        frame: frame,
+        batch: batch,
+        numberingA: numberingA,
+        numberingB: numberingB,
+        signed: signed,
         token: token,
       });
       toast.success("Card saved successfully!");
@@ -218,6 +241,89 @@ export default function CardEditor() {
               </Select>
             </div>
           )}
+
+          <div>
+            <Label>Rarity</Label>
+            <Select onValueChange={setRarity} defaultValue={rarity}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select rarity" />
+              </SelectTrigger>
+              <SelectContent>
+                {rarities.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {r}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Frame</Label>
+            <Select onValueChange={setFrame} defaultValue={frame}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select frame" />
+              </SelectTrigger>
+              <SelectContent>
+                {frames.map((f) => (
+                  <SelectItem key={f} value={f}>
+                    {f}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Batch</Label>
+            <Select onValueChange={setBatch} defaultValue={batch}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select batch" />
+              </SelectTrigger>
+              <SelectContent>
+                {batches.map((b) => (
+                  <SelectItem key={b} value={b}>
+                    {b}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Numbering</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={numberingA ?? ""}
+                onChange={(e) => setNumberingA(parseInt(e.target.value))}
+                placeholder="A"
+              />
+              <span>/</span>
+              <Input
+                type="number"
+                value={numberingB ?? ""}
+                onChange={(e) => setNumberingB(parseInt(e.target.value))}
+                placeholder="B"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label>Signed</Label>
+            <Select onValueChange={setSigned} defaultValue={signed}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select signed status" />
+              </SelectTrigger>
+              <SelectContent>
+                {signedOptions.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <Button onClick={handleSave} disabled={isSaving}>
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
