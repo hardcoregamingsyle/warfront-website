@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from "react-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
-import { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/layouts/DashboardLayout";
@@ -12,22 +11,22 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { motion } from "framer-motion";
 
 export default function CardViewer() {
-  const { cardId } = useParams<{ cardId: string }>();
+  const { cardId: customId } = useParams<{ cardId: string }>();
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const card = useQuery(api.cards.get, cardId ? { cardId } : "skip");
+  const card = useQuery(api.cards.get, customId ? { customId } : "skip");
   const userCard = useQuery(
     api.userCards.getForCurrentUser,
     card && token ? { cardId: card._id, token } : "skip"
   );
   const addUserCard = useMutation(api.userCards.add);
-  const deleteCard = useMutation(api.cards.deleteCard);
-  const createCard = useMutation(api.cards.createBlankCard);
+  const deleteCardMutation = useMutation(api.cards.deleteCard);
+  const createCardWithId = useMutation(api.cards.createCardWithId);
 
   const handleAddToInventory = async () => {
-    if (!token || !cardId || !card) {
+    if (!token || !customId || !card) {
       toast.error("You must be logged in to add cards.");
       return;
     }
@@ -45,27 +44,27 @@ export default function CardViewer() {
   };
 
   const handleCreateAndEdit = async () => {
-    if (!user || !token) {
-      toast.error("You must be logged in to create a card.");
+    if (!user || !token || !customId) {
+      toast.error("You must be logged in and have a card ID to create a card.");
       return;
     }
     const toastId = toast.loading("Creating new card...");
     try {
-      const newCardId = await createCard({ token });
+      await createCardWithId({ token, customId });
       toast.success("New card created! Redirecting to editor...", { id: toastId });
-      navigate(`/editor/card/${newCardId}`);
-    } catch (error) {
-      toast.error("Failed to create new card.", { id: toastId });
+      navigate(`/editor/card/${customId}`);
+    } catch (error: any) {
+      toast.error(`Failed to create new card: ${error.message}`, { id: toastId });
       console.error(error);
     }
   };
 
   const handleDeleteCard = async () => {
-    if (!token || !cardId) return;
+    if (!token || !card) return;
     if (window.confirm("Are you sure you want to delete this card? This action cannot be undone.")) {
       const toastId = toast.loading("Deleting card...");
       try {
-        await deleteCard({ token, cardId });
+        await deleteCardMutation({ token, cardId: card._id });
         toast.success("Card deleted successfully.", { id: toastId });
         navigate("/all-cards");
       } catch (error) {

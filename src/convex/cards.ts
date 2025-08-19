@@ -1,22 +1,20 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const get = query({
-  args: { cardId: v.string() },
-  handler: async (ctx, { cardId }) => {
-    const normalizedId = ctx.db.normalizeId("cards", cardId);
-    if (normalizedId === null) {
-      return null;
-    }
-    return await ctx.db.get(normalizedId);
+  args: { customId: v.string() },
+  handler: async (ctx, { customId }) => {
+    return await ctx.db
+      .query("cards")
+      .withIndex("by_customId", (q) => q.eq("customId", customId))
+      .unique();
   },
 });
 
 export const update = mutation({
   args: {
-    cardId: v.string(),
+    cardId: v.id("cards"), // Use the real _id for patching
     cardType: v.string(),
     cardName: v.string(),
     imageUrl: v.optional(v.string()),
@@ -29,11 +27,6 @@ export const update = mutation({
     token: v.string(),
   },
   handler: async (ctx, { cardId, cardType, cardName, imageUrl, rarity, frame, batch, numberingA, numberingB, signed, token }) => {
-    const normalizedId = ctx.db.normalizeId("cards", cardId);
-    if (normalizedId === null) {
-      throw new Error("Invalid card ID.");
-    }
-
     const session = await ctx.db
       .query("sessions")
       .withIndex("by_token", (q) => q.eq("token", token))
@@ -48,7 +41,7 @@ export const update = mutation({
         throw new Error("Unauthorized");
     }
 
-    await ctx.db.patch(normalizedId, {
+    await ctx.db.patch(cardId, {
       cardType,
       cardName,
       imageUrl,
@@ -63,7 +56,7 @@ export const update = mutation({
 });
 
 export const deleteCard = mutation({
-  args: { cardId: v.string(), token: v.string() },
+  args: { cardId: v.id("cards"), token: v.string() },
   handler: async (ctx, { cardId, token }) => {
     // Authorization
     const session = await ctx.db
@@ -80,18 +73,13 @@ export const deleteCard = mutation({
       throw new Error("Unauthorized");
     }
 
-    const normalizedId = ctx.db.normalizeId("cards", cardId);
-    if (normalizedId === null) {
-      throw new Error("Invalid card ID.");
-    }
-
     // 1. Delete the card itself
-    await ctx.db.delete(normalizedId);
+    await ctx.db.delete(cardId);
 
     // 2. Find and delete all userCards associated with this card
     const userCardEntries = await ctx.db
       .query("userCards")
-      .withIndex("by_cardId", (q) => q.eq("cardId", normalizedId))
+      .withIndex("by_cardId", (q) => q.eq("cardId", cardId))
       .collect();
 
     for (const entry of userCardEntries) {
@@ -102,11 +90,10 @@ export const deleteCard = mutation({
   },
 });
 
-// This function is for admins to create a new blank card entry,
-// which generates the unique ID they can then visit.
-export const createBlankCard = mutation({
-    args: { token: v.string() },
-    handler: async (ctx, { token }) => {
+// This function creates a new card with a specific custom ID.
+export const createCardWithId = mutation({
+    args: { token: v.string(), customId: v.string() },
+    handler: async (ctx, { token, customId }) => {
         const session = await ctx.db
           .query("sessions")
           .withIndex("by_token", (q) => q.eq("token", token))
@@ -121,9 +108,20 @@ export const createBlankCard = mutation({
             throw new Error("Unauthorized");
         }
 
+        // Check if a card with this custom ID already exists
+        const existingCard = await ctx.db
+            .query("cards")
+            .withIndex("by_customId", q => q.eq("customId", customId))
+            .unique();
+
+        if (existingCard) {
+            throw new Error("A card with this ID already exists.");
+        }
+
         const cardId = await ctx.db.insert("cards", {
-            cardType: "Ammo", // Default value
-            cardName: "Missile", // Default value
+            customId: customId,
+            cardType: "Default Type", // Default value
+            cardName: "New Card", // Default value
         });
 
         return cardId;

@@ -116,6 +116,7 @@ const schema = defineSchema(
       .index("by_userId", ["userId"]),
 
     cards: defineTable({
+      customId: v.string(), // The user-provided ID
       cardType: v.string(),
       cardName: v.string(),
       imageUrl: v.optional(v.string()),
@@ -125,7 +126,7 @@ const schema = defineSchema(
       numberingA: v.optional(v.number()),
       numberingB: v.optional(v.number()),
       signed: v.optional(v.string()),
-    }),
+    }).index("by_customId", ["customId"]),
 
     userCards: defineTable({
       userId: v.id("users"),

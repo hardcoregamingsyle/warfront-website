@@ -13,7 +13,7 @@ import { toast } from "sonner";
 export default function Dashboard() {
   const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
   const { user, token } = useAuth();
-  const createCard = useMutation(api.cards.createBlankCard);
+  const createCard = useMutation(api.cards.createCardWithId);
   const navigate = useNavigate();
 
   const handleCreateCard = async () => {
@@ -21,9 +21,13 @@ export default function Dashboard() {
       toast.error("You must be logged in to create a card.");
       return;
     }
+    
+    // Generate a random 21-character ID
+    const customId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
+    
     const toastId = toast.loading("Creating new card...");
     try {
-      const cardId = await createCard({ token });
+      const cardId = await createCard({ token, customId });
       toast.success("New card created! Redirecting to editor...", { id: toastId });
       navigate(`/cards/${cardId}`);
     } catch (error) {

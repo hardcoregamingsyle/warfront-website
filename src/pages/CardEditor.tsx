@@ -83,7 +83,7 @@ export default function CardEditor() {
   const navigate = useNavigate();
   const { user, token } = useAuth();
 
-  const card = useQuery(api.cards.get, { cardId: cardId as Id<"cards"> });
+  const card = useQuery(api.cards.get, cardId ? { customId: cardId } : "skip");
   const updateCard = useMutation(api.cards.update);
 
   const [selectedCardType, setSelectedCardType] = useState<string | undefined>();
@@ -157,34 +157,27 @@ export default function CardEditor() {
   };
 
   const handleSave = async () => {
-    if (!selectedCardType || !selectedCardName || !token) {
-      toast.error("Please select a card type and name.");
-      return;
-    }
-    if (!cardId) {
-      toast.error("Cannot save, card ID is missing.");
-      return;
-    }
-    setIsSaving(true);
+    if (!card || !token) return;
+    
+    const toastId = toast.loading("Saving card...");
     try {
       await updateCard({
-        cardId: cardId,
-        cardType: selectedCardType,
-        cardName: selectedCardName,
-        imageUrl: imageUrl,
-        rarity: rarity,
-        frame: frame,
-        batch: batch,
-        numberingA: numberingA,
-        numberingB: numberingB,
-        signed: signed,
-        token: token,
+        cardId: card._id,
+        cardType: selectedCardType || "",
+        cardName: selectedCardName || "",
+        imageUrl,
+        rarity,
+        frame,
+        batch,
+        numberingA,
+        numberingB,
+        signed,
+        token,
       });
-      toast.success("Card saved successfully!");
+      toast.success("Card saved successfully!", { id: toastId });
     } catch (error) {
-      toast.error("Failed to save card.");
-    } finally {
-      setIsSaving(false);
+      toast.error("Failed to save card.", { id: toastId });
+      console.error(error);
     }
   };
 
