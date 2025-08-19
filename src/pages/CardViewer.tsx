@@ -20,7 +20,7 @@ export default function CardViewer() {
   const card = useQuery(api.cards.get, cardId ? { cardId } : "skip");
   const userCard = useQuery(
     api.userCards.getForCurrentUser,
-    card ? { cardId: card._id } : "skip"
+    card && token ? { cardId: card._id, token } : "skip"
   );
   const addUserCard = useMutation(api.userCards.add);
   const deleteCard = useMutation(api.cards.deleteCard);
@@ -44,6 +44,22 @@ export default function CardViewer() {
     }
   };
 
+  const handleCreateAndEdit = async () => {
+    if (!user || !token) {
+      toast.error("You must be logged in to create a card.");
+      return;
+    }
+    const toastId = toast.loading("Creating new card...");
+    try {
+      const newCardId = await createCard({ token });
+      toast.success("New card created! Redirecting to editor...", { id: toastId });
+      navigate(`/editor/card/${newCardId}`);
+    } catch (error) {
+      toast.error("Failed to create new card.", { id: toastId });
+      console.error(error);
+    }
+  };
+
   const handleDeleteCard = async () => {
     if (!token || !cardId) return;
     if (window.confirm("Are you sure you want to delete this card? This action cannot be undone.")) {
@@ -56,22 +72,6 @@ export default function CardViewer() {
         toast.error("Failed to delete card.", { id: toastId });
         console.error(error);
       }
-    }
-  };
-
-  const handleCreateAndEdit = async () => {
-    if (!token) {
-      toast.error("You must be logged in to create a card.");
-      return;
-    }
-    const toastId = toast.loading("Creating new card...");
-    try {
-      const newCardId = await createCard({ token });
-      toast.success("New card created! Redirecting to editor...", { id: toastId });
-      navigate(`/editor/card/${newCardId}`);
-    } catch (error) {
-      toast.error("Failed to create new card.", { id: toastId });
-      console.error(error);
     }
   };
 
