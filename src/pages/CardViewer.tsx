@@ -18,6 +18,10 @@ export default function CardViewer() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const card = useQuery(api.cards.get, cardId ? { cardId } : "skip");
+  const userCard = useQuery(
+    api.userCards.getForCurrentUser,
+    card ? { cardId: card._id } : "skip"
+  );
   const addUserCard = useMutation(api.userCards.add);
   const deleteCard = useMutation(api.cards.deleteCard);
   const createCard = useMutation(api.cards.createBlankCard);
@@ -118,6 +122,7 @@ export default function CardViewer() {
   }
 
   const isAuthorizedEditor = user && ["admin", "owner", "cardsetter"].includes(user.role!);
+  const cardIsInInventory = !!userCard;
 
   return (
     <DashboardLayout>
@@ -171,8 +176,12 @@ export default function CardViewer() {
               </CardContent>
               <CardFooter className="flex flex-col gap-2">
                   {user && (
-                      <Button onClick={handleAddToInventory} className="w-full bg-red-600 hover:bg-red-700">
-                          Add to Digital Inventory
+                      <Button 
+                        onClick={handleAddToInventory} 
+                        className="w-full bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed"
+                        disabled={cardIsInInventory}
+                      >
+                          {cardIsInInventory ? "Card in Inventory" : "Add to Digital Inventory"}
                       </Button>
                   )}
                   {isAuthorizedEditor && (

@@ -1,79 +1,61 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { Id } from "./_generated/dataModel";
 
-// Helper to get user from token
-const getUserFromToken = async (ctx: any, token: string) => {
-    if (!token) {
-        return null;
-    }
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q: any) => q.eq("token", token))
-      .unique();
+// Check if the current logged-in user has a specific card
+export const getForCurrentUser = query({
+    args: { cardId: v.id("cards") },
+    handler: async (ctx, { cardId }) => {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) {
+            return null; // Not logged in, so can't have the card
+        }
 
-    if (!session || session.expires < Date.now()) {
-      return null;
-    }
-    return await ctx.db.get(session.userId);
-};
+        const userCard = await ctx.db
+            .query("userCards")
+            .withIndex("by_user_card", (q) =>
+                q.eq("userId", userId).eq("cardId", cardId)
+            )
+            .unique();
 
-export const add = mutation({
-    args: {
-        cardId: v.id("cards"),
-        token: v.string(),
+        return userCard; // Returns the document if found, otherwise null
     },
+});
+
+// Add a card to the current user's inventory
+export const add = mutation({
+    args: { cardId: v.id("cards"), token: v.string() }, // Keep token for compatibility with CardViewer
     handler: async (ctx, { cardId, token }) => {
-        const user = await getUserFromToken(ctx, token);
-        if (!user) {
-            throw new Error("User not authenticated");
-        }
+        // Auth check via token, maintaining existing pattern
+        const session = await ctx.db
+            .query("sessions")
+            .withIndex("by_token", (q) => q.eq("token", token))
+            .unique();
 
-        // Check if card exists
-        const card = await ctx.db.get(cardId);
-        if (!card) {
-            throw new Error("Card not found");
+        if (!session || session.expires < Date.now()) {
+            return { success: false, message: "User not authenticated." };
         }
+        const userId = session.userId;
 
-        // Check if user already has this card
+        // Check if the user already has the card
         const existingUserCard = await ctx.db
             .query("userCards")
             .withIndex("by_user_card", (q) =>
-                q.eq("userId", user._id).eq("cardId", cardId)
+                q.eq("userId", userId).eq("cardId", cardId)
             )
             .unique();
 
         if (existingUserCard) {
-            // Card already in inventory
             return { success: false, message: "Card already in inventory." };
         }
 
+        // Add the card to the user's inventory
         await ctx.db.insert("userCards", {
-            userId: user._id,
-            cardId: cardId,
+            userId,
+            cardId,
         });
 
-        return { success: true, message: "Card added to inventory." };
-    },
-});
-
-export const getForUser = query({
-    args: { token: v.string() },
-    handler: async (ctx, { token }) => {
-        const user = await getUserFromToken(ctx, token);
-        if (!user) {
-            return [];
-        }
-
-        const userCards = await ctx.db
-            .query("userCards")
-            .withIndex("by_userId", (q) => q.eq("userId", user._id))
-            .collect();
-
-        return Promise.all(
-            userCards.map(async (userCard) => {
-                return await ctx.db.get(userCard.cardId);
-            })
-        );
+        return { success: true, message: "Card added to inventory!" };
     },
 });
