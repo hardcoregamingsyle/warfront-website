@@ -1,6 +1,6 @@
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { motion } from "framer-motion";
-import { Swords, Shield, Users, Trophy, FilePlus2 } from "lucide-react";
+import { Swords, Shield, Users, Trophy, FilePlus2, Library } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router";
@@ -127,23 +127,41 @@ export default function Dashboard() {
             </Card>
             
             {user && ["admin", "owner", "cardsetter"].includes(user.role!) && (
-              <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-red-400">
-                    <FilePlus2 className="h-5 w-5" />
-                    Create Card
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-300 text-sm mb-4">Design a new digital card</p>
-                  <Button
-                    onClick={handleCreateCard}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    Create New
-                  </Button>
-                </CardContent>
-              </Card>
+              <>
+                <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-red-400">
+                      <FilePlus2 className="h-5 w-5" />
+                      Create Card
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-slate-300 text-sm mb-4">Design a new digital card</p>
+                    <Button
+                      onClick={handleCreateCard}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      Create New
+                    </Button>
+                  </CardContent>
+                </Card>
+                <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-red-400">
+                      <Library className="h-5 w-5" />
+                      View All Cards
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-slate-300 text-sm mb-4">Browse the entire card collection</p>
+                    <Link to="/all-cards">
+                      <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+                        Browse Collection
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </>
             )}
           </div>
 

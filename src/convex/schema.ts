@@ -44,6 +44,7 @@ const schema = defineSchema(
     })
       .index("by_email_normalized", ["email_normalized"])
       .index("by_name_normalized", ["name_normalized"])
+      .index("by_role", ["role"])
       .searchIndex("by_name", {
         searchField: "name",
       }),
@@ -131,7 +132,8 @@ const schema = defineSchema(
       cardId: v.id("cards"),
     })
       .index("by_user_card", ["userId", "cardId"])
-      .index("by_userId", ["userId"]),
+      .index("by_userId", ["userId"])
+      .index("by_cardId", ["cardId"]),
       
     blogs: defineTable({
       title: v.string(),

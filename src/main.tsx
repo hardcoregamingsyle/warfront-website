@@ -38,6 +38,7 @@ import CardViewer from "./pages/CardViewer.tsx";
 import BlogList from "./pages/BlogList.tsx";
 import BlogViewer from "./pages/BlogViewer.tsx";
 import BlogEditor from "./pages/BlogEditor.tsx";
+import AllCards from "./pages/AllCards.tsx";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -103,6 +104,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/blog" element={<BlogList />} />
               <Route path="/blog/:slug" element={<BlogViewer />} />
               <Route path="/editor/blog/:blogId" element={<BlogEditor />} />
+              <Route path="/all-cards" element={<AllCards />} />
             </Routes>
           </BrowserRouter>
           <Toaster />

@@ -61,6 +61,46 @@ export const update = mutation({
   },
 });
 
+export const deleteCard = mutation({
+  args: { cardId: v.string(), token: v.string() },
+  handler: async (ctx, { cardId, token }) => {
+    // Authorization
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session || session.expires < Date.now()) {
+      throw new Error("Invalid or expired session");
+    }
+
+    const user = await ctx.db.get(session.userId);
+    if (!user || !["admin", "owner", "cardsetter"].includes(user.role!)) {
+      throw new Error("Unauthorized");
+    }
+
+    const normalizedId = ctx.db.normalizeId("cards", cardId);
+    if (normalizedId === null) {
+      throw new Error("Invalid card ID.");
+    }
+
+    // 1. Delete the card itself
+    await ctx.db.delete(normalizedId);
+
+    // 2. Find and delete all userCards associated with this card
+    const userCardEntries = await ctx.db
+      .query("userCards")
+      .withIndex("by_cardId", (q) => q.eq("cardId", normalizedId))
+      .collect();
+
+    for (const entry of userCardEntries) {
+      await ctx.db.delete(entry._id);
+    }
+
+    return { success: true };
+  },
+});
+
 // This function is for admins to create a new blank card entry,
 // which generates the unique ID they can then visit.
 export const createBlankCard = mutation({

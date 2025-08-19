@@ -7,10 +7,9 @@ import { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import { Loader2, FilePlus2 } from "lucide-react";
+import { Loader2, FilePlus2, Trash2, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
 
 export default function CardViewer() {
   const { cardId } = useParams<{ cardId: string }>();
@@ -20,6 +19,8 @@ export default function CardViewer() {
 
   const card = useQuery(api.cards.get, cardId ? { cardId } : "skip");
   const addUserCard = useMutation(api.userCards.add);
+  const deleteCard = useMutation(api.cards.deleteCard);
+  const createCard = useMutation(api.cards.createBlankCard);
 
   const handleAddToInventory = async () => {
     if (!token || !cardId || !card) {
@@ -39,12 +40,36 @@ export default function CardViewer() {
     }
   };
 
-  const handleCreateCard = () => {
-    navigate("/dashboard");
-    // On the dashboard, the user can click the create card button.
-    // This is a placeholder to guide them. A toast could be better.
-    toast.info("Click the 'Create Card' button on your dashboard to make a new one.");
-  }
+  const handleDeleteCard = async () => {
+    if (!token || !cardId) return;
+    if (window.confirm("Are you sure you want to delete this card? This action cannot be undone.")) {
+      const toastId = toast.loading("Deleting card...");
+      try {
+        await deleteCard({ token, cardId });
+        toast.success("Card deleted successfully.", { id: toastId });
+        navigate("/all-cards");
+      } catch (error) {
+        toast.error("Failed to delete card.", { id: toastId });
+        console.error(error);
+      }
+    }
+  };
+
+  const handleCreateAndEdit = async () => {
+    if (!token) {
+      toast.error("You must be logged in to create a card.");
+      return;
+    }
+    const toastId = toast.loading("Creating new card...");
+    try {
+      const newCardId = await createCard({ token });
+      toast.success("New card created! Redirecting to editor...", { id: toastId });
+      navigate(`/editor/card/${newCardId}`);
+    } catch (error) {
+      toast.error("Failed to create new card.", { id: toastId });
+      console.error(error);
+    }
+  };
 
   if (card === undefined) {
     return (
@@ -62,26 +87,30 @@ export default function CardViewer() {
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center h-full text-center">
             <h1 className="text-3xl font-bold mb-4">Card Not Found</h1>
-            <p className="text-slate-400 mb-6">Sorry, the card you are looking for does not exist.</p>
-            {isAuthorizedCreator && (
-                <Card className="max-w-sm">
+            <p className="text-slate-400 mb-6">The card ID you've entered does not exist.</p>
+            {isAuthorizedCreator ? (
+                <Card className="max-w-sm bg-slate-900 border-red-500/20">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 text-red-400">
                             <FilePlus2 />
                             Create a New Card?
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-slate-500">
-                            Since this card doesn't exist, you can create a new one from your dashboard.
+                        <p className="text-sm text-slate-300">
+                            You can create a new card. A new ID will be generated and you will be redirected to the editor.
                         </p>
                     </CardContent>
                     <CardFooter>
-                         <Button onClick={() => navigate('/dashboard')} className="w-full">
-                            Go to Dashboard
+                         <Button onClick={handleCreateAndEdit} className="w-full bg-red-600 hover:bg-red-700 text-white">
+                            Create and Edit
                         </Button>
                     </CardFooter>
                 </Card>
+            ) : (
+                 <Button onClick={() => navigate('/dashboard')} variant="outline">
+                    Back to Dashboard
+                </Button>
             )}
         </div>
       </DashboardLayout>
@@ -147,9 +176,15 @@ export default function CardViewer() {
                       </Button>
                   )}
                   {isAuthorizedEditor && (
+                    <div className="w-full grid grid-cols-2 gap-2">
                       <Link to={`/editor/card/${card._id}`} className="w-full">
                           <Button variant="outline" className="w-full border-red-500 text-red-400 hover:bg-red-500/10">Edit Card</Button>
                       </Link>
+                      <Button variant="destructive" className="w-full" onClick={handleDeleteCard}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
                   )}
               </CardFooter>
           </Card>
