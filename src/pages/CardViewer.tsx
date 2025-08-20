@@ -185,7 +185,7 @@ export default function CardViewer() {
                   )}
                   {isAuthorizedEditor && (
                     <div className="w-full grid grid-cols-2 gap-2">
-                      <Link to={`/editor/card/${card._id}`} className="w-full">
+                      <Link to={`/editor/card/${card.customId}`} className="w-full">
                           <Button variant="outline" className="w-full border-red-500 text-red-400 hover:bg-red-500/10">Edit Card</Button>
                       </Link>
                       <Button variant="destructive" className="w-full" onClick={handleDeleteCard}>
