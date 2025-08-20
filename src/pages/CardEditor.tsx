@@ -85,10 +85,11 @@ export default function CardEditor() {
 
   const card = useQuery(api.cards.get, cardId ? { customId: cardId } : "skip");
   const updateCard = useMutation(api.cards.update);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
   const [selectedCardType, setSelectedCardType] = useState<string | undefined>();
   const [selectedCardName, setSelectedCardName] = useState<string | undefined>();
-  const [imageUrl, setImageUrl] = useState<string | undefined>(card?.imageUrl);
+  const [imageUrl, setImageUrl] = useState<string | undefined>();
   const [rarity, setRarity] = useState<string | undefined>(card?.rarity);
   const [frame, setFrame] = useState<string | undefined>(card?.frame);
   const [batch, setBatch] = useState<string | undefined>(card?.batch);
@@ -102,7 +103,7 @@ export default function CardEditor() {
     if (card) {
       setSelectedCardType(card.cardType);
       setSelectedCardName(card.cardName);
-      setImageUrl(card.imageUrl);
+      setImageUrl(card.imageUrl || undefined);
       setRarity(card.rarity);
       setFrame(card.frame);
       setBatch(card.batch);
@@ -140,20 +141,40 @@ export default function CardEditor() {
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !card || !token) return;
 
-    // This is where Cloudinary upload logic will go
-    // For now, we'll simulate it
     setIsUploading(true);
-    toast.info("Cloudinary integration not yet configured. Using placeholder.");
-    // In a real scenario, you would call a Convex action that uploads to Cloudinary
-    // and returns the URL.
-    setTimeout(() => {
-        const placeholderUrl = "https://via.placeholder.com/300x400";
-        setImageUrl(placeholderUrl);
+    const toastId = toast.loading("Uploading image...");
+
+    try {
+        const postUrl = await generateUploadUrl();
+        const result = await fetch(postUrl, {
+            method: "POST",
+            headers: { "Content-Type": file.type },
+            body: file,
+        });
+        const { storageId } = await result.json();
+
+        await updateCard({
+            cardId: card._id,
+            cardType: selectedCardType || "",
+            cardName: selectedCardName || "",
+            imageId: storageId,
+            rarity,
+            frame,
+            batch,
+            numberingA,
+            numberingB,
+            signed,
+            token,
+        });
+        toast.success("Image uploaded and saved.", { id: toastId });
+    } catch (error) {
+        console.error(error);
+        toast.error("Image upload failed.", { id: toastId });
+    } finally {
         setIsUploading(false);
-        toast.success("Image uploaded (placeholder).");
-    }, 2000);
+    }
   };
 
   const handleSave = async () => {
@@ -165,7 +186,6 @@ export default function CardEditor() {
         cardId: card._id,
         cardType: selectedCardType || "",
         cardName: selectedCardName || "",
-        imageUrl,
         rarity,
         frame,
         batch,

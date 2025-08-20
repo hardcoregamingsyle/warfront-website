@@ -5,10 +5,21 @@ import { Id } from "./_generated/dataModel";
 export const get = query({
   args: { customId: v.string() },
   handler: async (ctx, { customId }) => {
-    return await ctx.db
+    const card = await ctx.db
       .query("cards")
       .withIndex("by_customId", (q) => q.eq("customId", customId))
       .unique();
+    
+    if (!card) {
+        return null;
+    }
+
+    const imageUrl = card.imageId ? await ctx.storage.getUrl(card.imageId) : null;
+
+    return {
+        ...card,
+        imageUrl,
+    }
   },
 });
 
@@ -17,7 +28,7 @@ export const update = mutation({
     cardId: v.id("cards"), // Use the real _id for patching
     cardType: v.string(),
     cardName: v.string(),
-    imageUrl: v.optional(v.string()),
+    imageId: v.optional(v.id("_storage")),
     rarity: v.optional(v.string()),
     frame: v.optional(v.string()),
     batch: v.optional(v.string()),
@@ -26,7 +37,7 @@ export const update = mutation({
     signed: v.optional(v.string()),
     token: v.string(),
   },
-  handler: async (ctx, { cardId, cardType, cardName, imageUrl, rarity, frame, batch, numberingA, numberingB, signed, token }) => {
+  handler: async (ctx, { cardId, cardType, cardName, imageId, rarity, frame, batch, numberingA, numberingB, signed, token }) => {
     const session = await ctx.db
       .query("sessions")
       .withIndex("by_token", (q) => q.eq("token", token))
@@ -44,7 +55,7 @@ export const update = mutation({
     await ctx.db.patch(cardId, {
       cardType,
       cardName,
-      imageUrl,
+      imageId,
       rarity,
       frame,
       batch,

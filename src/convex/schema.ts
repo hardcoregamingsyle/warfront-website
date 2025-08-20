@@ -119,7 +119,7 @@ const schema = defineSchema(
       customId: v.string(), // The user-provided ID
       cardType: v.string(),
       cardName: v.string(),
-      imageUrl: v.optional(v.string()),
+      imageId: v.optional(v.id("_storage")),
       rarity: v.optional(v.string()),
       frame: v.optional(v.string()),
       batch: v.optional(v.string()),

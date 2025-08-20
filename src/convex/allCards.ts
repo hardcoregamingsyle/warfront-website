@@ -12,20 +12,25 @@ export const getAllCardsWithOwners = query({
         const userCardMap = new Map(userCards.map(uc => [uc.cardId, uc.userId]));
         const userMap = new Map(users.map(u => [u._id, u.name]));
 
-        const cardsWithOwners = cards.map(card => {
-            const userId = userCardMap.get(card._id);
-            let ownerName = "Unassigned";
-            if (userId) {
-                ownerName = userMap.get(userId) || "Unknown User";
-            } else if (ownerAccount) {
-                ownerName = ownerAccount.name;
-            }
+        const cardsWithOwners = await Promise.all(
+            cards.map(async (card) => {
+                const userId = userCardMap.get(card._id);
+                let ownerName = "Unassigned";
+                if (userId) {
+                    ownerName = userMap.get(userId) || "Unknown User";
+                } else if (ownerAccount) {
+                    ownerName = ownerAccount.name;
+                }
 
-            return {
-                ...card,
-                ownerName: ownerName,
-            };
-        });
+                const imageUrl = card.imageId ? await ctx.storage.getUrl(card.imageId) : null;
+
+                return {
+                    ...card,
+                    ownerName: ownerName,
+                    imageUrl: imageUrl,
+                };
+            })
+        );
 
         return cardsWithOwners;
     }
