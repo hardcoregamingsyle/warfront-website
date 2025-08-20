@@ -186,6 +186,7 @@ export default function CardEditor() {
         cardId: card._id,
         cardType: selectedCardType || "",
         cardName: selectedCardName || "",
+        imageId: card.imageId,
         rarity,
         frame,
         batch,
