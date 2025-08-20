@@ -84,6 +84,16 @@ export const deleteCard = mutation({
       throw new Error("Unauthorized");
     }
 
+    const card = await ctx.db.get(cardId);
+    if (!card) {
+      throw new Error("Card not found");
+    }
+
+    // Delete image from storage
+    if (card.imageId) {
+      await ctx.storage.delete(card.imageId);
+    }
+
     // 1. Delete the card itself
     await ctx.db.delete(cardId);
 
@@ -99,6 +109,52 @@ export const deleteCard = mutation({
 
     return { success: true };
   },
+});
+
+export const deleteAllCards = mutation({
+    args: { token: v.string() },
+    handler: async (ctx, { token }) => {
+        // Authorization
+        const session = await ctx.db
+            .query("sessions")
+            .withIndex("by_token", (q) => q.eq("token", token))
+            .unique();
+
+        if (!session || session.expires < Date.now()) {
+            throw new Error("Invalid or expired session");
+        }
+
+        const user = await ctx.db.get(session.userId);
+        if (!user || !["admin", "owner"].includes(user.role!)) {
+            throw new Error("Unauthorized");
+        }
+
+        const allCards = await ctx.db.query("cards").collect();
+        let deletedCount = 0;
+
+        for (const card of allCards) {
+            // Delete image from storage
+            if (card.imageId) {
+                await ctx.storage.delete(card.imageId);
+            }
+            
+            // Delete the card itself
+            await ctx.db.delete(card._id);
+
+            // Find and delete all userCards associated with this card
+            const userCardEntries = await ctx.db
+                .query("userCards")
+                .withIndex("by_cardId", (q) => q.eq("cardId", card._id))
+                .collect();
+
+            for (const entry of userCardEntries) {
+                await ctx.db.delete(entry._id);
+            }
+            deletedCount++;
+        }
+
+        return { success: true, deletedCount };
+    }
 });
 
 // This function creates a new card with a specific custom ID.

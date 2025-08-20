@@ -1,12 +1,40 @@
 import DashboardLayout from "@/layouts/DashboardLayout";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function AllCards() {
     const cards = useQuery(api.allCards.getAllCardsWithOwners);
+    const deleteAllCards = useMutation(api.cards.deleteAllCards);
+    const { user, token } = useAuth();
+
+    const handleDeleteAll = async () => {
+        if (!token) {
+            toast.error("Authentication error.");
+            return;
+        }
+        if (window.confirm("Are you sure you want to delete ALL cards? This action is irreversible.")) {
+            const toastId = toast.loading("Deleting all cards...");
+            try {
+                const result = await deleteAllCards({ token });
+                if (result.success) {
+                    toast.success(`Successfully deleted ${result.deletedCount} cards.`, { id: toastId });
+                } else {
+                    toast.error("Failed to delete all cards.", { id: toastId });
+                }
+            } catch (error: any) {
+                toast.error(`Failed to delete all cards: ${error.message}`, { id: toastId });
+                console.error(error);
+            }
+        }
+    };
+
+    const isAuthorized = user && ["admin", "owner"].includes(user.role!);
 
     if (cards === undefined) {
         return (
@@ -21,7 +49,14 @@ export default function AllCards() {
     return (
         <DashboardLayout>
             <div className="container mx-auto py-8">
-                <h1 className="text-3xl font-bold mb-6">All Cards</h1>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold">All Cards</h1>
+                    {isAuthorized && (
+                        <Button variant="destructive" onClick={handleDeleteAll}>
+                            Delete All Cards
+                        </Button>
+                    )}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {cards.map((card) => (
                         <Link to={`/cards/${card.customId}`} key={card._id}>
