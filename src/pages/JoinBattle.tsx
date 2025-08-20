@@ -43,16 +43,17 @@ export default function JoinBattle() {
   const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
   const pageKeywords = "Warfront, 1v1, online battle, PvP, card game, join match, multiplayer, lobby";
 
+  const battleStatus = useQuery(api.battles.isUserInActiveBattle);
+
   useEffect(() => {
-    if (battles && user) {
-      const myHostedBattle = battles.find(
-        (b) => b.hostId === user._id && b.status === "Full",
-      );
-      if (myHostedBattle) {
-        navigate(`/battle/${myHostedBattle._id}`);
-      }
+    if (battleStatus?.inBattle) {
+        if (battleStatus.battleType === '1v1') {
+            navigate(`/battle/${battleStatus.battleId}`);
+        } else if (battleStatus.battleType === 'multiplayer') {
+            navigate(`/multi-battle/${battleStatus.battleId}`);
+        }
     }
-  }, [battles, user, navigate]);
+  }, [battleStatus, navigate]);
 
   const handleCreateBattle = async () => {
     if (!token) {
@@ -168,6 +169,7 @@ export default function JoinBattle() {
           <div className="max-w-4xl mx-auto mb-4 flex justify-center gap-4">
             <Button
               onClick={handleCreateBattle}
+              disabled={battleStatus?.inBattle}
             >
               Create 1v1 Battle
             </Button>

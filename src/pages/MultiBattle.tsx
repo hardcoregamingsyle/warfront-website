@@ -1,14 +1,34 @@
 import DashboardLayout from "@/layouts/DashboardLayout";
-import { useParams } from "react-router";
-import { useQuery } from "convex/react";
+import { useParams, useNavigate } from "react-router";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 export default function MultiBattle() {
     const { battleId } = useParams<{ battleId: Id<"multiplayerBattles"> }>();
     const battle = useQuery(api.multiplayerBattles.get, battleId ? { battleId } : "skip");
+    const { user, token } = useAuth();
+    const navigate = useNavigate();
+    const leaveBattle = useMutation(api.multiplayerBattles.leave);
+
+    const handleLeaveBattle = async () => {
+        if (!battleId || !token) {
+            toast.error("Error leaving battle.");
+            return;
+        }
+        try {
+            await leaveBattle({ battleId, token });
+            toast.success("You have left the battle.");
+            navigate("/join-battle");
+        } catch (error: any) {
+            toast.error(error.data || "Failed to leave battle.");
+        }
+    };
 
     if (battle === undefined) {
         return (
@@ -33,7 +53,12 @@ export default function MultiBattle() {
     return (
         <DashboardLayout>
             <div className="container mx-auto text-white">
-                <h1 className="text-4xl font-bold text-center mb-8">Multiplayer Battle Room</h1>
+                <div className="flex justify-between items-center mb-8">
+                  <h1 className="text-4xl font-bold">Multiplayer Battle Room</h1>
+                  {battle && user && battle.playerIds.includes(user._id) && (
+                         <Button variant="destructive" onClick={handleLeaveBattle}>Leave Battle</Button>
+                    )}
+                </div>
                 <p className="text-center text-xl mb-4">Status: <span className="font-semibold">{battle.status}</span></p>
                 <p className="text-center text-lg mb-8">Players: {battle.players.length} / {battle.maxPlayers}</p>
 

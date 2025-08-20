@@ -57,20 +57,23 @@ export const create = mutation({
       throw new Error("User not authenticated!");
     }
 
-    const existingBattle = await ctx.db
-      .query("battles")
-      .withIndex("by_hostId", (q) => q.eq("hostId", user._id))
-      .first();
+    // Check if user is already in an active 1v1 battle
+    const in1v1 = await ctx.db
+        .query("battles")
+        .filter(q => q.or(q.eq(q.field("hostId"), user._id), q.eq(q.field("opponentId"), user._id)))
+        .filter(q => q.neq(q.field("status"), "Complete"))
+        .first();
+    if (in1v1) {
+        throw new Error("You are already in a Battle. You cannot Create or Join another Battle");
+    }
 
-    const existingMultiplayerBattle = await ctx.db
-      .query("multiplayerBattles")
-      .filter((q) => q.eq(q.field("hostId"), user._id))
-      .first();
-
-    if (existingBattle || existingMultiplayerBattle) {
-      throw new Error(
-        "You are already in a Battle. You cannot Create or Join another Battle",
-      );
+    // Check if user is already in an active multiplayer battle
+    const multiplayerBattles = await ctx.db.query("multiplayerBattles")
+        .filter(q => q.neq(q.field("status"), "Finished"))
+        .collect();
+    const inMultiplayer = multiplayerBattles.some(b => b.playerIds.includes(user._id));
+    if (inMultiplayer) {
+        throw new Error("You are already in a Battle. You cannot Create or Join another Battle");
     }
 
     await ctx.db.insert("battles", {
@@ -89,6 +92,25 @@ export const join = mutation({
       throw new Error("User not authenticated!");
     }
 
+    // Check if user is already in an active 1v1 battle
+    const in1v1 = await ctx.db
+        .query("battles")
+        .filter(q => q.or(q.eq(q.field("hostId"), user._id), q.eq(q.field("opponentId"), user._id)))
+        .filter(q => q.neq(q.field("status"), "Complete"))
+        .first();
+    if (in1v1) {
+        throw new Error("You are already in a Battle. You cannot Create or Join another Battle");
+    }
+
+    // Check if user is already in an active multiplayer battle
+    const multiplayerBattles = await ctx.db.query("multiplayerBattles")
+        .filter(q => q.neq(q.field("status"), "Finished"))
+        .collect();
+    const inMultiplayer = multiplayerBattles.some(b => b.playerIds.includes(user._id));
+    if (inMultiplayer) {
+        throw new Error("You are already in a Battle. You cannot Create or Join another Battle");
+    }
+
     const battle = await ctx.db.get(battleId);
     if (!battle) {
       throw new Error("Battle not found!");
@@ -100,22 +122,6 @@ export const join = mutation({
 
     if (battle.status !== "Open") {
       throw new Error("Battle is not open to join!");
-    }
-
-    const existingBattle = await ctx.db
-      .query("battles")
-      .withIndex("by_hostId", (q) => q.eq("hostId", user._id))
-      .first();
-
-    const existingMultiplayerBattle = await ctx.db
-      .query("multiplayerBattles")
-      .filter((q) => q.eq(q.field("hostId"), user._id))
-      .first();
-
-    if (existingBattle || existingMultiplayerBattle) {
-      throw new Error(
-        "You are already in a Battle. You cannot Create or Join another Battle",
-      );
     }
 
     await ctx.db.patch(battleId, {
@@ -208,4 +214,47 @@ export const cleanupInactiveBattles = internalMutation({
       await ctx.db.delete(battle._id);
     }
   },
+});
+
+export const isUserInActiveBattle = query({
+    args: {},
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return { inBattle: false, battleId: null, battleType: null };
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_email_normalized", q => q.eq("email_normalized", identity.email!.toLowerCase()))
+            .unique();
+        
+        if (!user) {
+            return { inBattle: false, battleId: null, battleType: null };
+        }
+
+        const userId = user._id;
+
+        const in1v1 = await ctx.db
+            .query("battles")
+            .filter((q: any) => q.or(q.eq(q.field("hostId"), userId), q.eq(q.field("opponentId"), userId)))
+            .filter((q: any) => q.neq(q.field("status"), "Complete"))
+            .first();
+        if (in1v1) {
+            return { inBattle: true, battleId: in1v1._id, battleType: '1v1' };
+        }
+
+        const multiplayerBattles = await ctx.db
+            .query("multiplayerBattles")
+            .filter((q: any) => q.neq(q.field("status"), "Finished"))
+            .collect();
+
+        const userMultiplayerBattle = multiplayerBattles.find(b => b.playerIds.includes(userId));
+
+        if (userMultiplayerBattle) {
+            return { inBattle: true, battleId: userMultiplayerBattle._id, battleType: 'multiplayer' };
+        }
+
+        return { inBattle: false, battleId: null, battleType: null };
+    }
 });
