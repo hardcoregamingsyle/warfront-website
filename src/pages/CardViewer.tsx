@@ -148,23 +148,23 @@ export default function CardViewer() {
                       <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                         <Card className="bg-slate-900 p-3">
                             <p className="font-semibold text-slate-500">Rarity</p>
-                            <p>{card.rarity}</p>
+                            <p className="text-slate-200">{card.rarity}</p>
                         </Card>
                         <Card className="bg-slate-900 p-3">
                             <p className="font-semibold text-slate-500">Frame</p>
-                            <p>{card.frame}</p>
+                            <p className="text-slate-200">{card.frame}</p>
                         </Card>
                         <Card className="bg-slate-900 p-3">
                             <p className="font-semibold text-slate-500">Batch</p>
-                            <p>{card.batch}</p>
+                            <p className="text-slate-200">{card.batch}</p>
                         </Card>
                         <Card className="bg-slate-900 p-3">
                             <p className="font-semibold text-slate-500">Numbering</p>
-                            <p>{card.numberingA}/{card.numberingB}</p>
+                            <p className="text-slate-200">{card.numberingA}/{card.numberingB}</p>
                         </Card>
                         <Card className="bg-slate-900 p-3 col-span-2">
                             <p className="font-semibold text-slate-500">Signed</p>
-                            <p>{card.signed}</p>
+                            <p className="text-slate-200">{card.signed}</p>
                         </Card>
                       </div>
                       <Link to="/blog/mig-29" className="text-red-400 hover:underline mt-4 inline-flex items-center gap-2">
