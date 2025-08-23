@@ -30,7 +30,7 @@ export const getForCurrentUser = query({
     },
 });
 
-// Add a card to the current user's inventory
+// Add a card to the current user's inventory, ensuring unique ownership
 export const add = mutation({
     args: { cardId: v.id("cards"), token: v.string() },
     handler: async (ctx, { cardId, token }) => {
@@ -43,25 +43,51 @@ export const add = mutation({
             return { success: false, message: "User not authenticated." };
         }
 
-        // Check if the user already has the card
-        const existingUserCard = await ctx.db
-            .query("userCards")
-            .withIndex("by_user_card", (q) =>
-                q.eq("userId", session.userId).eq("cardId", cardId)
-            )
-            .unique();
-
-        if (existingUserCard) {
-            return { success: false, message: "Card already in inventory." };
+        const currentUser = await ctx.db.get(session.userId);
+        if (!currentUser) {
+            return { success: false, message: "User not found." };
         }
 
-        // Add the card to the user's inventory
+        // Find if any user currently owns this card
+        const existingOwnerEntry = await ctx.db
+            .query("userCards")
+            .withIndex("by_cardId", (q) => q.eq("cardId", cardId))
+            .unique();
+
+        if (existingOwnerEntry) {
+            // If the current user already owns it, do nothing.
+            if (existingOwnerEntry.userId === session.userId) {
+                return { success: false, message: "Card already in your inventory." };
+            }
+
+            // If another user owns it, remove it from their inventory.
+            await ctx.db.delete(existingOwnerEntry._id);
+
+            // Notify the previous owner
+            const previousOwner = await ctx.db.get(existingOwnerEntry.userId);
+            const card = await ctx.db.get(cardId);
+            if (previousOwner && card) {
+                 await ctx.db.insert("notifications", {
+                    userId: previousOwner._id,
+                    type: "card_transfer",
+                    message: `Your card '${card.cardName}' was claimed by ${currentUser.displayName || currentUser.name}.`,
+                    href: `/cards/${card.customId}`,
+                    read: false,
+                });
+            }
+        }
+
+        // Add the card to the new user's inventory
         await ctx.db.insert("userCards", {
             userId: session.userId,
             cardId,
         });
 
-        return { success: true, message: "Card added to inventory!" };
+        if (existingOwnerEntry) {
+             return { success: true, message: "Card transferred to your inventory!" };
+        } else {
+             return { success: true, message: "Card added to inventory!" };
+        }
     },
 });
 
