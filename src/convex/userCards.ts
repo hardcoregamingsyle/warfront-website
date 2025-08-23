@@ -64,3 +64,45 @@ export const add = mutation({
         return { success: true, message: "Card added to inventory!" };
     },
 });
+
+// Get all cards in the current user's inventory
+export const getInventory = query({
+  args: { token: v.optional(v.string()) },
+  handler: async (ctx, { token }) => {
+    if (!token) {
+      return [];
+    }
+
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session || session.expires < Date.now()) {
+      return [];
+    }
+
+    const userCards = await ctx.db
+      .query("userCards")
+      .withIndex("by_userId", (q) => q.eq("userId", session.userId))
+      .collect();
+
+    const cards = await Promise.all(
+      userCards.map(async (userCard) => {
+        const card = await ctx.db.get(userCard.cardId);
+        if (!card) return null;
+        
+        // Get the image URL if imageId exists
+        const imageUrl = card.imageId ? await ctx.storage.getUrl(card.imageId) : null;
+        
+        return {
+          ...card,
+          imageUrl
+        };
+      })
+    );
+
+    // Filter out nulls if a card was deleted but the userCard entry wasn't
+    return cards.filter((card): card is NonNullable<typeof card> => card !== null);
+  },
+});
