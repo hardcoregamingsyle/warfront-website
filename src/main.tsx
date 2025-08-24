@@ -97,6 +97,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/blog" element={<BlogList />} />
                 <Route path="/blog/:slug" element={<BlogViewer />} />
                 <Route path="/all-cards" element={<AllCards />} />
+                <Route path="/verify-email" element={<EmailVerified />} />
 
                 {/* Protected Routes */}
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
