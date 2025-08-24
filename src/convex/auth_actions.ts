@@ -19,7 +19,7 @@ export const sendVerificationEmail = internalAction({
 
         try {
             const { data, error } = await resend.emails.send({
-                from: 'Warfront Verification <onboarding@resend.dev>',
+                from: 'Warfront <onboarding@resend.dev>',
                 to: [email],
                 subject: 'Verify your email address',
                 html: `

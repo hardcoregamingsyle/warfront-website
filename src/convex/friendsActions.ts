@@ -17,7 +17,7 @@ export const sendFriendRequestEmail = internalAction({
 
     try {
       await resend.emails.send({
-        from: "Warfront <noreply@warfront.com>",
+        from: "Warfront <onboarding@resend.dev>",
         to: [friendship.requestee.email],
         subject: `${friendship.requester.displayName || friendship.requester.name} sent you a friend request on Warfront`,
         html: `
@@ -57,7 +57,7 @@ export const sendFriendResponseEmail = action({
 
     try {
       await resend.emails.send({
-        from: "Warfront <noreply@warfront.com>",
+        from: "Warfront <onboarding@resend.dev>",
         to: [friendship.requester.email],
         subject,
         html: `
