@@ -194,12 +194,12 @@ export const signupAndLogin = mutation({
     });
 
     const verificationToken = generateToken();
-    const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    const tokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
     await ctx.db.insert("verificationTokens", {
       userId,
       token: verificationToken,
-      expires,
+      expires: tokenExpires,
     });
 
     await ctx.scheduler.runAfter(0, internal.auth_actions.sendVerificationEmail, {
@@ -208,7 +208,17 @@ export const signupAndLogin = mutation({
         token: verificationToken,
     });
 
-    return null; // No token returned for unverified users
+    // Create a session for the new user so they are logged in
+    const sessionToken = generateToken();
+    const sessionExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+
+    await ctx.db.insert("sessions", {
+      userId,
+      token: sessionToken,
+      expires: sessionExpires,
+    });
+
+    return sessionToken;
   },
 });
 
@@ -260,12 +270,12 @@ export const resendVerificationEmail = mutation({
 
     // Create a new token
     const verificationToken = generateToken();
-    const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    const tokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
     await ctx.db.insert("verificationTokens", {
       userId: user._id,
       token: verificationToken,
-      expires,
+      expires: tokenExpires,
     });
 
     // Send the email
