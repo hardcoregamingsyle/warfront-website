@@ -7,6 +7,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import { HelmetProvider } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
+import { Protected } from "@/lib/protected-page";
 import "./index.css";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -84,37 +85,40 @@ createRoot(document.getElementById("root")!).render(
             <RouteSyncer />
             <Suspense fallback={<SuspenseFallback />}>
               <Routes>
+                {/* Public Routes */}
                 <Route path="*" element={<NotFound />} />
                 <Route path="/" element={<Landing />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/join-battle" element={<JoinBattle />} />
-                <Route path="/how-to-play" element={<HowToPlay />} />
-                <Route path="/friends" element={<Friends />} />
-                <Route path="/users" element={<Users />} />
-                <Route path="/profile" element={<ProfileRedirect />} />
-                <Route path="/profile/:userId" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/settings/account" element={<AccountSettings />} />
-                <Route path="/settings/security" element={<SecuritySettings />} />
-                <Route path="/settings/visibility" element={<VisibilitySettings />} />
-                <Route path="/settings/socialmedia" element={<SocialMediaSettings />} />
-                <Route path="/history" element={<History />} />
-                <Route path="/trade-history" element={<TradeHistory />} />
-                <Route path="/battle-history" element={<BattleHistory />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/email-verified" element={<EmailVerified />} />
-                <Route path="/battle/:battleId" element={<BattleRoom />} />
-                <Route path="/multi_battle" element={<MultiBattle />} />
-                <Route path="/competitive" element={<Competitive />} />
+                <Route path="/how-to-play" element={<HowToPlay />} />
                 <Route path="/cards" element={<CardsRedirect />} />
                 <Route path="/cards/:cardId" element={<CardViewer />} />
-                <Route path="/editor/card/:cardId" element={<CardEditor />} />
                 <Route path="/blog" element={<BlogList />} />
                 <Route path="/blog/:slug" element={<BlogViewer />} />
-                <Route path="/editor/blog/:blogId" element={<BlogEditor />} />
                 <Route path="/all-cards" element={<AllCards />} />
+
+                {/* Protected Routes */}
+                <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+                <Route path="/inventory" element={<Protected><Inventory /></Protected>} />
+                <Route path="/join-battle" element={<Protected><JoinBattle /></Protected>} />
+                <Route path="/friends" element={<Protected><Friends /></Protected>} />
+                <Route path="/users" element={<Protected><Users /></Protected>} />
+                <Route path="/profile" element={<Protected><ProfileRedirect /></Protected>} />
+                <Route path="/profile/:userId" element={<Protected><Profile /></Protected>} />
+                <Route path="/settings" element={<Protected><Settings /></Protected>} />
+                <Route path="/settings/account" element={<Protected><AccountSettings /></Protected>} />
+                <Route path="/settings/security" element={<Protected><SecuritySettings /></Protected>} />
+                <Route path="/settings/visibility" element={<Protected><VisibilitySettings /></Protected>} />
+                <Route path="/settings/socialmedia" element={<Protected><SocialMediaSettings /></Protected>} />
+                <Route path="/history" element={<Protected><History /></Protected>} />
+                <Route path="/trade-history" element={<Protected><TradeHistory /></Protected>} />
+                <Route path="/battle-history" element={<Protected><BattleHistory /></Protected>} />
+                <Route path="/battle/:battleId" element={<Protected><BattleRoom /></Protected>} />
+                <Route path="/multi_battle" element={<Protected><MultiBattle /></Protected>} />
+                <Route path="/competitive" element={<Protected><Competitive /></Protected>} />
+                <Route path="/editor/card/:cardId" element={<Protected><CardEditor /></Protected>} />
+                <Route path="/editor/blog/:blogId" element={<Protected><BlogEditor /></Protected>} />
               </Routes>
             </Suspense>
           </BrowserRouter>
