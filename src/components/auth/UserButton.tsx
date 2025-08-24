@@ -55,7 +55,7 @@ export function UserButton({ className, size = 8 }: UserButtonProps) {
 
   // Handle confirmed sign out and redirect
   const handleConfirmedSignOut = async () => {
-    signOut();
+    await signOut();
     // Use window.location.replace for a hard redirect to the homepage
     window.location.replace("/");
     setShowSignOutConfirm(false);

@@ -48,9 +48,10 @@ export function useAuth() {
     return newToken;
   };
 
-  const signOut = () => {
+  const signOut = async () => {
     if (token) {
-      logoutMutation({ token });
+      // Wait for the server to process the logout before continuing
+      await logoutMutation({ token });
     }
     setToken(null);
   };
