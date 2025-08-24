@@ -14,7 +14,7 @@ export const sendVerificationEmail = internalAction({
         token: v.string(),
      },
     handler: async (ctx, { email, name, token }) => {
-        const verificationUrl = `${domain}/verify-email?token=${token}`;
+        const verificationUrl = `${domain}/email-verified?token=${token}`;
         console.log(`Sending verification email to ${email}`);
 
         try {

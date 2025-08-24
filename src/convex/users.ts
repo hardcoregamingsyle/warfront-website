@@ -65,6 +65,38 @@ export const currentUser = query({
   },
 });
 
+export const verifyUserEmail = mutation({
+    args: { token: v.string() },
+    handler: async (ctx, { token }) => {
+        const verificationRecord = await ctx.db
+            .query("verificationTokens")
+            .withIndex("by_token", (q) => q.eq("token", token))
+            .unique();
+
+        if (!verificationRecord) {
+            throw new Error("Invalid verification token.");
+        }
+
+        if (verificationRecord.expires < Date.now()) {
+            await ctx.db.delete(verificationRecord._id);
+            throw new Error("Verification token has expired. Please sign up again.");
+        }
+
+        const user = await ctx.db.get(verificationRecord.userId);
+        if (!user) {
+            throw new Error("User for this token not found.");
+        }
+
+        // Update user role to Verified
+        await ctx.db.patch(user._id, { role: ROLES.VERIFIED, emailVerified: true });
+
+        // Delete the token so it can't be used again
+        await ctx.db.delete(verificationRecord._id);
+
+        return "Email verified successfully.";
+    },
+});
+
 export const login = mutation({
   args: { identifier: v.string(), password: v.string() },
   handler: async (ctx, { identifier, password }) => {

@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, User, Crown, Users, Wrench, TestTube, Scroll } from "lucide-react";
+import { Shield, Crown, Scroll, Pencil } from "lucide-react";
+import { ROLES } from "@/convex/schema";
 
 interface RoleSelectionDialogProps {
   open: boolean;
@@ -21,40 +22,33 @@ interface RoleSelectionDialogProps {
 
 const roles = [
   {
-    value: "admin",
-    label: "Admin",
-    description: "Full system access and user management",
+    value: ROLES.OWNER,
+    label: "Owner",
+    description: "Highest-level access. Can assign Admins.",
     icon: Crown,
     color: "text-yellow-400"
   },
   {
-    value: "staff",
-    label: "Staff",
-    description: "Moderate users and manage content",
+    value: ROLES.ADMIN,
+    label: "Admin",
+    description: "Full system access and user management.",
     icon: Shield,
-    color: "text-blue-400"
+    color: "text-red-400"
   },
   {
-    value: "cardsetter",
+    value: ROLES.CARD_SETTER,
     label: "Card Setter",
-    description: "Create and manage game cards",
+    description: "Create and manage game cards.",
     icon: Scroll,
     color: "text-purple-400"
   },
   {
-    value: "test",
-    label: "Tester",
-    description: "Test new features and report bugs",
-    icon: TestTube,
-    color: "text-green-400"
+    value: ROLES.BLOGGERS,
+    label: "Blogger",
+    description: "Create and manage blog posts.",
+    icon: Pencil,
+    color: "text-blue-400"
   },
-  {
-    value: "user",
-    label: "Regular User",
-    description: "Standard player access",
-    icon: User,
-    color: "text-gray-400"
-  }
 ];
 
 export default function RoleSelectionDialog({ open, onClose, token }: RoleSelectionDialogProps) {
@@ -74,19 +68,20 @@ export default function RoleSelectionDialog({ open, onClose, token }: RoleSelect
       toast.success("Role assigned successfully!");
       onClose();
     } catch (error: any) {
-      toast.error(error.message || "Failed to assign role");
+      const message = error.data?.data || "Failed to assign role";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-slate-800 border-slate-700 text-white">
         <DialogHeader>
           <DialogTitle className="text-red-400">Select Your Role</DialogTitle>
           <DialogDescription className="text-slate-300">
-            As an admin account, please choose your role in the system.
+            As a privileged user, please choose your initial role in the system.
           </DialogDescription>
         </DialogHeader>
         
