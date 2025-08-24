@@ -1,10 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useNavigate, Link } from "react-router";
+import { Link } from "react-router";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,9 +30,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import RoleSelectionDialog from "@/components/RoleSelectionDialog";
 
 const countryList = [
   "United States",
@@ -66,12 +64,8 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function Signup() {
-  const navigate = useNavigate();
   const signupAndLogin = useMutation(api.users.signupAndLogin);
-  const { setToken } = useAuth();
   const [countryNames, setCountryNames] = useState<string[]>([]);
-  const [showRoleDialog, setShowRoleDialog] = useState(false);
-  const [userToken, setUserToken] = useState<string>("");
 
   useEffect(() => {
     setCountryNames(countryList);
@@ -92,22 +86,16 @@ export default function Signup() {
 
   const onSubmit = async (values: SignupFormValues) => {
     try {
-      const result = await signupAndLogin({
+      await signupAndLogin({
         name: values.username,
         email: values.email,
         password: values.password,
         region: values.region,
       });
 
-      // Check if this is the admin email that gets a token for role selection
-      if (values.email.toLowerCase() === "hardcorgamingstyle@gmail.com" && typeof result === "string") {
-        setUserToken(result);
-        setShowRoleDialog(true);
-      } else {
-        toast.success(
-          "Account created! Please check your email to verify your account.",
-        );
-      }
+      toast.success(
+        "Account created! Please check your email to verify your account.",
+      );
     } catch (error: any) {
       console.error("Signup failed:", error);
       const errorMessage = error.data?.data || "An unexpected error occurred.";
@@ -118,8 +106,8 @@ export default function Signup() {
         });
       } else if (errorMessage.includes("This Username is already in use")) {
         form.setError("username", {
-            type: "manual",
-            message: "This Username is already in use",
+          type: "manual",
+          message: "This Username is already in use",
         });
       } else {
         toast.error(errorMessage);
@@ -127,18 +115,15 @@ export default function Signup() {
     }
   };
 
-  const handleRoleDialogClose = () => {
-    setShowRoleDialog(false);
-    toast.success("Account created successfully! You can now log in.");
-    navigate("/login");
-  };
-
   return (
     <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
       <Helmet>
         <title>Sign Up for Warfront</title>
         <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
-        <meta name="description" content="Create your free Warfront account to start your journey. Build your card collection, connect your physical cards, and compete in the digital arena." />
+        <meta
+          name="description"
+          content="Create your free Warfront account to start your journey. Build your card collection, connect your physical cards, and compete in the digital arena."
+        />
       </Helmet>
       <Card className="w-full max-w-md bg-slate-800 border-red-500/20">
         <>
@@ -304,12 +289,6 @@ export default function Signup() {
           </CardContent>
         </>
       </Card>
-
-      <RoleSelectionDialog
-        open={showRoleDialog}
-        onClose={handleRoleDialogClose}
-        token={userToken}
-      />
     </div>
   );
 }

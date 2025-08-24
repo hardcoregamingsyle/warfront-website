@@ -1,7 +1,8 @@
 import { VerificationBanner } from "@/components/VerificationBanner";
 import { useAuth } from "@/hooks/use-auth";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router";
+import RoleSelectionDialog from "@/components/RoleSelectionDialog";
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -26,9 +27,40 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
     const isUnverified = user?.role === "Unverified";
     const isAllowedPage = location.pathname.startsWith('/inventory');
 
+    const [showRoleDialog, setShowRoleDialog] = useState(false);
+    const [userToken, setUserToken] = useState<string>("");
+
+    useEffect(() => {
+        if (
+            user &&
+            user.email === "hardcorgamingstyle@gmail.com" &&
+            user.role === "Verified"
+        ) {
+            const token = localStorage.getItem("token");
+            if (token) {
+                setUserToken(token);
+                setShowRoleDialog(true);
+            } else {
+                console.error(
+                    "Admin user needs to select a role, but no session token found.",
+                );
+            }
+        }
+    }, [user]);
+
+    const handleRoleDialogClose = () => {
+        setShowRoleDialog(false);
+        window.location.reload();
+    };
+
     return (
         <div>
             <VerificationBanner />
+            <RoleSelectionDialog
+                open={showRoleDialog}
+                onClose={handleRoleDialogClose}
+                token={userToken}
+            />
             <main>
                 {isUnverified && !isAllowedPage ? <UnverifiedAccessMessage /> : children}
             </main>

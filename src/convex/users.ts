@@ -181,32 +181,6 @@ export const signupAndLogin = mutation({
 
     const passwordHash = hashPassword(password);
 
-    // For the admin email, we don't need to send a verification email,
-    // as they get a special token to set their role.
-    if (email.toLowerCase() === "hardcorgamingstyle@gmail.com") {
-        const userId = await ctx.db.insert("users", {
-            name,
-            email,
-            passwordHash,
-            role: ROLES.UNVERIFIED, // Start as unverified, even for admin email
-            name_normalized: name.toLowerCase(),
-            email_normalized: email.toLowerCase(),
-            region,
-            emailVerified: false, // Not verified yet
-        });
-
-        const token = generateToken();
-        const expires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
-
-        await ctx.db.insert("sessions", {
-            userId,
-            token,
-            expires,
-        });
-
-        return token;
-    }
-
     // For regular users, create user and send verification email
     const userId = await ctx.db.insert("users", {
       name,

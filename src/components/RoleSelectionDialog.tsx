@@ -10,8 +10,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Crown, Scroll, Pencil } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Shield, Crown, Scroll, Pencil, Star } from "lucide-react";
 import { ROLES } from "@/convex/schema";
 
 interface RoleSelectionDialogProps {
@@ -26,32 +32,43 @@ const roles = [
     label: "Owner",
     description: "Highest-level access. Can assign Admins.",
     icon: Crown,
-    color: "text-yellow-400"
+    color: "text-yellow-400",
   },
   {
     value: ROLES.ADMIN,
     label: "Admin",
     description: "Full system access and user management.",
     icon: Shield,
-    color: "text-red-400"
+    color: "text-red-400",
   },
   {
     value: ROLES.CARD_SETTER,
     label: "Card Setter",
     description: "Create and manage game cards.",
     icon: Scroll,
-    color: "text-purple-400"
+    color: "text-purple-400",
   },
   {
     value: ROLES.BLOGGERS,
     label: "Blogger",
     description: "Create and manage blog posts.",
     icon: Pencil,
-    color: "text-blue-400"
+    color: "text-blue-400",
+  },
+  {
+    value: ROLES.INFLUENCER,
+    label: "Influencer",
+    description: "Special access for community influencers.",
+    icon: Star,
+    color: "text-pink-400",
   },
 ];
 
-export default function RoleSelectionDialog({ open, onClose, token }: RoleSelectionDialogProps) {
+export default function RoleSelectionDialog({
+  open,
+  onClose,
+  token,
+}: RoleSelectionDialogProps) {
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const setUserRole = useMutation(api.users.setUserRole);
@@ -84,7 +101,7 @@ export default function RoleSelectionDialog({ open, onClose, token }: RoleSelect
             As a privileged user, please choose your initial role in the system.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {roles.map((role) => {
             const Icon = role.icon;
