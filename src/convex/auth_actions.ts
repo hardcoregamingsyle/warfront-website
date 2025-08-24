@@ -10,12 +10,18 @@ export const sendVerificationEmail = internalAction({
         token: v.string(),
     },
     handler: async (ctx, { email, name, token }) => {
-        const resend = new Resend(process.env.RESEND_API_KEY!);
-        const domain = process.env.VITE_CONVEX_URL?.replace(/.prod.convex.cloud/, "");
+        const siteUrl = process.env.SITE_URL;
+        if (!siteUrl) {
+            console.error("SITE_URL environment variable is not set. Cannot send verification email.");
+            return;
+        }
 
-        const verificationUrl = `${domain}/verify-email?token=${token}`;
+        const resend = new Resend(process.env.RESEND_API_KEY!);
+        const verificationUrl = `${siteUrl}/verify-email?token=${token}`;
 
         try {
+            // Note: To send emails, your domain must be verified in Resend.
+            // The `onboarding@resend.dev` is a special address for testing.
             await resend.emails.send({
                 from: "Warfront <onboarding@resend.dev>",
                 to: email,
