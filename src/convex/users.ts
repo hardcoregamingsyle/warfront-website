@@ -226,6 +226,59 @@ export const logout = mutation({
   },
 });
 
+export const resendVerificationEmail = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session) {
+      throw new Error("Invalid session. Please log in again.");
+    }
+
+    const user = await ctx.db.get(session.userId);
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    if (user.role !== ROLES.UNVERIFIED) {
+      throw new Error("This account is already verified.");
+    }
+
+    // Invalidate old tokens by deleting them
+    const existingTokens = await ctx.db
+      .query("verificationTokens")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .collect();
+
+    for (const tokenDoc of existingTokens) {
+      await ctx.db.delete(tokenDoc._id);
+    }
+
+    // Create a new token
+    const verificationToken = generateToken();
+    const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+    await ctx.db.insert("verificationTokens", {
+      userId: user._id,
+      token: verificationToken,
+      expires,
+    });
+
+    // Send the email
+    await ctx.scheduler.runAfter(0, internal.auth_actions.sendVerificationEmail, {
+        email: user.email,
+        name: user.name,
+        token: verificationToken,
+    });
+
+    return "Verification email sent successfully.";
+  },
+});
+
 export const getUserProfile = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
