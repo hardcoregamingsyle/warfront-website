@@ -615,3 +615,105 @@ export const setUserRole = mutation({
     return "Role assigned successfully";
   },
 });
+
+export const requestPasswordReset = mutation({
+  args: { identifier: v.string() },
+  handler: async (ctx, { identifier }) => {
+    const lowerIdentifier = identifier.toLowerCase();
+    let user;
+
+    // Check if identifier is email or username
+    if (lowerIdentifier.includes("@")) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_email_normalized", (q) =>
+          q.eq("email_normalized", lowerIdentifier),
+        )
+        .first();
+    } else {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_name_normalized", (q) =>
+          q.eq("name_normalized", lowerIdentifier),
+        )
+        .first();
+    }
+
+    if (!user) {
+      // Don't reveal if user exists or not for security
+      return "If an account with that email/username exists, a password reset link has been sent.";
+    }
+
+    // Delete any existing password reset tokens for this user
+    const existingTokens = await ctx.db
+      .query("passwordResetTokens")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .collect();
+
+    for (const token of existingTokens) {
+      await ctx.db.delete(token._id);
+    }
+
+    // Create new password reset token
+    const resetToken = generateToken();
+    const tokenExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    await ctx.db.insert("passwordResetTokens", {
+      userId: user._id,
+      token: resetToken,
+      expires: tokenExpires,
+    });
+
+    // Send password reset email
+    await ctx.scheduler.runAfter(0, internal.auth_actions.sendPasswordResetEmail, {
+      email: user.email,
+      name: user.name,
+      token: resetToken,
+    });
+
+    return "If an account with that email/username exists, a password reset link has been sent.";
+  },
+});
+
+export const resetPassword = mutation({
+  args: { token: v.string(), newPassword: v.string() },
+  handler: async (ctx, { token, newPassword }) => {
+    const resetRecord = await ctx.db
+      .query("passwordResetTokens")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!resetRecord) {
+      throw new Error("This password reset link is invalid or has already been used.");
+    }
+
+    if (resetRecord.expires < Date.now()) {
+      await ctx.db.delete(resetRecord._id);
+      throw new Error("This password reset link has expired. Please request a new one.");
+    }
+
+    const user = await ctx.db.get(resetRecord.userId);
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    // Update password
+    const passwordHash = hashPassword(newPassword);
+    await ctx.db.patch(user._id, { passwordHash });
+
+    // Delete the reset token
+    await ctx.db.delete(resetRecord._id);
+
+    // Delete all sessions to force re-login
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .collect();
+
+    for (const session of sessions) {
+      await ctx.db.delete(session._id);
+    }
+
+    return "Password reset successfully. Please log in with your new password.";
+  },
+});

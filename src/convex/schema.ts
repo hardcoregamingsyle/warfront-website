@@ -62,6 +62,12 @@ const schema = defineSchema(
       expires: v.number(),
     }).index("by_token", ["token"]).index("by_userId", ["userId"]),
 
+    passwordResetTokens: defineTable({
+      userId: v.id("users"),
+      token: v.string(),
+      expires: v.number(),
+    }).index("by_token", ["token"]).index("by_userId", ["userId"]),
+
     battles: defineTable({
       hostId: v.id("users"),
       opponentId: v.optional(v.id("users")),
