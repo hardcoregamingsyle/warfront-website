@@ -34,19 +34,19 @@ export const createSeedUsers = mutation({
         name: "cardsetter1",
         email: "hardcorgamingstyle@gmail.com",
         password: "Belive*8",
-        role: ROLES.CARDSETTER,
+        role: ROLES.CARD_SETTER,
       },
       {
         name: "Cardsetter2",
         email: "hardcorgamingstyle@gmail.com",
         password: "Belive*8",
-        role: ROLES.CARDSETTER,
+        role: ROLES.CARD_SETTER,
       },
       {
         name: "Testaccount123",
         email: "hardcorgamingstyle@gmail.com",
         password: "Belive*8",
-        role: ROLES.TEST,
+        role: ROLES.VERIFIED,
       },
     ];
 

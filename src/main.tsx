@@ -7,7 +7,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import { HelmetProvider } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
-import { Protected } from "@/lib/protected-page";
+import { ProtectedRoute } from "@/layouts/ProtectedRoute";
 import "./index.css";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -99,26 +99,26 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/all-cards" element={<AllCards />} />
 
                 {/* Protected Routes */}
-                <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
-                <Route path="/inventory" element={<Protected><Inventory /></Protected>} />
-                <Route path="/join-battle" element={<Protected><JoinBattle /></Protected>} />
-                <Route path="/friends" element={<Protected><Friends /></Protected>} />
-                <Route path="/users" element={<Protected><Users /></Protected>} />
-                <Route path="/profile" element={<Protected><ProfileRedirect /></Protected>} />
-                <Route path="/profile/:userId" element={<Protected><Profile /></Protected>} />
-                <Route path="/settings" element={<Protected><Settings /></Protected>} />
-                <Route path="/settings/account" element={<Protected><AccountSettings /></Protected>} />
-                <Route path="/settings/security" element={<Protected><SecuritySettings /></Protected>} />
-                <Route path="/settings/visibility" element={<Protected><VisibilitySettings /></Protected>} />
-                <Route path="/settings/socialmedia" element={<Protected><SocialMediaSettings /></Protected>} />
-                <Route path="/history" element={<Protected><History /></Protected>} />
-                <Route path="/trade-history" element={<Protected><TradeHistory /></Protected>} />
-                <Route path="/battle-history" element={<Protected><BattleHistory /></Protected>} />
-                <Route path="/battle/:battleId" element={<Protected><BattleRoom /></Protected>} />
-                <Route path="/multi_battle" element={<Protected><MultiBattle /></Protected>} />
-                <Route path="/competitive" element={<Protected><Competitive /></Protected>} />
-                <Route path="/editor/card/:cardId" element={<Protected><CardEditor /></Protected>} />
-                <Route path="/editor/blog/:blogId" element={<Protected><BlogEditor /></Protected>} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+                <Route path="/join-battle" element={<ProtectedRoute><JoinBattle /></ProtectedRoute>} />
+                <Route path="/friends" element={<ProtectedRoute><Friends /></ProtectedRoute>} />
+                <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfileRedirect /></ProtectedRoute>} />
+                <Route path="/profile/:userId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                <Route path="/settings/account" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
+                <Route path="/settings/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
+                <Route path="/settings/visibility" element={<ProtectedRoute><VisibilitySettings /></ProtectedRoute>} />
+                <Route path="/settings/socialmedia" element={<ProtectedRoute><SocialMediaSettings /></ProtectedRoute>} />
+                <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+                <Route path="/trade-history" element={<ProtectedRoute><TradeHistory /></ProtectedRoute>} />
+                <Route path="/battle-history" element={<ProtectedRoute><BattleHistory /></ProtectedRoute>} />
+                <Route path="/battle/:battleId" element={<ProtectedRoute><BattleRoom /></ProtectedRoute>} />
+                <Route path="/multi_battle" element={<ProtectedRoute><MultiBattle /></ProtectedRoute>} />
+                <Route path="/competitive" element={<ProtectedRoute><Competitive /></ProtectedRoute>} />
+                <Route path="/editor/card/:cardId" element={<ProtectedRoute><CardEditor /></ProtectedRoute>} />
+                <Route path="/editor/blog/:blogId" element={<ProtectedRoute><BlogEditor /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </BrowserRouter>

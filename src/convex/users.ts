@@ -6,7 +6,7 @@ import {
   query,
 } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
-import { roleValidator } from "./schema";
+import { roleValidator, ROLES } from "./schema";
 import { internal } from "./_generated/api";
 
 // Simple hash function for demo purposes - not secure for production
@@ -156,11 +156,11 @@ export const signupAndLogin = mutation({
             name,
             email,
             passwordHash,
-            role: "admin" as const,
+            role: ROLES.UNVERIFIED, // Start as unverified, even for admin email
             name_normalized: name.toLowerCase(),
             email_normalized: email.toLowerCase(),
             region,
-            emailVerified: true, // Admin is auto-verified
+            emailVerified: false, // Not verified yet
         });
 
         const token = generateToken();
@@ -180,7 +180,7 @@ export const signupAndLogin = mutation({
       name,
       email,
       passwordHash,
-      role: "user" as const,
+      role: ROLES.UNVERIFIED, // Start as unverified
       name_normalized: name.toLowerCase(),
       email_normalized: email.toLowerCase(),
       region,
@@ -253,6 +253,36 @@ export const searchUsers = query({
       name: user.name,
       image: user.image,
     }));
+  },
+});
+
+export const getOldUnverifiedUsers = internalQuery({
+    args: { creationTime: v.number() },
+    handler: async (ctx, { creationTime }) => {
+        return await ctx.db
+            .query("users")
+            .withIndex("by_role", (q) => q.eq("role", ROLES.UNVERIFIED))
+            .filter((q) => q.lt(q.field("_creationTime"), creationTime))
+            .collect();
+    }
+});
+
+export const internalDeleteUser = internalMutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    // First, find and delete any sessions associated with the user
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .collect();
+
+    for (const session of sessions) {
+      await ctx.db.delete(session._id);
+    }
+
+    // Now, delete the user
+    await ctx.db.delete(userId);
+    return "User deleted successfully";
   },
 });
 

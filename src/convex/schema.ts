@@ -3,25 +3,23 @@ import { Infer, v } from "convex/values";
 
 // default user roles. can add / remove based on the project as needed
 export const ROLES = {
-  ADMIN: "admin",
-  USER: "user",
-  MEMBER: "member",
-  GUEST: "guest",
-  OWNER: "owner",
-  STAFF: "staff",
-  TEST: "test",
-  CARDSETTER: "cardsetter",
+  UNVERIFIED: "Unverified",
+  VERIFIED: "Verified", 
+  INFLUENCER: "Influencer",
+  ADMIN: "Admin",
+  OWNER: "Owner",
+  CARD_SETTER: "Card Setter",
+  BLOGGERS: "Bloggers",
 } as const;
 
 export const roleValidator = v.union(
+  v.literal(ROLES.UNVERIFIED),
+  v.literal(ROLES.VERIFIED),
+  v.literal(ROLES.INFLUENCER),
   v.literal(ROLES.ADMIN),
-  v.literal(ROLES.USER),
-  v.literal(ROLES.MEMBER),
-  v.literal(ROLES.GUEST),
   v.literal(ROLES.OWNER),
-  v.literal(ROLES.STAFF),
-  v.literal(ROLES.TEST),
-  v.literal(ROLES.CARDSETTER)
+  v.literal(ROLES.CARD_SETTER),
+  v.literal(ROLES.BLOGGERS)
 );
 export type Role = Infer<typeof roleValidator>;
 
@@ -41,6 +39,7 @@ const schema = defineSchema(
       region: v.optional(v.string()),
       dob: v.optional(v.string()), // Date of Birth
       emailVerified: v.optional(v.boolean()),
+      lastActivityTime: v.optional(v.number()),
     })
       .index("by_email_normalized", ["email_normalized"])
       .index("by_name_normalized", ["name_normalized"])

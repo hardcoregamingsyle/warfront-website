@@ -1,4 +1,5 @@
 import { query } from "./_generated/server";
+import { ROLES } from "./schema";
 
 export const getAllCardsWithOwners = query({
     args: {},
@@ -7,7 +8,7 @@ export const getAllCardsWithOwners = query({
         const userCards = await ctx.db.query("userCards").collect();
         const users = await ctx.db.query("users").collect();
 
-        const ownerAccount = users.find(u => u.role === 'owner');
+        const ownerAccount = users.find(u => u.role === ROLES.OWNER);
 
         const userCardMap = new Map(userCards.map(uc => [uc.cardId, uc.userId]));
         const userMap = new Map(users.map(u => [u._id, u.name]));
