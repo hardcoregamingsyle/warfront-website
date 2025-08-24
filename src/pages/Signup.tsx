@@ -2,8 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -64,7 +63,7 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function Signup() {
-  const signupAndLogin = useMutation(api.users.signupAndLogin);
+  const { signUp } = useAuth();
   const navigate = useNavigate();
   const [countryNames, setCountryNames] = useState<string[]>([]);
 
@@ -87,22 +86,16 @@ export default function Signup() {
 
   const onSubmit = async (values: SignupFormValues) => {
     try {
-      const token = await signupAndLogin({
+      await signUp({
         name: values.username,
         email: values.email,
         password: values.password,
         region: values.region,
       });
-
-      if (token) {
-        localStorage.setItem("token", token);
-        toast.success(
-          "Account created! Please check your email to verify your account.",
-        );
-        navigate("/dashboard");
-      } else {
-        toast.error("Failed to log in after signup. Please try logging in manually.");
-      }
+      toast.success(
+        "Account created! Please check your email to verify your account.",
+      );
+      navigate("/dashboard");
     } catch (error: any) {
       console.error("Signup failed:", error);
       const errorMessage = error.data?.data || "An unexpected error occurred.";

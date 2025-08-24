@@ -36,6 +36,7 @@ export function useAuth() {
     isTokenLoaded ? (token ? { token } : { token: undefined }) : "skip",
   );
   const login = useMutation(api.users.login);
+  const signupAndLogin = useMutation(api.users.signupAndLogin);
   const logoutMutation = useMutation(api.users.logout);
 
   const isAuthenticated = !!user;
@@ -44,6 +45,23 @@ export function useAuth() {
 
   const signIn = async (args: { identifier: string; password: string }) => {
     const newToken = await login(args);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(TOKEN_KEY, newToken);
+    }
+    setToken(newToken);
+    return newToken;
+  };
+
+  const signUp = async (args: {
+    name: string;
+    email: string;
+    password: string;
+    region: string;
+  }) => {
+    const newToken = await signupAndLogin(args);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(TOKEN_KEY, newToken);
+    }
     setToken(newToken);
     return newToken;
   };
@@ -53,6 +71,9 @@ export function useAuth() {
       // Wait for the server to process the logout before continuing
       await logoutMutation({ token });
     }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(TOKEN_KEY);
+    }
     setToken(null);
   };
 
@@ -61,6 +82,7 @@ export function useAuth() {
     isAuthenticated,
     user,
     signIn,
+    signUp,
     signOut,
     token,
     setToken,

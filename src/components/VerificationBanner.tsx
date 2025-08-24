@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 
 export const VerificationBanner = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [isSending, setIsSending] = useState(false);
   const resendEmail = useMutation(api.users.resendVerificationEmail);
 
@@ -19,13 +19,15 @@ export const VerificationBanner = () => {
   const handleResend = async () => {
     setIsSending(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
+      // Directly read from localStorage as a fallback to ensure token is available
+      const sessionToken = token || localStorage.getItem("auth_token");
+
+      if (!sessionToken) {
         toast.error("You are not logged in. Please log in again.");
         setIsSending(false);
         return;
       }
-      await resendEmail({ token });
+      await resendEmail({ token: sessionToken });
       toast.success("A new verification link has been sent to your email.");
     } catch (error: any) {
       const message =
