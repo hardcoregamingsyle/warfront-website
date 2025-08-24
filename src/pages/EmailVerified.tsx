@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -15,8 +15,14 @@ export default function EmailVerified() {
   );
   const [message, setMessage] = useState("");
   const verifyEmail = useMutation(api.users.verifyUserEmail);
+  const verificationAttempted = useRef(false);
 
   useEffect(() => {
+    if (verificationAttempted.current) {
+      return;
+    }
+    verificationAttempted.current = true;
+
     const token = new URLSearchParams(location.search).get("token");
 
     if (!token) {

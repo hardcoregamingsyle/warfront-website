@@ -74,26 +74,35 @@ export const verifyUserEmail = mutation({
             .unique();
 
         if (!verificationRecord) {
-            throw new Error("Invalid verification token.");
+            // This can happen if the user clicks the link twice (and the token is deleted)
+            // or the token is invalid. We can't distinguish, so we give a generic error.
+            throw new Error("This verification link is invalid or has already been used.");
         }
 
         if (verificationRecord.expires < Date.now()) {
             await ctx.db.delete(verificationRecord._id);
-            throw new Error("Verification token has expired. Please sign up again.");
+            throw new Error("This verification link has expired. Please request a new one.");
         }
 
         const user = await ctx.db.get(verificationRecord.userId);
         if (!user) {
-            throw new Error("User for this token not found.");
+            // This should not happen if the token is valid, but we check just in case.
+            throw new Error("User for this token not found. The account may have been deleted.");
+        }
+
+        // If user is already verified, we can just let them know.
+        if (user.emailVerified) {
+            await ctx.db.delete(verificationRecord._id); // Clean up the used token
+            return "This email address has already been verified.";
         }
 
         // Update user role to Verified
-        await ctx.db.patch(user._id, { role: ROLES.VERIFIED, emailVerified: true });
+        await ctx.db.patch(user._id, { role: "Verified", emailVerified: true });
 
         // Delete the token so it can't be used again
         await ctx.db.delete(verificationRecord._id);
 
-        return "Email verified successfully.";
+        return "Email verified successfully! You can now log in.";
     },
 });
 
