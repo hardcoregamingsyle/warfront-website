@@ -18,6 +18,8 @@ const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Login = lazy(() => import("./pages/Login.tsx"));
 const Signup = lazy(() => import("./pages/Signup.tsx"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword.tsx"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const Inventory = lazy(() => import("./pages/Inventory.tsx"));
 const JoinBattle = lazy(() => import("./pages/JoinBattle.tsx"));
 const HowToPlay = lazy(() => import("./pages/HowToPlay.tsx"));
@@ -90,6 +92,8 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/email-verified" element={<EmailVerified />} />
                 <Route path="/how-to-play" element={<HowToPlay />} />
                 <Route path="/cards" element={<CardsRedirect />} />
