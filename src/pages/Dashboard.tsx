@@ -9,20 +9,61 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
+import { useCallback, memo } from "react";
+
+const QuickActionCard = memo(({ 
+  icon: Icon, 
+  title, 
+  description, 
+  buttonText, 
+  href, 
+  onClick 
+}: {
+  icon: any;
+  title: string;
+  description: string;
+  buttonText: string;
+  href?: string;
+  onClick?: () => void;
+}) => (
+  <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
+    <CardHeader className="pb-3">
+      <CardTitle className="flex items-center gap-2 text-red-400">
+        <Icon className="h-5 w-5" />
+        {title}
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-slate-300 text-sm mb-4">{description}</p>
+      {href ? (
+        <Link to={href}>
+          <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+            {buttonText}
+          </Button>
+        </Link>
+      ) : (
+        <Button
+          onClick={onClick}
+          className="w-full bg-red-600 hover:bg-red-700 text-white"
+        >
+          {buttonText}
+        </Button>
+      )}
+    </CardContent>
+  </Card>
+));
 
 export default function Dashboard() {
-  const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
   const { user, token } = useAuth();
   const createCard = useMutation(api.cards.createCardWithId);
   const navigate = useNavigate();
 
-  const handleCreateCard = async () => {
+  const handleCreateCard = useCallback(async () => {
     if (!token) {
       toast.error("You must be logged in to create a card.");
       return;
     }
     
-    // Generate a random 21-character ID
     const customId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
     
     const toastId = toast.loading("Creating new card...");
@@ -34,7 +75,9 @@ export default function Dashboard() {
       toast.error("Failed to create new card.", { id: toastId });
       console.error(error);
     }
-  };
+  }, [token, createCard, navigate]);
+
+  const isPrivilegedUser = user && ["admin", "owner", "cardsetter"].includes(user.role!);
 
   return (
     <DashboardLayout>
@@ -62,109 +105,54 @@ export default function Dashboard() {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-red-400">
-                  <Swords className="h-5 w-5" />
-                  Quick Battle
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-300 text-sm mb-4">Jump into combat immediately</p>
-                <Link to="/join-battle">
-                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                    Deploy Now
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <QuickActionCard
+              icon={Swords}
+              title="Quick Battle"
+              description="Jump into combat immediately"
+              buttonText="Deploy Now"
+              href="/join-battle"
+            />
 
-            <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-red-400">
-                  <Shield className="h-5 w-5" />
-                  Inventory
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-300 text-sm mb-4">Manage your weapons and gear</p>
-                <Link to="/inventory">
-                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                    View Inventory
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <QuickActionCard
+              icon={Shield}
+              title="Inventory"
+              description="Manage your weapons and gear"
+              buttonText="View Inventory"
+              href="/inventory"
+            />
 
-            <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-red-400">
-                  <Users className="h-5 w-5" />
-                  Multiplayer
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-300 text-sm mb-4">Challenge other commanders</p>
-                <Link to="/multi_battle">
-                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                    Find Match
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <QuickActionCard
+              icon={Users}
+              title="Multiplayer"
+              description="Challenge other commanders"
+              buttonText="Find Match"
+              href="/multi_battle"
+            />
 
-            <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-red-400">
-                  <Trophy className="h-5 w-5" />
-                  Tournaments
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-300 text-sm mb-4">Compete for glory and rewards</p>
-                <Link to="/competitive">
-                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                    Enter Arena
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <QuickActionCard
+              icon={Trophy}
+              title="Tournaments"
+              description="Compete for glory and rewards"
+              buttonText="Enter Arena"
+              href="/competitive"
+            />
             
-            {user && ["admin", "owner", "cardsetter"].includes(user.role!) && (
+            {isPrivilegedUser && (
               <>
-                <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-red-400">
-                      <FilePlus2 className="h-5 w-5" />
-                      Create Card
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-300 text-sm mb-4">Design a new digital card</p>
-                    <Button
-                      onClick={handleCreateCard}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      Create New
-                    </Button>
-                  </CardContent>
-                </Card>
-                <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-red-400">
-                      <Library className="h-5 w-5" />
-                      View All Cards
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-300 text-sm mb-4">Browse the entire card collection</p>
-                    <Link to="/all-cards">
-                      <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                        Browse Collection
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
+                <QuickActionCard
+                  icon={FilePlus2}
+                  title="Create Card"
+                  description="Design a new digital card"
+                  buttonText="Create New"
+                  onClick={handleCreateCard}
+                />
+                <QuickActionCard
+                  icon={Library}
+                  title="View All Cards"
+                  description="Browse the entire card collection"
+                  buttonText="Browse Collection"
+                  href="/all-cards"
+                />
               </>
             )}
           </div>
