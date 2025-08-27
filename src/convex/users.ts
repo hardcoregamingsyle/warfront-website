@@ -97,7 +97,7 @@ export const verifyUserEmail = mutation({
         }
 
         // Update user role to Verified
-        await ctx.db.patch(user._id, { role: "Verified", emailVerified: true });
+        await ctx.db.patch(user._id, { role: ROLES.VERIFIED, emailVerified: true });
 
         // Delete the token so it can't be used again
         await ctx.db.delete(verificationRecord._id);

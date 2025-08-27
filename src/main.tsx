@@ -94,7 +94,6 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/email-verified" element={<EmailVerified />} />
                 <Route path="/how-to-play" element={<HowToPlay />} />
                 <Route path="/cards" element={<CardsRedirect />} />
                 <Route path="/cards/:cardId" element={<CardViewer />} />

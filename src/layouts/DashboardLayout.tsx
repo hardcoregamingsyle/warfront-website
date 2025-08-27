@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { memo, useCallback } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +28,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Id } from "@/convex/_generated/dataModel";
-import { memo, useCallback } from "react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -167,4 +167,4 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
   );
 }
 
-export default memo(DashboardLayout);
+export default DashboardLayout;
