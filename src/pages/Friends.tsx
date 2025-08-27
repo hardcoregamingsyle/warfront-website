@@ -10,8 +10,9 @@ import { UserCheck, UserX, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
+import { memo } from "react";
 
-export default function Friends() {
+function Friends() {
   const { token } = useAuth();
   const friendRequests = useQuery(api.friends.getFriendRequests, token ? { token } : "skip");
   const friends = useQuery(api.friends.getFriends, token ? { token } : "skip");
@@ -133,3 +134,5 @@ export default function Friends() {
     </DashboardLayout>
   );
 }
+
+export default memo(Friends);

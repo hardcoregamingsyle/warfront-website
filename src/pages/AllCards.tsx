@@ -7,8 +7,9 @@ import { Link } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { memo } from "react";
 
-export default function AllCards() {
+function AllCards() {
     const cards = useQuery(api.allCards.getAllCardsWithOwners);
     const deleteAllCards = useMutation(api.cards.deleteAllCards);
     const { user, token } = useAuth();
@@ -76,3 +77,5 @@ export default function AllCards() {
         </DashboardLayout>
     );
 }
+
+export default memo(AllCards);

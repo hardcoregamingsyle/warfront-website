@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import DashboardLayout from "@/layouts/DashboardLayout";
@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import { Loader2, Search } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
-export default function Users() {
+function Users() {
   const [searchQuery, setSearchQuery] = useState("");
   const users = useQuery(api.users.searchUsers, { search: searchQuery });
   const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
@@ -85,3 +85,5 @@ export default function Users() {
     </DashboardLayout>
   );
 }
+
+export default memo(Users);

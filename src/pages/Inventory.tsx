@@ -7,8 +7,9 @@ import { Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
+import { memo } from "react";
 
-export default function Inventory() {
+function Inventory() {
   const { token } = useAuth();
   const inventoryCards = useQuery(
     api.userCards.getInventory,
@@ -83,3 +84,5 @@ export default function Inventory() {
     </DashboardLayout>
   );
 }
+
+export default memo(Inventory);
