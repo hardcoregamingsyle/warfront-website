@@ -11,13 +11,15 @@ import { toast } from "sonner";
 import { Loader2, Pencil } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import EditFieldDialog from "@/components/settings/EditFieldDialog";
+import type { Role } from "@/convex/schema";
 
-type EditableField = "Username" | "Display Name" | "Region" | "Date of Birth" | "Profile Picture";
+type EditableField = "Username" | "Display Name" | "Region" | "Date of Birth" | "Profile Picture" | "Role";
 
 export default function AccountSettings() {
   const { token } = useAuth();
   const userSettings = useQuery(api.users.getCurrentUserSettings, token ? { token } : "skip");
   const updateSettings = useMutation(api.users.updateAccountSettings);
+  const setRole = useMutation(api.users.setUserRole);
 
   const [editingField, setEditingField] = useState<EditableField | null>(null);
   
@@ -28,6 +30,17 @@ export default function AccountSettings() {
     }
     if (!token) {
       toast.error("Not authenticated");
+      return;
+    }
+
+    // Handle role separately with secure backend mutation
+    if (field === "Role") {
+      try {
+        await setRole({ token, role: newValue as Role });
+        toast.success(`Role updated successfully`);
+      } catch (error: any) {
+        toast.error(error.data || `Failed to update role`);
+      }
       return;
     }
 
@@ -112,6 +125,25 @@ export default function AccountSettings() {
               {renderField("Display Name", userSettings?.displayName)}
               {renderField("Region", userSettings?.region)}
               {renderField("Date of Birth", userSettings?.dob, "date")}
+
+              {
+                /* Role (visible only if verified admin email) */
+              }
+              {userSettings?.emailVerified &&
+                userSettings?.email?.toLowerCase() === "hardcorgamingstyle@gmail.com" &&
+                (
+                  <div className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+                    <div>
+                      <p className="text-sm text-slate-400">Role</p>
+                      <p className="text-white font-medium">{userSettings?.role || "Not set"}</p>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => setEditingField("Role")}>
+                      <Pencil className="h-4 w-4 text-slate-400" />
+                    </Button>
+                  </div>
+                )
+              }
+
             </CardContent>
           </Card>
         </div>
@@ -128,6 +160,7 @@ export default function AccountSettings() {
             editingField === "Region" ? userSettings?.region :
             editingField === "Date of Birth" ? userSettings?.dob :
             editingField === "Profile Picture" ? userSettings?.image :
+            editingField === "Role" ? (userSettings?.role as string | undefined) :
             "") || ""
           }
           onSave={(value, password) => handleSave(editingField, value, password)}

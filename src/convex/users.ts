@@ -537,6 +537,9 @@ export const getCurrentUserSettings = query({
       email: user.email,
       image: user.image,
       dob: user.dob,
+      // Add role and emailVerified so the UI can decide whether to show Role control
+      role: user.role,
+      emailVerified: user.emailVerified,
     };
   },
 });

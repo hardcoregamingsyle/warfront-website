@@ -52,7 +52,14 @@ const signupSchema = z
     gender: z.enum(["male", "female", "other", "prefer_not_to_say"]),
     dob: z.string().min(1, "Date of birth is required"),
     region: z.string().min(1, "Region is required"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(20, "Password must be at most 20 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,20}$/,
+        "Password must include uppercase, lowercase, number, and symbol"
+      ),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
