@@ -14,7 +14,7 @@ const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
 // Lazy-loaded pages
 const Landing = lazy(() => import("./pages/Landing.tsx"));
-const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
+import Dashboard from "./pages/Dashboard.tsx";
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Login = lazy(() => import("./pages/Login.tsx"));
 const Signup = lazy(() => import("./pages/Signup.tsx"));
