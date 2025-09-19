@@ -35,7 +35,24 @@ function AllCards() {
         }
     };
 
-    const isAuthorized = user && ["admin", "owner"].includes(user.role!);
+    const isAuthorized = user && (user.role === "Admin" || user.role === "Owner");
+
+    if (!isAuthorized) {
+        return (
+            <DashboardLayout>
+                <div className="flex items-center justify-center h-full py-24">
+                    <Card className="bg-slate-900/50 border-red-500/20">
+                        <CardHeader>
+                            <CardTitle className="text-red-400">Access Denied</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-slate-300">You are not authorized to view this page.</p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </DashboardLayout>
+        );
+    }
 
     if (cards === undefined) {
         return (
