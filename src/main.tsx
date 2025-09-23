@@ -100,7 +100,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/cards/:cardId" element={<CardViewer />} />
                 <Route path="/blog" element={<BlogList />} />
                 <Route path="/blog/:slug" element={<BlogViewer />} />
-                <Route path="/all-cards" element={<AllCards />} />
+                <Route path="/all-cards" element={<ProtectedRoute><AllCards /></ProtectedRoute>} />
                 <Route path="/verify-email" element={<EmailVerified />} />
 
                 {/* Protected Routes */}
