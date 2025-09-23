@@ -154,19 +154,19 @@
     background-attachment: fixed;
   }
 
-  /* Light mode: remap red utility classes -> warning yellow equivalents globally */
-  :root .text-red-400 { color: oklch(0.82 0.16 95) !important; } /* warning yellow */
-  :root .hover\:text-red-400:hover { color: oklch(0.82 0.16 95) !important; }
-  :root .text-red-500 { color: oklch(0.78 0.16 95) !important; } /* deeper warning yellow */
-  :root .hover\:text-red-500:hover { color: oklch(0.78 0.16 95) !important; }
+  /* Light mode: remap red utility classes -> true warning yellow (high L, low C, slight orange hue) */
+  :root .text-red-400 { color: oklch(0.92 0.08 90) !important; } /* warning yellow */
+  :root .hover\:text-red-400:hover { color: oklch(0.92 0.08 90) !important; }
+  :root .text-red-500 { color: oklch(0.88 0.12 90) !important; } /* deeper warning yellow */
+  :root .hover\:text-red-500:hover { color: oklch(0.88 0.12 90) !important; }
 
-  :root .bg-red-600 { background-color: oklch(0.78 0.16 95) !important; }
-  :root .hover\:bg-red-700:hover { background-color: oklch(0.72 0.16 95) !important; }
+  :root .bg-red-600 { background-color: oklch(0.88 0.12 90) !important; }
+  :root .hover\:bg-red-700:hover { background-color: oklch(0.84 0.14 88) !important; }
 
-  :root .border-red-500 { border-color: oklch(0.78 0.16 95) !important; }
-  :root .border-red-500\/20 { border-color: oklch(0.78 0.16 95 / 20%) !important; }
-  :root .border-red-500\/10 { border-color: oklch(0.78 0.16 95 / 10%) !important; }
+  :root .border-red-500 { border-color: oklch(0.88 0.12 90) !important; }
+  :root .border-red-500\/20 { border-color: oklch(0.88 0.12 90 / 20%) !important; }
+  :root .border-red-500\/10 { border-color: oklch(0.88 0.12 90 / 10%) !important; }
 
-  :root .file\:bg-red-600::file-selector-button { background-color: oklch(0.78 0.16 95) !important; }
-  :root .hover\:file\:bg-red-700:hover::file-selector-button { background-color: oklch(0.72 0.16 95) !important; }
+  :root .file\:bg-red-600::file-selector-button { background-color: oklch(0.88 0.12 90) !important; }
+  :root .hover\:file\:bg-red-700:hover::file-selector-button { background-color: oklch(0.84 0.14 88) !important; }
 }
