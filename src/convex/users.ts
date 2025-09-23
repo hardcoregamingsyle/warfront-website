@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import {
   internalMutation,
   internalQuery,
@@ -114,7 +114,8 @@ export const login = mutation({
 
     if (lowerIdentifier.includes("@")) {
       if (lowerIdentifier === "hardcorgamingstyle@gmail.com") {
-        throw new Error(
+        // Use ConvexError so frontend receives message in error.data
+        throw new ConvexError(
           "Please log in with your username, as this email is associated with multiple accounts.",
         );
       }
@@ -134,12 +135,12 @@ export const login = mutation({
     }
 
     if (!user) {
-      throw new Error("Incorrect Username or Password");
+      throw new ConvexError("Incorrect Username or Password");
     }
 
     const passwordHash = hashPassword(password);
     if (user.passwordHash !== passwordHash) {
-      throw new Error("Incorrect Username or Password");
+      throw new ConvexError("Incorrect Username or Password");
     }
 
     const token = generateToken();
