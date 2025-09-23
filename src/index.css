@@ -89,6 +89,9 @@
   --sidebar-border: oklch(0.85 0.02 95);
   --sidebar-ring: oklch(0.72 0.12 135);
 
+  /* Header background for light theme: brown */
+  --header-bg: oklch(0.6 0.09 60);
+
   /* Background image variable for light theme (khaki camo) */
   --bg-image: url('https://harmless-tapir-303.convex.cloud/api/storage/667ce84d-aa1d-42b8-9029-fd2eba8a0143');
 }
@@ -129,6 +132,9 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 
+  /* Header background for dark theme: use existing primary to preserve original look */
+  --header-bg: var(--primary);
+
   /* Background image variable for dark theme (blue camo) */
   --bg-image: url('https://harmless-tapir-303.convex.cloud/api/storage/23d4400d-5fae-4459-a7a4-f0d9e1c1efd7');
 }
@@ -148,21 +154,19 @@
     background-attachment: fixed;
   }
 
-  /* Light mode: remap red utility classes -> brown equivalents globally */
-  :root .text-red-400 { color: oklch(0.58 0.08 60) !important; } /* medium brown */
-  :root .hover\:text-red-400:hover { color: oklch(0.58 0.08 60) !important; }
-  :root .text-red-500 { color: oklch(0.52 0.1 55) !important; } /* darker brown */
-  :root .hover\:text-red-500:hover { color: oklch(0.52 0.1 55) !important; }
+  /* Light mode: remap red utility classes -> warning yellow equivalents globally */
+  :root .text-red-400 { color: oklch(0.82 0.16 95) !important; } /* warning yellow */
+  :root .hover\:text-red-400:hover { color: oklch(0.82 0.16 95) !important; }
+  :root .text-red-500 { color: oklch(0.78 0.16 95) !important; } /* deeper warning yellow */
+  :root .hover\:text-red-500:hover { color: oklch(0.78 0.16 95) !important; }
 
-  :root .bg-red-600 { background-color: oklch(0.5 0.1 55) !important; }
-  :root .hover\:bg-red-700:hover { background-color: oklch(0.44 0.11 55) !important; }
+  :root .bg-red-600 { background-color: oklch(0.78 0.16 95) !important; }
+  :root .hover\:bg-red-700:hover { background-color: oklch(0.72 0.16 95) !important; }
 
-  :root .border-red-500 { border-color: oklch(0.5 0.1 55) !important; }
-  /* handle common opacity variants used in the app */
-  :root .border-red-500\/20 { border-color: oklch(0.5 0.1 55 / 20%) !important; }
-  :root .border-red-500\/10 { border-color: oklch(0.5 0.1 55 / 10%) !important; }
+  :root .border-red-500 { border-color: oklch(0.78 0.16 95) !important; }
+  :root .border-red-500\/20 { border-color: oklch(0.78 0.16 95 / 20%) !important; }
+  :root .border-red-500\/10 { border-color: oklch(0.78 0.16 95 / 10%) !important; }
 
-  /* Inputs using Tailwind file: variants */
-  :root .file\:bg-red-600::file-selector-button { background-color: oklch(0.5 0.1 55) !important; }
-  :root .hover\:file\:bg-red-700:hover::file-selector-button { background-color: oklch(0.44 0.11 55) !important; }
+  :root .file\:bg-red-600::file-selector-button { background-color: oklch(0.78 0.16 95) !important; }
+  :root .hover\:file\:bg-red-700:hover::file-selector-button { background-color: oklch(0.72 0.16 95) !important; }
 }

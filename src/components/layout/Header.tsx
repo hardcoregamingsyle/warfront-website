@@ -47,7 +47,7 @@ export default function Header() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className="sticky top-0 z-50 w-full border-b border-slate-700 bg-[var(--primary)]"
+      className="sticky top-0 z-50 w-full border-b border-slate-700 bg-[var(--header-bg)]"
     >
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
         <Link to="/" className="mr-6 flex items-center space-x-2">
