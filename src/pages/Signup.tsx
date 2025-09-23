@@ -194,7 +194,7 @@ export default function Signup() {
                           className={`text-white ${
                             isDark
                               ? "placeholder:text-slate-400"
-                              : "placeholder:text-red-400/60"
+                              : "placeholder:text-white"
                           }`}
                           placeholder="Your call sign"
                           {...field}
