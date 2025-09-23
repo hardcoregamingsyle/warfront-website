@@ -10,11 +10,8 @@ export const sendVerificationEmail = internalAction({
         token: v.string(),
     },
     handler: async (ctx, { email, name, token }) => {
-        const siteUrl = process.env.SITE_URL;
-        if (!siteUrl) {
-            console.error("CRITICAL: SITE_URL environment variable is not set. Cannot send verification email.");
-            return;
-        }
+        // Use provided SITE_URL or fall back to the correct production domain
+        const siteUrl = process.env.SITE_URL || "https://warfront.vly.site";
 
         const resendApiKey = process.env.RESEND_API_KEY;
         if (!resendApiKey) {
