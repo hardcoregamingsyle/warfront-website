@@ -33,19 +33,6 @@ import { useState, useEffect } from "react";
 import { Sun, Moon } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
-const countryList = [
-  "United States",
-  "Canada",
-  "Mexico",
-  "United Kingdom",
-  "Germany",
-  "France",
-  "Japan",
-  "Australia",
-  "Brazil",
-  "India",
-];
-
 const signupSchema = z
   .object({
     username: z.string().min(3, "Username must be at least 3 characters"),
@@ -72,8 +59,26 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function Signup() {
   const { signUp } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [countryNames, setCountryNames] = useState<string[]>([]);
+
+  // Add: safe idle callback helper
+  // This uses requestIdleCallback if available, otherwise falls back to a timeout
+  const runWhenIdle = (cb: () => void) => {
+    if (typeof (window as any).requestIdleCallback === "function") {
+      (window as any).requestIdleCallback(cb);
+    } else {
+      setTimeout(cb, 0);
+    }
+  };
+
+  // Add: lazy load function for countries
+  const loadCountries = async () => {
+    if (countryNames.length > 0) return;
+    const mod = await import("@/data/countries");
+    setCountryNames(mod.countries);
+  };
 
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -82,8 +87,21 @@ export default function Signup() {
   });
 
   useEffect(() => {
-    setCountryNames(countryList);
-  }, []);
+    // Signed out: load immediately (higher priority)
+    if (!isAuthenticated) {
+      loadCountries();
+      return;
+    }
+    // Signed in: defer until idle (lower priority)
+    runWhenIdle(() => {
+      // Still keep it lazy; will also load on dropdown open if user interacts earlier
+      // We don't force-load if already populated
+      if (countryNames.length === 0) {
+        loadCountries();
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -288,6 +306,9 @@ export default function Signup() {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        onOpenChange={(open) => {
+                          if (open && countryNames.length === 0) loadCountries();
+                        }}
                       >
                         <FormControl>
                           <SelectTrigger className="text-white">
