@@ -42,7 +42,7 @@ export default function Admin() {
     <DashboardLayout>
       <Helmet>
         <title>Admin | Warfront</title>
-        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
+        <link rel="icon" type="image/png" href="/assets/Logo.png" />
         <meta name="description" content="Administrative controls for Warfront." />
       </Helmet>
 
