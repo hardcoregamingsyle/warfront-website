@@ -23,7 +23,8 @@ import { ROLES } from "@/convex/schema";
 interface RoleSelectionDialogProps {
   open: boolean;
   onClose: () => void;
-  token: string;
+  // Make token optional; we'll fall back to localStorage if it's not provided
+  token?: string;
 }
 
 const roles = [
@@ -93,9 +94,18 @@ export default function RoleSelectionDialog({
       return;
     }
 
+    // Pull token from props or localStorage as a fallback
+    const effectiveToken =
+      (typeof window !== "undefined" ? (token ?? localStorage.getItem("auth_token") ?? "") : token ?? "") as string;
+
+    if (!effectiveToken) {
+      toast.error("Please log in again to assign a role.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await setUserRole({ token, role: selectedRole as any });
+      await setUserRole({ token: effectiveToken, role: selectedRole as any });
       toast.success("Role assigned successfully!");
       onClose();
     } catch (error: any) {
