@@ -99,7 +99,7 @@ export default function Header() {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
-          className="md:hidden bg-slate-900"
+          className="md:hidden bg-[var(--header-bg)]"
         >
           <div className="px-4 pt-2 pb-4 space-y-2">
             {navLinks.map((link) => (

@@ -132,8 +132,8 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 
-  /* Header background for dark theme: use existing primary to preserve original look */
-  --header-bg: var(--primary);
+  /* Header background for dark theme: deep navy blue */
+  --header-bg: oklch(0.20 0.03 255);
 
   /* Background image variable for dark theme (blue camo) */
   --bg-image: url('https://harmless-tapir-303.convex.cloud/api/storage/23d4400d-5fae-4459-a7a4-f0d9e1c1efd7');
