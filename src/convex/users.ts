@@ -440,9 +440,8 @@ export const updateAccountSettings = mutation({
     dob: v.optional(v.string()),
     image: v.optional(v.string()),
     storageId: v.optional(v.id("_storage")),
-    password: v.string(),
   },
-  handler: async (ctx, { token, username, displayName, region, dob, image, storageId, password }) => {
+  handler: async (ctx, { token, username, displayName, region, dob, image, storageId }) => {
     // Get current user from token
     const session = await ctx.db
       .query("sessions")
@@ -456,12 +455,6 @@ export const updateAccountSettings = mutation({
     const user = await ctx.db.get(session.userId);
     if (!user) {
       throw new Error("User not found");
-    }
-
-    // Verify password
-    const passwordHash = hashPassword(password);
-    if (user.passwordHash !== passwordHash) {
-      throw new Error("Incorrect password");
     }
 
     // Check if username is already taken (if changing username)

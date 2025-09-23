@@ -32,7 +32,7 @@ export default function AccountSettings() {
   const [editingField, setEditingField] = useState<EditableField | null>(null);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   
-  const handleSave = async (field: EditableField, newValue: string | { storageId: Id<"_storage"> }, password_confirmation: string) => {
+  const handleSave = async (field: EditableField, newValue: string | { storageId: Id<"_storage"> }) => {
     // Handle role separately with secure backend mutation (no password required)
     if (field === "Role") {
       try {
@@ -49,17 +49,12 @@ export default function AccountSettings() {
       return;
     }
 
-    // For all other fields, require password confirmation
-    if (!password_confirmation) {
-      toast.error("Please enter your password to confirm changes");
-      return;
-    }
     if (!token) {
       toast.error("Not authenticated");
       return;
     }
 
-    const payload: any = { token, password: password_confirmation };
+    const payload: any = { token };
     if (field === "Username") {
       payload.username = newValue as string;
     } else if (field === "Display Name") {
@@ -180,7 +175,7 @@ export default function AccountSettings() {
                                   toast.error("Please select a role");
                                   return;
                                 }
-                                handleSave("Role", toSave, ""); // No password required
+                                handleSave("Role", toSave); // No password required
                               }}
                               className="bg-red-600 hover:bg-red-700"
                             >
@@ -226,7 +221,7 @@ export default function AccountSettings() {
             editingField === "Profile Picture" ? userSettings?.image :
             "") || ""
           }
-          onSave={(value, password) => handleSave(editingField, value, password)}
+          onSave={(value) => handleSave(editingField, value)}
           inputType={editingField === "Date of Birth" ? "date" : "text"}
         />
       )}

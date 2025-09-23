@@ -23,7 +23,6 @@ interface EditFieldDialogProps {
   currentValue: string;
   onSave: (
     value: string | { storageId: Id<"_storage"> },
-    password_confirmation: string
   ) => Promise<void>;
   inputType?: string;
 }
@@ -37,7 +36,6 @@ export default function EditFieldDialog({
   inputType = "text",
 }: EditFieldDialogProps) {
   const [newValue, setNewValue] = useState(currentValue);
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -69,11 +67,10 @@ export default function EditFieldDialog({
           body: selectedFile,
         });
         const { storageId } = await result.json();
-        await onSave({ storageId }, password);
+        await onSave({ storageId });
       } else {
-        await onSave(newValue, password);
+        await onSave(newValue);
       }
-      setPassword("");
       onClose();
     } catch (error) {
       console.error(error);
@@ -143,17 +140,6 @@ export default function EditFieldDialog({
               />
             </div>
           )}
-          <div className="space-y-2">
-            <Label htmlFor="password">Confirm Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-slate-800 border-slate-600"
-              placeholder="Enter password to confirm"
-            />
-          </div>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
