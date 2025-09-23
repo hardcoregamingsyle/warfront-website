@@ -47,6 +47,7 @@ const BlogList = lazy(() => import("./pages/BlogList.tsx"));
 const BlogViewer = lazy(() => import("./pages/BlogViewer.tsx"));
 const BlogEditor = lazy(() => import("./pages/BlogEditor.tsx"));
 const AllCards = lazy(() => import("./pages/AllCards.tsx"));
+const Admin = lazy(() => import("./pages/Admin.tsx"));
 
 function RouteSyncer() {
   const location = useLocation();
@@ -123,6 +124,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/competitive" element={<ProtectedRoute><Competitive /></ProtectedRoute>} />
                 <Route path="/editor/card/:cardId" element={<ProtectedRoute><CardEditor /></ProtectedRoute>} />
                 <Route path="/editor/blog/:blogId" element={<ProtectedRoute><BlogEditor /></ProtectedRoute>} />
+                <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </BrowserRouter>
