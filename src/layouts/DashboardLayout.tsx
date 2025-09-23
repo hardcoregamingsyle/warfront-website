@@ -127,7 +127,7 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b border-slate-800 px-4 lg:h-[60px] lg:px-6">
             <Link to="/" className="flex items-center gap-2 font-semibold">
-              <img src="/assets/Untitled_design.png" alt="Warfront" className="h-8 w-8" />
+              <img src="/assets/Logo.png" alt="Warfront" className="h-8 w-8" />
               <span className="">Warfront</span>
             </Link>
             <Button
@@ -175,7 +175,7 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b border-slate-800 bg-[var(--header-bg)] px-4 lg:h-[60px] lg:px-6 md:hidden">
            <Link to="/" className="flex items-center gap-2 font-semibold">
-              <img src="/assets/Untitled_design.png" alt="Warfront" className="h-8 w-8" />
+              <img src="/assets/Logo.png" alt="Warfront" className="h-8 w-8" />
               <span className="">Warfront</span>
             </Link>
             <div className="ml-auto flex items-center gap-4">
