@@ -118,10 +118,12 @@
   }
   body {
     @apply text-foreground;
+    /* Use a single full-size image instead of tiles */
     background-color: #0f172a; /* slate-900 */
     background-image: url('https://harmless-tapir-303.convex.cloud/api/storage/23d4400d-5fae-4459-a7a4-f0d9e1c1efd7');
-    background-repeat: repeat;
-    background-size: 600px auto; /* adjust tile size for aesthetics */
-    background-attachment: fixed;
+    background-repeat: no-repeat;         /* prevent tiling */
+    background-size: cover;               /* scale to cover viewport */
+    background-position: center center;   /* center the image */
+    background-attachment: fixed;         /* subtle parallax effect */
   }
 }
