@@ -45,46 +45,61 @@
 /* CHANGE VALUES FOR THEME */
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.6 0.25 25);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Light theme palette: Khaki whitish yellow base, khaki greens for primary, greens instead of reds */
+  --background: oklch(0.93 0.06 95);           /* khaki-cream */
+  --foreground: oklch(0.22 0.03 95);           /* deep olive text */
+  --card: oklch(0.95 0.04 95);
+  --card-foreground: oklch(0.22 0.03 95);
+  --popover: oklch(0.95 0.04 95);
+  --popover-foreground: oklch(0.22 0.03 95);
+
+  /* Primary previously blue -> khaki green */
+  --primary: oklch(0.72 0.12 135);             /* khaki green */
+  --primary-foreground: oklch(0.2 0.03 95);
+
+  /* Replace red with green accents for light */
+  --secondary: oklch(0.9 0.04 95);
+  --secondary-foreground: oklch(0.22 0.03 95);
+  --muted: oklch(0.92 0.02 95);
+  --muted-foreground: oklch(0.38 0.03 95);
+  --accent: oklch(0.86 0.05 135);
+  --accent-foreground: oklch(0.22 0.03 95);
+
+  --destructive: oklch(0.69 0.13 142);         /* use green instead of red */
+  --border: oklch(0.85 0.02 95);
+  --input: oklch(0.88 0.02 95);
+  --ring: oklch(0.72 0.12 135);
+
+  --chart-1: oklch(0.7 0.12 135);
+  --chart-2: oklch(0.64 0.08 170);
+  --chart-3: oklch(0.58 0.05 200);
+  --chart-4: oklch(0.8 0.18 100);
+  --chart-5: oklch(0.76 0.16 70);
+
+  --sidebar: oklch(0.95 0.04 95);
+  --sidebar-foreground: oklch(0.22 0.03 95);
+  --sidebar-primary: oklch(0.72 0.12 135);
+  --sidebar-primary-foreground: oklch(0.18 0.03 95);
+  --sidebar-accent: oklch(0.9 0.04 95);
+  --sidebar-accent-foreground: oklch(0.22 0.03 95);
+  --sidebar-border: oklch(0.85 0.02 95);
+  --sidebar-ring: oklch(0.72 0.12 135);
+
+  /* Background image variable for light theme (khaki camo) */
+  --bg-image: url('https://harmless-tapir-303.convex.cloud/api/storage/667ce84d-aa1d-42b8-9029-fd2eba8a0143');
 }
 
 .dark {
+  /* Existing dark stays similar; keep strong contrast and reds */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
+
+  /* Keep current red accents for dark */
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
@@ -110,6 +125,9 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Background image variable for dark theme (blue camo) */
+  --bg-image: url('https://harmless-tapir-303.convex.cloud/api/storage/23d4400d-5fae-4459-a7a4-f0d9e1c1efd7');
 }
 
 @layer base {
@@ -118,12 +136,12 @@
   }
   body {
     @apply text-foreground;
-    /* Use a single full-size image instead of tiles */
-    background-color: #0f172a; /* slate-900 */
-    background-image: url('https://harmless-tapir-303.convex.cloud/api/storage/23d4400d-5fae-4459-a7a4-f0d9e1c1efd7');
-    background-repeat: no-repeat;         /* prevent tiling */
-    background-size: cover;               /* scale to cover viewport */
-    background-position: center center;   /* center the image */
-    background-attachment: fixed;         /* subtle parallax effect */
+    /* Single full-screen image driven by theme variable */
+    background-color: var(--background);
+    background-image: var(--bg-image);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
   }
 }

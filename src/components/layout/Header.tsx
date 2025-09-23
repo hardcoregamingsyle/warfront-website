@@ -3,10 +3,35 @@ import { Button } from "@/components/ui/button";
 import { UserButton } from "@/components/auth/UserButton";
 import { motion } from "framer-motion";
 import { Swords, Shield, Gamepad2, HelpCircle, Menu, X, Users, History } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Sun, Moon } from "lucide-react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Add theme state + initializer
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem("theme");
+    if (saved === "light") return false;
+    return true;
+  });
+
+  // Initialize document class from saved preference
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const root = document.documentElement;
+      if (isDark) {
+        root.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        root.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark((v) => !v);
 
   const navLinks = [
     { href: "/dashboard", label: "Dashboard", icon: <Shield className="h-5 w-5" /> },
@@ -43,6 +68,18 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
+          {/* Theme toggle button (desktop) */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleTheme}
+            className="hidden md:inline-flex border-slate-600 text-slate-200 hover:bg-slate-800"
+            aria-label="Change theme"
+            title="Change theme"
+          >
+            {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+
           <div className="hidden md:block">
             <UserButton />
           </div>
@@ -76,6 +113,21 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            {/* Theme toggle (mobile) */}
+            <Button
+              variant="outline"
+              onClick={() => {
+                toggleTheme();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full border-slate-600 text-slate-200 hover:bg-slate-800"
+            >
+              {isDark ? (
+                <span className="flex items-center gap-2"><Sun className="h-4 w-4" /> Switch to Light</span>
+              ) : (
+                <span className="flex items-center gap-2"><Moon className="h-4 w-4" /> Switch to Dark</span>
+              )}
+            </Button>
             <div className="border-t border-slate-700 pt-4">
               <UserButton />
             </div>
