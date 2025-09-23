@@ -46,7 +46,7 @@ export default function Landing() {
     <div className="min-h-screen">
       <Helmet>
         <title>Combat for the Digital Age – Warfront</title>
-        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
+        <link rel="icon" type="image/png" href="/assets/Logo.png" />
         <meta name="description" content="Experience Warfront, the family-friendly military TCG & CCG. Battle online with friends or play offline with physical cards. A perfect mix of combat, strategy, and fun for all ages." />
         <meta name="keywords" content="Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards" />
         <meta property="og:title" content="Warfront: A Family-Friendly TCG for the Digital Age" />
@@ -66,7 +66,7 @@ export default function Landing() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <img src="/assets/Untitled_design.png" alt="Warfront Logo" className="h-12 w-auto" />
+              <img src="/assets/Logo.png" alt="Warfront Logo" className="h-12 w-auto" />
             </div>
 
             {/* Desktop Navigation */}
@@ -342,7 +342,7 @@ export default function Landing() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="mb-4">
-                <img src="/assets/Untitled_design.png" alt="Warfront Logo" className="h-12 w-auto" />
+                <img src="/assets/Logo.png" alt="Warfront Logo" className="h-12 w-auto" />
               </div>
               <p className="text-slate-400">
                 The ultimate military strategy card game experience.
