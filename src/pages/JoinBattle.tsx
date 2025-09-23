@@ -35,6 +35,7 @@ export default function JoinBattle() {
   const createBattle = useMutation(api.battles.create);
   const createMultiplayerBattle = useMutation(api.multiplayerBattles.create);
   const joinMultiplayerBattle = useMutation(api.multiplayerBattles.join);
+  const leaveMultiplayerBattle = useMutation(api.multiplayerBattles.leave);
 
   const joinBattle = useMutation(api.battles.join);
   const cancelBattle = useMutation(api.battles.cancel);
@@ -136,6 +137,20 @@ export default function JoinBattle() {
       toast.error(
         "An Unexpected Error Occurred. Please try again Later",
       );
+    }
+  };
+
+  const handleCancelMultiplayerBattle = async (battleId: Id<"multiplayerBattles">) => {
+    if (!token) {
+      toast.error("Authentication error.");
+      return;
+    }
+    try {
+      await leaveMultiplayerBattle({ battleId, token });
+      toast.success("Lobby deleted.");
+    } catch (error: any) {
+      console.error("Failed to delete lobby:", error);
+      toast.error(error.data || "Failed to delete lobby.");
     }
   };
 
@@ -333,6 +348,15 @@ export default function JoinBattle() {
                             onClick={() => handleJoinMultiplayerBattle(battle._id)}
                           >
                             Join Lobby
+                          </Button>
+                        )}
+                        {user && user._id === battle.hostId && (
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleCancelMultiplayerBattle(battle._id)}
+                            className="ml-2"
+                          >
+                            Delete Lobby
                           </Button>
                         )}
                       </div>
