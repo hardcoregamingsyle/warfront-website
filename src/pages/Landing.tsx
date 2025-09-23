@@ -13,12 +13,34 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Helmet } from "react-helmet-async";
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem("theme");
+    return saved !== "light";
+  });
+
+  // Apply theme to document root
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const root = document.documentElement;
+      if (isDark) {
+        root.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        root.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark((v) => !v);
 
   return (
     <div className="min-h-screen">
@@ -35,7 +57,7 @@ export default function Landing() {
       </Helmet>
       {/* Navigation */}
       <motion.nav 
-        className="fixed top-0 w-full z-50 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700"
+        className="fixed top-0 w-full z-50 bg-[var(--header-bg)] backdrop-blur-sm border-b border-slate-700"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -54,8 +76,18 @@ export default function Landing() {
               <a href="#contact" className="text-slate-300 hover:text-white transition-colors">Contact</a>
             </div>
 
-            {/* Auth Button */}
-            <div className="hidden md:block">
+            {/* Desktop Actions: Auth + Theme toggle */}
+            <div className="hidden md:flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleTheme}
+                className="border-slate-600 text-slate-200 hover:bg-slate-800"
+                aria-label="Change theme"
+                title="Change theme"
+              >
+                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
               <AuthButton 
                 trigger={<Button className="bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
               />
@@ -86,7 +118,21 @@ export default function Landing() {
                 <a href="#features" className="block px-3 py-2 text-slate-300 hover:text-white">Features</a>
                 <a href="#gameplay" className="block px-3 py-2 text-slate-300 hover:text-white">Gameplay</a>
                 <a href="#contact" className="block px-3 py-2 text-slate-300 hover:text-white">Contact</a>
-                <div className="px-3 py-2">
+                <div className="px-3 py-2 grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      toggleTheme();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full border-slate-600 text-slate-200 hover:bg-slate-800"
+                  >
+                    {isDark ? (
+                      <span className="flex items-center gap-2"><Sun className="h-4 w-4" /> Light</span>
+                    ) : (
+                      <span className="flex items-center gap-2"><Moon className="h-4 w-4" /> Dark</span>
+                    )}
+                  </Button>
                   <AuthButton 
                     trigger={<Button className="w-full bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
                   />
