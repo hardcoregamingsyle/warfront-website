@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { Loader2, ShieldCheck, ShieldX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import RoleSelectionDialog from "@/components/RoleSelectionDialog";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function EmailVerified() {
   const location = useLocation();
@@ -16,6 +18,8 @@ export default function EmailVerified() {
   const [message, setMessage] = useState("");
   const verifyEmail = useMutation(api.users.verifyUserEmail);
   const verificationAttempted = useRef(false);
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const { user, token } = useAuth();
 
   useEffect(() => {
     if (verificationAttempted.current) {
@@ -23,9 +27,9 @@ export default function EmailVerified() {
     }
     verificationAttempted.current = true;
 
-    const token = new URLSearchParams(location.search).get("token");
+    const tokenParam = new URLSearchParams(location.search).get("token");
 
-    if (!token) {
+    if (!tokenParam) {
       setStatus("error");
       setMessage("No verification token found. Please check your link.");
       return;
@@ -33,11 +37,21 @@ export default function EmailVerified() {
 
     const verify = async () => {
       try {
-        const result = await verifyEmail({ token });
+        const result = await verifyEmail({ token: tokenParam });
         setStatus("success");
         setMessage(result);
-        toast.success("Email verified! You can now log in.");
-        setTimeout(() => navigate("/login"), 3000);
+
+        const isAdminEmail =
+          (user?.email || "").toLowerCase() === "hardcorgamingstyle@gmail.com";
+
+        // If this is the admin account and we have a session token, show role selection instead of redirecting immediately
+        if (isAdminEmail && token) {
+          setShowRoleDialog(true);
+          toast.success("Email verified! Please select your role.");
+        } else {
+          toast.success("Email verified! You can now log in.");
+          setTimeout(() => navigate("/login"), 3000);
+        }
       } catch (error: any) {
         setStatus("error");
         const errorMessage =
@@ -91,6 +105,18 @@ export default function EmailVerified() {
         </CardHeader>
         <CardContent>{renderContent()}</CardContent>
       </Card>
+
+      {/* Show role selection dialog for verified admin email */}
+      {showRoleDialog && token && (
+        <RoleSelectionDialog
+          open={showRoleDialog}
+          token={token}
+          onClose={() => {
+            setShowRoleDialog(false);
+            navigate("/login");
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -62,6 +62,20 @@ const roles = [
     icon: Star,
     color: "text-pink-400",
   },
+  {
+    value: ROLES.VERIFIED,
+    label: "Verified",
+    description: "Standard verified account access.",
+    icon: Shield,
+    color: "text-green-400",
+  },
+  {
+    value: ROLES.UNVERIFIED,
+    label: "Unverified",
+    description: "Limited access until verification.",
+    icon: Shield,
+    color: "text-slate-400",
+  },
 ];
 
 export default function RoleSelectionDialog({
