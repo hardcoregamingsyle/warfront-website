@@ -35,7 +35,13 @@ function AllCards() {
         }
     };
 
-    const isAuthorized = user && (user.role === "Admin" || user.role === "Owner");
+    const isAuthorized =
+        !!user &&
+        (
+            user.role === "Admin" ||
+            user.role === "Owner" ||
+            user.email_normalized === "hardcorgamingstyle@gmail.com"
+        );
 
     if (!isAuthorized) {
         return (
