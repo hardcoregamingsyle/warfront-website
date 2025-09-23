@@ -1,0 +1,17 @@
+# Cloudflare Pages configuration
+name = "warfront-landing-page"
+compatibility_date = "2025-01-01"
+
+# Pages will deploy the static output from Vite
+pages_build_output_dir = "dist"
+
+[build]
+# Cloudflare will run this to build the site
+command = "pnpm build"
+
+# If you later add Pages Functions, set: functions = "./functions"
+# and define any runtime bindings/secrets under [vars] or [observability] etc.
+
+# [vars]
+# # Add any public Vite vars here if needed (VITE_*)
+# VITE_SOME_PUBLIC_VAR = "value"
