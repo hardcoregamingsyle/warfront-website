@@ -23,6 +23,32 @@ const hashPassword = (password: string) => {
   return hash.toString(36);
 };
 
+// Add: Helper to assert admin privileges by token
+const assertIsAdmin = async (ctx: any, token: string) => {
+  const session = await ctx.db
+    .query("sessions")
+    .withIndex("by_token", (q: any) => q.eq("token", token))
+    .unique();
+
+  if (!session || session.expires < Date.now()) {
+    throw new Error("Invalid or expired session");
+  }
+  const current = await ctx.db.get(session.userId);
+  if (!current) throw new Error("User not found");
+
+  const roleLc = (current.role ?? "").toString().toLowerCase();
+  const emailLc = (current.email_normalized ?? "").toLowerCase();
+  const isAdmin =
+    roleLc === "admin" ||
+    roleLc === "owner" ||
+    emailLc === "hardcorgamingstyle@gmail.com";
+
+  if (!isAdmin) {
+    throw new Error("Not authorized");
+  }
+  return { current, session };
+};
+
 export const getVerificationToken = internalQuery({
     args: { token: v.string() },
     handler: async (ctx, { token }) => {
@@ -712,5 +738,90 @@ export const resetPassword = mutation({
     }
 
     return "Password reset successfully. Please log in with your new password.";
+  },
+});
+
+// Add: List all users (admin only)
+export const listAllUsers = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    await assertIsAdmin(ctx, token);
+    const users = await ctx.db.query("users").order("asc").collect();
+    return users.map((u) => ({
+      _id: u._id,
+      name: u.name,
+      displayName: u.displayName,
+      region: u.region,
+      email: u.email,
+      email_normalized: u.email_normalized,
+      role: u.role,
+      image: u.image,
+    }));
+  },
+});
+
+// Add: Admin set someone else's role
+export const adminSetUserRole = mutation({
+  args: { token: v.string(), userId: v.id("users"), role: roleValidator },
+  handler: async (ctx, { token, userId, role }) => {
+    await assertIsAdmin(ctx, token);
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+    await ctx.db.patch(userId, { role });
+    return "Role updated";
+  },
+});
+
+// Add: Admin reset password for a user
+export const adminResetPassword = mutation({
+  args: { token: v.string(), userId: v.id("users"), newPassword: v.string() },
+  handler: async (ctx, { token, userId, newPassword }) => {
+    await assertIsAdmin(ctx, token);
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+
+    // Enforce strong password policy server-side as well
+    const strong =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,20}$/.test(
+        newPassword,
+      );
+    if (!strong) {
+      throw new Error(
+        "Password must be 8-20 chars and include uppercase, lowercase, number, and symbol",
+      );
+    }
+
+    const passwordHash = hashPassword(newPassword);
+    await ctx.db.patch(userId, { passwordHash });
+
+    // Invalidate sessions for that user
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .collect();
+    for (const s of sessions) {
+      await ctx.db.delete(s._id);
+    }
+
+    return "Password reset";
+  },
+});
+
+// Add: Admin delete user
+export const adminDeleteUser = mutation({
+  args: { token: v.string(), userId: v.id("users") },
+  handler: async (ctx, { token, userId }) => {
+    await assertIsAdmin(ctx, token);
+    // Delete sessions
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .collect();
+    for (const s of sessions) {
+      await ctx.db.delete(s._id);
+    }
+    // Delete user
+    await ctx.db.delete(userId);
+    return "User deleted";
   },
 });
