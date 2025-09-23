@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useEffect } from "react";
+import { Sun, Moon } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 const countryList = [
@@ -74,9 +75,30 @@ export default function Signup() {
   const navigate = useNavigate();
   const [countryNames, setCountryNames] = useState<string[]>([]);
 
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem("theme");
+    return saved !== "light";
+  });
+
   useEffect(() => {
     setCountryNames(countryList);
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const root = document.documentElement;
+      if (isDark) {
+        root.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        root.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark((v) => !v);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -123,7 +145,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
+    <div className="min-h-screen text-white flex items-center justify-center p-4">
       <Helmet>
         <title>Sign Up for Warfront</title>
         <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
@@ -132,11 +154,26 @@ export default function Signup() {
           content="Create your free Warfront account to start your journey. Build your card collection, connect your physical cards, and compete in the digital arena."
         />
       </Helmet>
-      <Card className="w-full max-w-md bg-slate-800 border-red-500/20">
+
+      {/* Theme Toggle (page level) */}
+      <div className="fixed top-4 right-4">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={toggleTheme}
+          className="border-slate-600 text-slate-200 hover:bg-slate-800"
+          aria-label="Change theme"
+          title="Change theme"
+        >
+          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </Button>
+      </div>
+
+      <Card className="w-full max-w-md bg-[var(--header-bg)] border-slate-700">
         <>
           <CardHeader>
             <CardTitle className="text-red-400">Create Your Account</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-red-400">
               Join the ranks of elite commanders.
             </CardDescription>
           </CardHeader>
@@ -151,9 +188,17 @@ export default function Signup() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Username</FormLabel>
+                      <FormLabel className="text-red-400">Username</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your call sign" {...field} />
+                        <Input
+                          className={`text-white ${
+                            isDark
+                              ? "placeholder:text-slate-400"
+                              : "placeholder:text-red-400/60"
+                          }`}
+                          placeholder="Your call sign"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -164,10 +209,15 @@ export default function Signup() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-red-400">Email</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
+                          className={`text-white ${
+                            isDark
+                              ? "placeholder:text-slate-400"
+                              : "placeholder:text-red-400/60"
+                          }`}
                           placeholder="name@example.com"
                           {...field}
                         />
@@ -176,23 +226,23 @@ export default function Signup() {
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="gender"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gender</FormLabel>
+                        <FormLabel className="text-red-400">Gender</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="text-white">
                               <SelectValue placeholder="Select your gender" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-slate-900 border-slate-700 text-white">
                             <SelectItem value="male">Male</SelectItem>
                             <SelectItem value="female">Female</SelectItem>
                             <SelectItem value="other">Other</SelectItem>
@@ -210,9 +260,19 @@ export default function Signup() {
                     name="dob"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Date of Birth</FormLabel>
+                        <FormLabel className="text-red-400">
+                          Date of Birth
+                        </FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input
+                            type="date"
+                            className={`text-white ${
+                              isDark
+                                ? "placeholder:text-slate-400"
+                                : "placeholder:text-red-400/60"
+                            }`}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -224,17 +284,17 @@ export default function Signup() {
                   name="region"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Region</FormLabel>
+                      <FormLabel className="text-red-400">Region</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="text-white">
                             <SelectValue placeholder="Select your region" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="bg-slate-900 border-slate-700 text-white">
                           {countryNames.map((country) => (
                             <SelectItem key={country} value={country}>
                               {country}
@@ -251,9 +311,18 @@ export default function Signup() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel className="text-red-400">Password</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} />
+                        <Input
+                          type="password"
+                          className={`text-white ${
+                            isDark
+                              ? "placeholder:text-slate-400"
+                              : "placeholder:text-red-400/60"
+                          }`}
+                          placeholder="Create a strong password"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -264,9 +333,20 @@ export default function Signup() {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
+                      <FormLabel className="text-red-400">
+                        Confirm Password
+                      </FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} />
+                        <Input
+                          type="password"
+                          className={`text-white ${
+                            isDark
+                              ? "placeholder:text-slate-400"
+                              : "placeholder:text-red-400/60"
+                          }`}
+                          placeholder="Re-enter your password"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -284,7 +364,7 @@ export default function Signup() {
                 </Button>
               </form>
             </Form>
-            <p className="mt-4 text-center text-sm text-slate-400">
+            <p className="mt-4 text-center text-sm text-slate-300">
               Already have an account?{" "}
               <Link
                 to="/login"

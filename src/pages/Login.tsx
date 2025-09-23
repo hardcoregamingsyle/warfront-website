@@ -22,8 +22,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import { Sun, Moon } from "lucide-react";
 
 const loginSchema = z.object({
   identifier: z.string().min(1, "Please enter your email or username"),
@@ -37,6 +38,26 @@ export default function Login() {
   const location = useLocation();
   const { signIn } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem("theme");
+    return saved !== "light";
+  });
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const root = document.documentElement;
+      if (isDark) {
+        root.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        root.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark((v) => !v);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -65,16 +86,31 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
+    <div className="min-h-screen text-white flex items-center justify-center p-4">
       <Helmet>
         <title>Login to Warfront</title>
         <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Log in to your Warfront account to access your physical card collection, play online, and manage your profile." />
       </Helmet>
-      <Card className="w-full max-w-md bg-slate-800 border-red-500/20">
+
+      {/* Theme Toggle (page level) */}
+      <div className="fixed top-4 right-4">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={toggleTheme}
+          className="border-slate-600 text-slate-200 hover:bg-slate-800"
+          aria-label="Change theme"
+          title="Change theme"
+        >
+          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </Button>
+      </div>
+
+      <Card className="w-full max-w-md bg-[var(--header-bg)] border-slate-700">
         <CardHeader>
           <CardTitle className="text-red-400">Welcome Back, Commander</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-red-400">
             Enter your credentials to access the command center.
           </CardDescription>
         </CardHeader>
@@ -86,9 +122,19 @@ export default function Login() {
                 name="identifier"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email or Username</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-red-400">Email or Username</FormLabel>
+                    </div>
                     <FormControl>
-                      <Input placeholder="Your call sign or email" {...field} />
+                      <Input
+                        className={`text-white ${
+                          isDark
+                            ? "placeholder:text-slate-400"
+                            : "placeholder:text-red-400/60"
+                        }`}
+                        placeholder="Your call sign or email"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -100,7 +146,7 @@ export default function Login() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel className="text-red-400">Password</FormLabel>
                       <Link
                         to="/forgot-password"
                         className="text-sm font-medium text-red-400 hover:text-red-500"
@@ -109,7 +155,16 @@ export default function Login() {
                       </Link>
                     </div>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input
+                        type="password"
+                        className={`text-white ${
+                          isDark
+                            ? "placeholder:text-slate-400"
+                            : "placeholder:text-red-400/60"
+                        }`}
+                        placeholder="Enter your password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -130,7 +185,7 @@ export default function Login() {
               </Button>
             </form>
           </Form>
-          <p className="mt-4 text-center text-sm text-slate-400">
+          <p className="mt-4 text-center text-sm text-slate-300">
             Don't have an account?{" "}
             <Link
               to="/signup"
