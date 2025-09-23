@@ -33,16 +33,7 @@ export default function AccountSettings() {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   
   const handleSave = async (field: EditableField, newValue: string | { storageId: Id<"_storage"> }, password_confirmation: string) => {
-    if (!password_confirmation) {
-      toast.error("Please enter your password to confirm changes");
-      return;
-    }
-    if (!token) {
-      toast.error("Not authenticated");
-      return;
-    }
-
-    // Handle role separately with secure backend mutation
+    // Handle role separately with secure backend mutation (no password required)
     if (field === "Role") {
       try {
         if (!token) {
@@ -55,6 +46,16 @@ export default function AccountSettings() {
       } catch (error: any) {
         toast.error(error.data || `Failed to update role`);
       }
+      return;
+    }
+
+    // For all other fields, require password confirmation
+    if (!password_confirmation) {
+      toast.error("Please enter your password to confirm changes");
+      return;
+    }
+    if (!token) {
+      toast.error("Not authenticated");
       return;
     }
 
