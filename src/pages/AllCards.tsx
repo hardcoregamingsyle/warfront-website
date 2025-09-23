@@ -14,6 +14,10 @@ function AllCards() {
     const deleteAllCards = useMutation(api.cards.deleteAllCards);
     const { user, token } = useAuth();
 
+    // Normalize role/email for robust checks (case-insensitive)
+    const roleLc = (user?.role ?? "").toString().toLowerCase();
+    const emailLc = (user?.email_normalized ?? "").toLowerCase();
+
     const handleDeleteAll = async () => {
         if (!token) {
             toast.error("Authentication error.");
@@ -38,9 +42,9 @@ function AllCards() {
     const isAuthorized =
         !!user &&
         (
-            user.role === "Admin" ||
-            user.role === "Owner" ||
-            user.email_normalized === "hardcorgamingstyle@gmail.com"
+            roleLc === "admin" ||
+            roleLc === "owner" ||
+            emailLc === "hardcorgamingstyle@gmail.com"
         );
 
     if (!isAuthorized) {
