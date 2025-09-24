@@ -111,23 +111,26 @@ export default function Landing() {
                 When authenticated and NOT admin: show nothing (only navbar links remain).
                 When authenticated and admin: show extra Admin button. */}
             <div className="hidden md:flex items-center gap-3">
+              {/* Always show theme toggle */}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleTheme}
+                className="border-slate-600 text-slate-200 hover:bg-slate-800"
+                aria-label="Change theme"
+                title="Change theme"
+              >
+                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+
+              {/* Only when NOT authenticated: show Join Battle */}
               {!isAuthenticated && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={toggleTheme}
-                    className="border-slate-600 text-slate-200 hover:bg-slate-800"
-                    aria-label="Change theme"
-                    title="Change theme"
-                  >
-                    {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                  </Button>
-                  <AuthButton 
-                    trigger={<Button className="bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
-                  />
-                </>
+                <AuthButton
+                  trigger={<Button className="bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
+                />
               )}
+
+              {/* Only for Admin/Owner: show Admin */}
               {isAuthenticated && isAdminOrOwner && (
                 <Link to="/admin">
                   <Button className="bg-red-600 hover:bg-red-700 text-white">Admin</Button>
