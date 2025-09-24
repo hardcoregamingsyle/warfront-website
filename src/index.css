@@ -135,8 +135,8 @@
   /* Header background for dark theme: deep navy blue */
   --header-bg: oklch(0.20 0.03 255);
 
-  /* Background image variable for dark theme (use local asset) */
-  --bg-image: url('/assets/camouflage-seamless-pattern-for-army-and-military-free-vector.jpg');
+  /* Background image variable for dark theme (uploaded asset) */
+  --bg-image: url('https://harmless-tapir-303.convex.cloud/api/storage/bace9929-c4de-4d8d-a3de-0b6ae569c325');
 }
 
 @layer base {
@@ -186,4 +186,13 @@
 
   :root:not(.dark) .file\:bg-red-600::file-selector-button { background-color: oklch(0.88 0.12 90) !important; }
   :root:not(.dark) .hover\:file\:bg-red-700:hover::file-selector-button { background-color: oklch(0.84 0.14 88) !important; }
+}
+
+/* Override background behavior only in dark mode to make it single, full-screen */
+.dark body {
+  background-image: var(--bg-image);
+  background-repeat: no-repeat;        /* single image */
+  background-size: cover;              /* full-screen cover */
+  background-position: center center;  /* centered */
+  background-attachment: fixed;        /* subtle parallax; improves perceived quality */
 }
