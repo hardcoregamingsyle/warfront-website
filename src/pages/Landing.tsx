@@ -100,21 +100,33 @@ export default function Landing() {
               )}
             </div>
 
-            {/* Desktop Actions: Auth + Theme toggle */}
+            {/* Desktop Actions */}
+            {/* When NOT authenticated: show theme toggle + Join Battle.
+                When authenticated and NOT admin: show nothing (only navbar links remain).
+                When authenticated and admin: show extra Admin button. */}
             <div className="hidden md:flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={toggleTheme}
-                className="border-slate-600 text-slate-200 hover:bg-slate-800"
-                aria-label="Change theme"
-                title="Change theme"
-              >
-                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
-              <AuthButton 
-                trigger={<Button className="bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
-              />
+              {!isAuthenticated && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={toggleTheme}
+                    className="border-slate-600 text-slate-200 hover:bg-slate-800"
+                    aria-label="Change theme"
+                    title="Change theme"
+                  >
+                    {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                  </Button>
+                  <AuthButton 
+                    trigger={<Button className="bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
+                  />
+                </>
+              )}
+              {isAuthenticated && isAdminOrOwner && (
+                <Link to="/admin">
+                  <Button className="bg-red-600 hover:bg-red-700 text-white">Admin</Button>
+                </Link>
+              )}
             </div>
 
             {/* Mobile menu button */}
@@ -143,7 +155,9 @@ export default function Landing() {
                 <a href="#gameplay" className="block px-3 py-2 text-slate-300 hover:text-white">Gameplay</a>
                 <a href="#contact" className="block px-3 py-2 text-slate-300 hover:text-white">Contact</a>
                 {isAuthenticated && isAdminOrOwner && (
-                  <Link to="/admin" className="block px-3 py-2 text-slate-300 hover:text-white">Admin</Link>
+                  <Link to="/admin" className="block px-3 py-2">
+                    <Button className="w-full bg-red-600 hover:bg-red-700 text-white">Admin</Button>
+                  </Link>
                 )}
                 <div className="px-3 py-2 grid grid-cols-2 gap-2">
                   <Button
@@ -160,9 +174,11 @@ export default function Landing() {
                       <span className="flex items-center gap-2"><Moon className="h-4 w-4" /> Dark</span>
                     )}
                   </Button>
-                  <AuthButton 
-                    trigger={<Button className="w-full bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
-                  />
+                  {!isAuthenticated && (
+                    <AuthButton 
+                      trigger={<Button className="w-full bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
+                    />
+                  )}
                 </div>
               </div>
             </motion.div>
