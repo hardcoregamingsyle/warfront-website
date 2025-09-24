@@ -164,8 +164,8 @@
     background-color: var(--background);
     background-image: var(--bg-image);
     background-repeat: repeat;
-    /* Increase light mode pattern size (dark mode overrides below) */
-    background-size: 640px 640px;
+    /* Increase light mode pattern size more */
+    background-size: 960px 960px;
     background-position: center center;
     background-attachment: scroll;
     /* Add transition for smoother theme switching */
