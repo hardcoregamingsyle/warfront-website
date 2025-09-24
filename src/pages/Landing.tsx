@@ -5,12 +5,6 @@ import { motion } from "framer-motion";
 import {
   Menu,
   Play,
-  Shield,
-  Star,
-  Sword,
-  Target,
-  Trophy,
-  Users,
   X,
 } from "lucide-react";
 import { Sun, Moon } from "lucide-react";
