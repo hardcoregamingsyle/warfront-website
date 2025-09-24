@@ -187,6 +187,12 @@
 
   :root:not(.dark) .file\:bg-red-600::file-selector-button { background-color: oklch(0.88 0.12 90) !important; }
   :root:not(.dark) .hover\:file\:bg-red-700:hover::file-selector-button { background-color: oklch(0.84 0.14 88) !important; }
+
+  /* Ensure ALL buttons have white text in Light mode */
+  :root:not(.dark) button,
+  :root:not(.dark) [role="button"] {
+    color: #FFFFFF !important;
+  }
 }
 
 /* Override background behavior only in dark mode to make it single, full-screen */
