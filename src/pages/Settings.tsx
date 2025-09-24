@@ -18,7 +18,7 @@ export default function Settings() {
         <title>Settings - Warfront</title>
         <meta name="description" content="Manage your Warfront account settings, including security, visibility, and connected social media accounts." />
       </Helmet>
-      <div className="bg-black min-h-screen -m-10 p-10">
+      <div className="min-h-screen -m-10 p-10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-red-400 mb-8">Settings</h1>
           <div className="space-y-4">
