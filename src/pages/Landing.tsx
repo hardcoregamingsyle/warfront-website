@@ -26,6 +26,12 @@ export default function Landing() {
     return saved !== "light";
   });
 
+  // Preload background image for better performance
+  useEffect(() => {
+    const img = new Image();
+    img.src = '/assets/camouflage-seamless-pattern-for-army-and-military-free-vector.jpg';
+  }, []);
+
   // Apply theme to document root
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -47,6 +53,7 @@ export default function Landing() {
       <Helmet>
         <title>Combat for the Digital Age – Warfront</title>
         <link rel="icon" type="image/png" href="/assets/Logo.png" />
+        <link rel="preload" as="image" href="/assets/camouflage-seamless-pattern-for-army-and-military-free-vector.jpg" />
         <meta name="description" content="Experience Warfront, the family-friendly military TCG & CCG. Battle online with friends or play offline with physical cards. A perfect mix of combat, strategy, and fun for all ages." />
         <meta name="keywords" content="Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards" />
         <meta property="og:title" content="Warfront: A Family-Friendly TCG for the Digital Age" />
