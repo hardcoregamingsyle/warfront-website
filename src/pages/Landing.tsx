@@ -18,6 +18,12 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/use-auth";
+import { Suspense, lazy } from "react";
+
+const FeaturesSection = lazy(() => import("./landing/FeaturesSection"));
+const GameplaySection = lazy(() => import("./landing/GameplaySection"));
+const CTASection = lazy(() => import("./landing/CTASection"));
+const FooterSection = lazy(() => import("./landing/FooterSection"));
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -224,209 +230,25 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-16 px-4 sm:px-6 lg:px-8 bg-slate-800/50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-              Battle Features
-            </h2>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-              Experience warfare like never before with our advanced tactical systems
-            </p>
-          </motion.div>
+      {/* Features Section (lazy) */}
+      <Suspense fallback={<div className="h-[600px]" />}>
+        <FeaturesSection />
+      </Suspense>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Sword className="h-8 w-8 text-red-500" />,
-                title: "Strategic Combat",
-                description: "Deploy units with unique abilities and create devastating combinations"
-              },
-              {
-                icon: <Shield className="h-8 w-8 text-blue-500" />,
-                title: "Defensive Tactics",
-                description: "Build fortifications and defensive lines to protect your territory"
-              },
-              {
-                icon: <Target className="h-8 w-8 text-green-500" />,
-                title: "Precision Strikes",
-                description: "Execute targeted attacks to eliminate key enemy positions"
-              },
-              {
-                icon: <Users className="h-8 w-8 text-purple-500" />,
-                title: "Multiplayer Battles",
-                description: "Challenge players worldwide in ranked competitive matches"
-              },
-              {
-                icon: <Trophy className="h-8 w-8 text-yellow-500" />,
-                title: "Tournament Mode",
-                description: "Compete in seasonal tournaments for exclusive rewards"
-              },
-              {
-                icon: <Star className="h-8 w-8 text-orange-500" />,
-                title: "Card Collection",
-                description: "Collect rare cards and build the ultimate military deck"
-              }
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card className="bg-slate-900/50 border-slate-700 hover:border-slate-600 transition-colors h-full">
-                  <CardContent className="p-6">
-                    <div className="mb-4">{feature.icon}</div>
-                    <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-                    <p className="text-slate-300">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Gameplay Section (lazy) */}
+      <Suspense fallback={<div className="h-[600px]" />}>
+        <GameplaySection />
+      </Suspense>
 
-      {/* Gameplay Section */}
-      <section id="gameplay" className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-                Master the Art of War
-              </h2>
-              <p className="text-lg text-slate-300 mb-6">
-                Every decision matters in Warfront. Plan your moves, anticipate enemy tactics, 
-                and adapt your strategy in real-time battles that will test your military prowess.
-              </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Turn-based tactical gameplay",
-                  "Resource management systems",
-                  "Dynamic battlefield conditions",
-                  "Multiple victory conditions"
-                ].map((item, index) => (
-                  <li key={index} className="flex items-center text-slate-300">
-                    <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link to="/how-to-play">
-                <Button className="bg-red-600 hover:bg-red-700 text-white">
-                  Learn How to Play
-                </Button>
-              </Link>
-            </motion.div>
+      {/* CTA Section (lazy) */}
+      <Suspense fallback={<div className="h-[360px]" />}>
+        <CTASection />
+      </Suspense>
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <div className="bg-slate-800 rounded-lg border border-slate-700 aspect-square flex items-center justify-center">
-                <div className="text-center">
-                  <Target className="h-16 w-16 text-red-500 mx-auto mb-4" />
-                  <p className="text-slate-400 text-lg">Gameplay Screenshot</p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-red-900/20 to-slate-900/20">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-              Ready for Battle?
-            </h2>
-            <p className="text-xl text-slate-300 mb-8">
-              Join thousands of commanders already dominating the battlefield. 
-              Your military campaign starts now.
-            </p>
-            <div className="flex justify-center">
-              <AuthButton 
-                trigger={
-                  <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg">
-                    <Play className="mr-2 h-5 w-5" />
-                    Start Your Campaign
-                  </Button>
-                }
-              />
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer id="contact" className="bg-slate-900 border-t border-slate-700 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="mb-4">
-                <img src="/assets/Logo.png" alt="Warfront Logo" className="h-12 w-auto" />
-              </div>
-              <p className="text-slate-400">
-                The ultimate military strategy card game experience.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-white font-bold mb-4">Game</h3>
-              <ul className="space-y-2 text-slate-400">
-                <li><a href="#" className="hover:text-white transition-colors">Download</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">System Requirements</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Release Notes</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-white font-bold mb-4">Community</h3>
-              <ul className="space-y-2 text-slate-400">
-                <li><a href="https://discord.gg/BjH5NSWYGM" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Discord</a></li>
-                <li><a href="https://www.youtube.com/channel/UCAoKv9QSWtPZkxGA97kVfvw?subscribe" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">YouTube</a></li>
-                <li><a href="https://www.facebook.com/profile.php?id=61579598579273" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Facebook</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Forums</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Tournaments</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-white font-bold mb-4">Support</h3>
-              <ul className="space-y-2 text-slate-400">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Bug Reports</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-700 mt-8 pt-8 text-center text-slate-400">
-            <p>&copy; 2024 Warfront. All rights reserved. Built for tactical supremacy.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Footer (lazy) */}
+      <Suspense fallback={<div className="h-[300px]" />}>
+        <FooterSection />
+      </Suspense>
     </div>
   );
 }
