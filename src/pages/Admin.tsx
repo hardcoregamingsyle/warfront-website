@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Users, Settings, Activity } from "lucide-react";
+import { Link } from "react-router";
 
 export default function Admin() {
   const { user } = useAuth();
@@ -41,7 +42,7 @@ export default function Admin() {
     <DashboardLayout>
       <Helmet>
         <title>Admin | Warfront</title>
-        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
+        <link rel="icon" type="image/png" href="/assets/Logo.png" />
         <meta name="description" content="Administrative controls for Warfront." />
       </Helmet>
 
@@ -58,9 +59,11 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="space-y-2 text-slate-300">
               <p>Review reports, manage user roles, and handle escalations.</p>
-              <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
-                Open Moderation
-              </Button>
+              <Link to="/admin/users">
+                <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Manage Users
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -73,9 +76,11 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="space-y-2 text-slate-300">
               <p>Search users, inspect profiles, and manage access.</p>
-              <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
-                Manage Users
-              </Button>
+              <Link to="/admin/users">
+                <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Open Users
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -88,9 +93,11 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="space-y-2 text-slate-300">
               <p>Environment, maintenance tasks, and feature flags.</p>
-              <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
-                System Settings
-              </Button>
+              <Link to="/admin/cms">
+                <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Open CMS
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -103,9 +110,11 @@ export default function Admin() {
             </CardHeader>
             <CardContent className="space-y-2 text-slate-300">
               <p>Recent actions, health metrics, and security logs.</p>
-              <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
-                View Logs
-              </Button>
+              <Link to="/all-cards">
+                <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Go to All Cards
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

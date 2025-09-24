@@ -89,7 +89,7 @@ export default function Login() {
     <div className="min-h-screen text-white flex items-center justify-center p-4">
       <Helmet>
         <title>Login to Warfront</title>
-        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
+        <link rel="icon" type="image/png" href="/assets/Logo.png" />
         <meta name="description" content="Log in to your Warfront account to access your physical card collection, play online, and manage your profile." />
       </Helmet>
 
@@ -160,7 +160,7 @@ export default function Login() {
                         className={`text-white ${
                           isDark
                             ? "placeholder:text-slate-400"
-                            : "placeholder:text-red-400/60"
+                            : "placeholder:text-white"
                         }`}
                         placeholder="Enter your password"
                         {...field}
