@@ -165,7 +165,7 @@ export default function JoinBattle() {
         <meta property="og:description" content="Challenge players from around the world in a head-to-head battle." />
         <meta property="og:image" content="https://www.reddit.com/r/MemeTemplatesOfficial/comments/l25ks2/2_guys_fighting_1_guy_vibing/" />
       </Helmet>
-      <div className="bg-slate-900 text-white -m-8 p-8 min-h-screen">
+      <div className="-m-8 p-8 min-h-screen text-foreground">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -176,7 +176,7 @@ export default function JoinBattle() {
             <h1 className="text-5xl font-bold tracking-tight text-red-500">
               Find a Battle
             </h1>
-            <p className="text-xl text-slate-300 mt-4 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
               Choose your opponent and enter the fray. Victory awaits the bold.
             </p>
           </div>
@@ -194,7 +194,7 @@ export default function JoinBattle() {
                   Create Multiplayer Battle
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-slate-900 border-slate-700 text-white">
+              <DialogContent className="bg-background border-border text-foreground">
                 <DialogHeader>
                   <DialogTitle>Create Multiplayer Lobby</DialogTitle>
                 </DialogHeader>
@@ -208,7 +208,7 @@ export default function JoinBattle() {
                       type="number"
                       value={maxPlayers}
                       onChange={(e) => setMaxPlayers(Number(e.target.value))}
-                      className="col-span-3 bg-slate-800 border-slate-600"
+                      className="col-span-3 bg-background border-input text-foreground"
                       min={2}
                       max={8}
                     />
@@ -233,11 +233,11 @@ export default function JoinBattle() {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-white my-8">1v1 Open Battles</h2>
+            <h2 className="text-3xl font-bold text-center text-foreground my-8">1v1 Open Battles</h2>
             <div className="space-y-4">
               {battles === undefined && (
                 <div className="flex justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-white" />
+                  <Loader2 className="h-8 w-8 animate-spin text-foreground" />
                 </div>
               )}
               {battles && battles.length === 0 && (
@@ -314,11 +314,11 @@ export default function JoinBattle() {
           </div>
 
           <div className="max-w-4xl mx-auto mt-12">
-            <h2 className="text-3xl font-bold text-center text-white my-8">Multiplayer Lobbies</h2>
+            <h2 className="text-3xl font-bold text-center text-foreground my-8">Multiplayer Lobbies</h2>
             <div className="space-y-4">
               {multiBattles === undefined && (
                 <div className="flex justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-white" />
+                  <Loader2 className="h-8 w-8 animate-spin text-foreground" />
                 </div>
               )}
               {multiBattles && multiBattles.length === 0 && (
