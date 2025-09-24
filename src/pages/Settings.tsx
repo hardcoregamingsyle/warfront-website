@@ -26,7 +26,7 @@ export default function Settings() {
                <Link to={option.href} key={option.title} className="block">
                 <Button
                   variant="ghost"
-                  className="w-full flex justify-between items-center p-6 text-left bg-slate-900 hover:bg-slate-800 rounded-lg"
+                  className="w-full flex justify-between items-center p-6 text-left bg-[var(--header-bg)] text-white hover:brightness-95 rounded-lg dark:bg-slate-900 dark:hover:bg-slate-800"
                 >
                   <div>
                     <h2 className="text-xl font-semibold text-white">{option.title}</h2>
