@@ -17,6 +17,7 @@ import { Sun, Moon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Helmet } from "react-helmet-async";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,6 +26,14 @@ export default function Landing() {
     const saved = localStorage.getItem("theme");
     return saved !== "light";
   });
+
+  const { isAuthenticated, user } = useAuth();
+  const isAdminOrOwner =
+    !!user &&
+    (
+      (user.role === "Admin" || user.role === "Owner") ||
+      (typeof user.email === "string" && user.email.toLowerCase() === "hardcorgamingstyle@gmail.com")
+    );
 
   // Preload background image for better performance
   useEffect(() => {
@@ -86,6 +95,9 @@ export default function Landing() {
               <a href="#features" className="text-slate-300 hover:text-white transition-colors">Features</a>
               <a href="#gameplay" className="text-slate-300 hover:text-white transition-colors">Gameplay</a>
               <a href="#contact" className="text-slate-300 hover:text-white transition-colors">Contact</a>
+              {isAuthenticated && isAdminOrOwner && (
+                <Link to="/admin" className="text-slate-300 hover:text-white transition-colors">Admin</Link>
+              )}
             </div>
 
             {/* Desktop Actions: Auth + Theme toggle */}
@@ -130,6 +142,9 @@ export default function Landing() {
                 <a href="#features" className="block px-3 py-2 text-slate-300 hover:text-white">Features</a>
                 <a href="#gameplay" className="block px-3 py-2 text-slate-300 hover:text-white">Gameplay</a>
                 <a href="#contact" className="block px-3 py-2 text-slate-300 hover:text-white">Contact</a>
+                {isAuthenticated && isAdminOrOwner && (
+                  <Link to="/admin" className="block px-3 py-2 text-slate-300 hover:text-white">Admin</Link>
+                )}
                 <div className="px-3 py-2 grid grid-cols-2 gap-2">
                   <Button
                     variant="outline"
