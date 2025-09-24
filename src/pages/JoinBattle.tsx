@@ -173,10 +173,10 @@ export default function JoinBattle() {
           className="container mx-auto"
         >
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold tracking-tight text-red-500">
+            <h1 className="text-5xl font-bold tracking-tight text-yellow-300">
               Find a Battle
             </h1>
-            <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
+            <p className="text-xl text-white mt-4 max-w-2xl mx-auto">
               Choose your opponent and enter the fray. Victory awaits the bold.
             </p>
           </div>
@@ -233,7 +233,7 @@ export default function JoinBattle() {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-foreground my-8">1v1 Open Battles</h2>
+            <h2 className="text-3xl font-bold text-center text-yellow-300 my-8">1v1 Open Battles</h2>
             <div className="space-y-4">
               {battles === undefined && (
                 <div className="flex justify-center">
@@ -241,7 +241,7 @@ export default function JoinBattle() {
                 </div>
               )}
               {battles && battles.length === 0 && (
-                <p className="text-center text-slate-400">
+                <p className="text-center text-white">
                   No open 1v1 battles. Be the first to create one!
                 </p>
               )}
@@ -266,7 +266,7 @@ export default function JoinBattle() {
 
                         {/* VS */}
                         <div className="col-span-1 flex justify-center">
-                          <span className="text-slate-500 text-2xl font-thin">VS</span>
+                          <span className="text-white text-2xl font-thin">VS</span>
                         </div>
 
                         {/* Opponent */}
@@ -314,7 +314,7 @@ export default function JoinBattle() {
           </div>
 
           <div className="max-w-4xl mx-auto mt-12">
-            <h2 className="text-3xl font-bold text-center text-foreground my-8">Multiplayer Lobbies</h2>
+            <h2 className="text-3xl font-bold text-center text-yellow-300 my-8">Multiplayer Lobbies</h2>
             <div className="space-y-4">
               {multiBattles === undefined && (
                 <div className="flex justify-center">
@@ -322,7 +322,7 @@ export default function JoinBattle() {
                 </div>
               )}
               {multiBattles && multiBattles.length === 0 && (
-                <p className="text-center text-slate-400">
+                <p className="text-center text-white">
                   No open multiplayer lobbies. Be the first to create one!
                 </p>
               )}
@@ -338,7 +338,7 @@ export default function JoinBattle() {
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-lg font-bold text-white">Lobby by {battle.players[0]?.name}</p>
-                          <p className="text-sm text-slate-400">
+                          <p className="text-sm text-white">
                             Players: {battle.playerIds.length} / {battle.maxPlayers}
                           </p>
                         </div>
