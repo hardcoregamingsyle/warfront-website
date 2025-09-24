@@ -153,3 +153,47 @@ If you didn't request this password reset, please ignore this email.`,
     });
   },
 });
+
+export const sendNotificationEmail = internalAction({
+  args: {
+    email: v.string(),
+    name: v.string(),
+    subject: v.string(),
+    html: v.union(v.string(), v.null()),
+    text: v.union(v.string(), v.null()),
+  },
+  handler: async (ctx, { email, name, subject, html, text }) => {
+    console.log(`Sending notification email to: ${email}`);
+    await brevoSendEmail({
+      senderEmail: "no-reply@mail.warfront.skinticals.com",
+      senderName: process.env.BREVO_SENDER_NAME || "Warfront",
+      toEmail: email,
+      toName: name,
+      subject,
+      html: html ?? undefined,
+      text: text ?? undefined,
+    });
+  },
+});
+
+export const sendAlertEmail = internalAction({
+  args: {
+    email: v.string(),
+    name: v.string(),
+    subject: v.string(),
+    html: v.union(v.string(), v.null()),
+    text: v.union(v.string(), v.null()),
+  },
+  handler: async (ctx, { email, name, subject, html, text }) => {
+    console.log(`Sending alert email to: ${email}`);
+    await brevoSendEmail({
+      senderEmail: "alert@mail.warfront.skinticals.com",
+      senderName: process.env.BREVO_SENDER_NAME || "Warfront",
+      toEmail: email,
+      toName: name,
+      subject,
+      html: html ?? undefined,
+      text: text ?? undefined,
+    });
+  },
+});
