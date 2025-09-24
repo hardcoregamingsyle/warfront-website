@@ -300,3 +300,64 @@ export const getFriendshipDetails = query({
     };
   },
 });
+
+export const unfriendUser = mutation({
+  args: {
+    token: v.string(),
+    friendId: v.id("users"),
+  },
+  handler: async (ctx, { token, friendId }) => {
+    // Validate session
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+
+    if (!session || session.expires < Date.now()) {
+      throw new Error("Invalid or expired session");
+    }
+
+    // Find an accepted friendship in either direction
+    const f1 = await ctx.db
+      .query("friendships")
+      .withIndex("by_requestee_and_requester", (q) =>
+        q.eq("requesteeId", friendId).eq("requesterId", session.userId)
+      )
+      .first();
+
+    const f2 = await ctx.db
+      .query("friendships")
+      .withIndex("by_requestee_and_requester", (q) =>
+        q.eq("requesteeId", session.userId).eq("requesterId", friendId)
+      )
+      .first();
+
+    const friendship = f1 ?? f2;
+
+    if (!friendship || friendship.status !== "accepted") {
+      throw new Error("No existing friendship found");
+    }
+
+    // Delete the friendship
+    await ctx.db.delete(friendship._id);
+
+    // Notify both users
+    await ctx.db.insert("notifications", {
+      userId: session.userId,
+      type: "friend_update",
+      message: "You have unfriended a user.",
+      href: "/friends",
+      read: false,
+    });
+
+    await ctx.db.insert("notifications", {
+      userId: friendId,
+      type: "friend_update",
+      message: "A user has unfriended you.",
+      href: "/friends",
+      read: false,
+    });
+
+    return "Unfriended successfully";
+  },
+});

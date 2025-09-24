@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserCheck, UserX, Users } from "lucide-react";
+import { UserCheck, UserX, Users, UserMinus } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
@@ -17,6 +17,7 @@ function Friends() {
   const friendRequests = useQuery(api.friends.getFriendRequests, token ? { token } : "skip");
   const friends = useQuery(api.friends.getFriends, token ? { token } : "skip");
   const respondToRequest = useMutation(api.friends.respondToFriendRequest);
+  const unfriend = useMutation(api.friends.unfriendUser);
 
   const handleResponse = async (friendshipId: Id<"friendships">, response: "accepted" | "declined") => {
     if (!token) return;
@@ -26,6 +27,17 @@ function Friends() {
       toast.success(`Friend request ${response}!`);
     } catch (error: any) {
       toast.error(error.data || "Failed to respond to friend request");
+    }
+  };
+
+  const handleUnfriend = async (friendId: Id<"users">) => {
+    if (!token) return;
+    const t = toast.loading("Unfriending...");
+    try {
+      await unfriend({ token, friendId });
+      toast.success("Unfriended", { id: t });
+    } catch (error: any) {
+      toast.error(error.data || "Failed to unfriend", { id: t });
     }
   };
 
@@ -109,16 +121,29 @@ function Friends() {
             {friends && friends.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {friends.map((friend) => (
-                  <div key={friend._id} className="flex items-center gap-4 p-4 bg-slate-800 rounded-lg">
-                    <Avatar>
-                      <AvatarImage src={friend.image} alt={friend.name} />
-                      <AvatarFallback>{friend.name?.[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-semibold text-white">
-                        {friend.displayName || friend.name}
-                      </p>
-                      <p className="text-sm text-slate-400">@{friend.name}</p>
+                  <div key={friend._id} className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <Avatar>
+                        <AvatarImage src={friend.image} alt={friend.name} />
+                        <AvatarFallback>{friend.name?.[0]}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-semibold text-white">
+                          {friend.displayName || friend.name}
+                        </p>
+                        <p className="text-sm text-slate-400">@{friend.name}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleUnfriend(friend._id as Id<"users">)}
+                        title="Unfriend"
+                      >
+                        <UserMinus className="mr-2 h-4 w-4" />
+                        Unfriend
+                      </Button>
                     </div>
                   </div>
                 ))}
