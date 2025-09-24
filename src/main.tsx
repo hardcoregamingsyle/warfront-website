@@ -10,6 +10,17 @@ import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/layouts/ProtectedRoute";
 import "./index.css";
 
+// Initialize theme globally before React mounts so all routes get correct background/colors
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+  const saved = localStorage.getItem("theme");
+  const root = document.documentElement;
+  if (saved === "light") {
+    root.classList.remove("dark");
+  } else {
+    root.classList.add("dark");
+  }
+}
+
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
 // Lazy-loaded pages
