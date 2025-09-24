@@ -52,11 +52,16 @@ export default function AdminUsers() {
   const deleteUser = useMutation(api.users.adminDeleteUser);
 
   const [passwords, setPasswords] = useState<Record<string, string>>({}); // per-user new password
+  const [hiddenIds, setHiddenIds] = useState<Record<string, true>>({});
 
   const sortedUsers = useMemo(() => {
     if (!users) return [];
     return [...users].sort((a, b) => a.name.localeCompare(b.name));
   }, [users]);
+
+  const visibleUsers = useMemo(() => {
+    return sortedUsers.filter((u) => !hiddenIds[u._id]);
+  }, [sortedUsers, hiddenIds]);
 
   if (!isAuthorized) {
     return (
@@ -114,9 +119,14 @@ export default function AdminUsers() {
     if (!window.confirm("Delete this user? This cannot be undone.")) return;
     const t = toast.loading("Deleting user...");
     try {
+      setHiddenIds((s) => ({ ...s, [userId]: true }));
       await deleteUser({ token, userId });
       toast.success("User deleted", { id: t });
     } catch (e: any) {
+      setHiddenIds((s) => {
+        const { [userId]: _removed, ...rest } = s;
+        return rest;
+      });
       toast.error(e.message || "Failed to delete user", { id: t });
     }
   };
@@ -144,7 +154,7 @@ export default function AdminUsers() {
               </tr>
             </thead>
             <tbody>
-              {sortedUsers.map((u: UserRow) => (
+              {visibleUsers.map((u: UserRow) => (
                 <tr key={u._id} className="border-t border-slate-800">
                   <td className="px-4 py-3">{u.name}</td>
                   <td className="px-4 py-3">{u.email}</td>
@@ -199,7 +209,7 @@ export default function AdminUsers() {
                   </td>
                 </tr>
               ))}
-              {sortedUsers.length === 0 && (
+              {visibleUsers.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
                     No users found.
