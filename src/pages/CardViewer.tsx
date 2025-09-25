@@ -52,6 +52,8 @@ export default function CardViewer() {
     try {
       await createCardWithId({ token, customId });
       toast.success("New card created! Redirecting to editor...", { id: toastId });
+      // Add a short delay to ensure the editor can see the newly created card
+      await new Promise((resolve) => setTimeout(resolve, 500));
       navigate(`/editor/card/${customId}`);
     } catch (error: any) {
       toast.error(`Failed to create new card: ${error.message}`, { id: toastId });
