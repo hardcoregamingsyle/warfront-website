@@ -85,7 +85,9 @@ export default function CardViewer() {
   }
 
   if (card === null) {
-    const isAuthorizedCreator = user && ["admin", "owner", "cardsetter"].includes(user.role!);
+    const role = (user?.role ?? "").toString().toLowerCase();
+    const isAuthorizedCreator = !!user && (role === "admin" || role === "owner" || role === "card_setter");
+
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center h-full text-center">
@@ -100,13 +102,16 @@ export default function CardViewer() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-slate-300">
-                            You can create a new card. A new ID will be generated and you will be redirected to the editor.
+                        <p className="text-sm text-slate-300 mb-3">
+                          You can create a new card using this exact ID:
                         </p>
-                    </CardContent>
+                        <div className="text-xs md:text-sm font-mono bg-black/40 border border-red-500/20 text-red-300 rounded px-2 py-1 break-all">
+                          /cards/{customId}
+                        </div>
+                      </CardContent>
                     <CardFooter>
                          <Button onClick={handleCreateAndEdit} className="w-full bg-red-600 hover:bg-red-700 text-white">
-                            Create and Edit
+                            Create Card with this ID & Edit
                         </Button>
                     </CardFooter>
                 </Card>
