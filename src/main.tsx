@@ -62,6 +62,7 @@ const Admin = lazy(() => import("./pages/Admin.tsx"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers.tsx"));
 const AdminCMS = lazy(() => import("./pages/AdminCMS.tsx"));
 const AdminModeration = lazy(() => import("./pages/AdminModeration.tsx"));
+const AdminCardInfo = lazy(() => import("./pages/AdminCardInfo.tsx"));
 
 function RouteSyncer() {
   const location = useLocation();
@@ -142,6 +143,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
                 <Route path="/admin/cms" element={<ProtectedRoute><AdminCMS /></ProtectedRoute>} />
                 <Route path="/admin/moderation" element={<ProtectedRoute><AdminModeration /></ProtectedRoute>} />
+                <Route path="/admin/card-info" element={<ProtectedRoute><AdminCardInfo /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </BrowserRouter>
