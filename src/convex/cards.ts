@@ -55,6 +55,8 @@ export const update = mutation({
     await ctx.db.patch(cardId, {
       cardType,
       cardName,
+      // keep the normalized name in sync
+      name_normalized: cardName.toLowerCase(),
       imageId,
       rarity,
       frame,
@@ -189,6 +191,7 @@ export const createCardWithId = mutation({
             customId: customId,
             cardType: "Default Type", // Default value
             cardName: "New Card", // Default value
+            name_normalized: "new card",
         });
 
         return cardId;

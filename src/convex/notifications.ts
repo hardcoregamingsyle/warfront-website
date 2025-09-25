@@ -123,10 +123,11 @@ export const adminBroadcastNotification = mutation({
     for (const [, userId] of userMap) {
       await ctx.db.insert("notifications", {
         userId,
-        title,
-        body: message,
+        type: "broadcast",
+        message: `${title}: ${message}`,
+        href: "/dashboard",
         read: false,
-      } as any);
+      });
     }
 
     // Fire-and-forget emails via Brevo (optional, best-effort)

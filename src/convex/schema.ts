@@ -124,14 +124,99 @@ const schema = defineSchema(
       customId: v.string(), // The user-provided ID
       cardType: v.string(),
       cardName: v.string(),
+      name_normalized: v.string(), // For case-insensitive searches
       imageId: v.optional(v.id("_storage")),
       rarity: v.optional(v.string()),
+      rarityId: v.optional(v.id("rarities")),
+      upgradeId: v.optional(v.id("upgrades")),
       frame: v.optional(v.string()),
       batch: v.optional(v.string()),
       numberingA: v.optional(v.number()),
       numberingB: v.optional(v.number()),
       signed: v.optional(v.string()),
-    }).index("by_customId", ["customId"]),
+      // Card stats for future attacks/abilities system
+      health: v.optional(v.number()),
+      attackSlots: v.optional(v.number()),
+      abilitySlots: v.optional(v.number()),
+      passiveSlots: v.optional(v.number()),
+    })
+      .index("by_customId", ["customId"])
+      .index("by_name_normalized", ["name_normalized"])
+      .index("by_rarityId", ["rarityId"])
+      .index("by_upgradeId", ["upgradeId"]),
+
+    // New tables for the card management system
+    rarities: defineTable({
+      name: v.string(),
+      name_normalized: v.string(),
+      code: v.string(), // Short code like "C", "UC", "R", "SR", "UR"
+      description: v.optional(v.string()),
+    }).index("by_name_normalized", ["name_normalized"]),
+
+    upgrades: defineTable({
+      name: v.string(),
+      name_normalized: v.string(),
+      description: v.optional(v.string()),
+    }).index("by_name_normalized", ["name_normalized"]),
+
+    batches: defineTable({
+      cardId: v.id("cards"),
+      label: v.string(), // A, B, C, etc.
+      type: v.union(
+        v.literal("NORMAL"),
+        v.literal("EXCLUSIVE"), 
+        v.literal("LIMITED")
+      ),
+      maxSupply: v.optional(v.number()), // null for E/L batches
+      minted: v.number(), // current count
+      isComplete: v.boolean(),
+    })
+      .index("by_cardId", ["cardId"])
+      .index("by_cardId_and_label", ["cardId", "label"]),
+
+    // Future tables for attacks/abilities system (scaffolding)
+    attacks: defineTable({
+      name: v.string(),
+      name_normalized: v.string(),
+      subject: v.optional(v.string()),
+      description: v.string(),
+      attackType: v.string(),
+      damage: v.optional(v.number()),
+      heal: v.optional(v.number()),
+      value: v.optional(v.number()),
+    }).index("by_name_normalized", ["name_normalized"]),
+
+    passives: defineTable({
+      name: v.string(),
+      name_normalized: v.string(),
+      type: v.union(
+        v.literal("DAMAGE_BOOST"),
+        v.literal("HEALTH_BOOST"),
+        v.literal("DEFENCE"),
+        v.literal("AUTO_HEAL_SELF"),
+        v.literal("AUTO_HEAL_ALLY")
+      ),
+      description: v.string(),
+    }).index("by_name_normalized", ["name_normalized"]),
+
+    abilities: defineTable({
+      name: v.string(),
+      name_normalized: v.string(),
+      type: v.union(
+        v.literal("DESTROY_TARGET"),
+        v.literal("STUN"),
+        v.literal("LONG_STUN"),
+        v.literal("EXTRA_LONG_STUN"),
+        v.literal("BOOST_ALL_ALLIES"),
+        v.literal("HEAL_ALLIES"),
+        v.literal("MULTIPLE_TARGETS"),
+        v.literal("REVIVE"),
+        v.literal("REUSE"),
+        v.literal("MULTIPLE_TURNS")
+      ),
+      description: v.string(),
+      value: v.optional(v.number()), // For stun duration, heal amount, etc.
+    }).index("by_name_normalized", ["name_normalized"]),
 
     userCards: defineTable({
       userId: v.id("users"),

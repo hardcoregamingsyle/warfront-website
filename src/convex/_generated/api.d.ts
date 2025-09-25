@@ -18,6 +18,7 @@ import type * as auth from "../auth.js";
 import type * as auth_actions from "../auth_actions.js";
 import type * as battles from "../battles.js";
 import type * as blogs from "../blogs.js";
+import type * as cardInfo from "../cardInfo.js";
 import type * as cards from "../cards.js";
 import type * as crons from "../crons.js";
 import type * as dev from "../dev.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   auth_actions: typeof auth_actions;
   battles: typeof battles;
   blogs: typeof blogs;
+  cardInfo: typeof cardInfo;
   cards: typeof cards;
   crons: typeof crons;
   dev: typeof dev;
