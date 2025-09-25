@@ -70,6 +70,27 @@ export const listBatchesForCard = query({
   },
 });
 
+export const listAttacks = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("attacks").order("asc").collect();
+  },
+});
+
+export const listPassives = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("passives").order("asc").collect();
+  },
+});
+
+export const listAbilities = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("abilities").order("asc").collect();
+  },
+});
+
 // Mutations
 export const deleteCard = mutation({
   args: { token: v.string(), cardId: v.id("cards") },
@@ -217,6 +238,189 @@ export const markBatchComplete = mutation({
 
     await ctx.db.patch(batchId, { isComplete: true });
     return "Batch marked as complete";
+  },
+});
+
+// Creation mutations for Rarity and Upgrade
+export const createRarity = mutation({
+  args: {
+    token: v.string(),
+    name: v.string(),
+    code: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, { token, name, code, description }) => {
+    await assertIsAdmin(ctx, token);
+
+    const name_normalized = name.toLowerCase();
+    const dup = await ctx.db
+      .query("rarities")
+      .withIndex("by_name_normalized", (q) => q.eq("name_normalized", name_normalized))
+      .unique();
+    if (dup) throw new Error("Rarity with this name already exists");
+
+    const id = await ctx.db.insert("rarities", {
+      name,
+      name_normalized,
+      code,
+      description,
+    });
+    return id;
+  },
+});
+
+export const createUpgrade = mutation({
+  args: {
+    token: v.string(),
+    name: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, { token, name, description }) => {
+    await assertIsAdmin(ctx, token);
+
+    const name_normalized = name.toLowerCase();
+    const dup = await ctx.db
+      .query("upgrades")
+      .withIndex("by_name_normalized", (q) => q.eq("name_normalized", name_normalized))
+      .unique();
+    if (dup) throw new Error("Upgrade with this name already exists");
+
+    const id = await ctx.db.insert("upgrades", {
+      name,
+      name_normalized,
+      description,
+    });
+    return id;
+  },
+});
+
+// Create Card mutation (syncs fields with cards usage)
+export const createCard = mutation({
+  args: {
+    token: v.string(),
+    customId: v.string(),
+    cardType: v.string(),
+    cardName: v.string(),
+    health: v.number(),
+    attackSlots: v.number(),
+    abilitySlots: v.number(),
+    passiveSlots: v.optional(v.number()),
+    rarityId: v.optional(v.id("rarities")),
+    upgradeId: v.optional(v.id("upgrades")),
+  },
+  handler: async (ctx, args) => {
+    const { token, customId, cardType, cardName, health, attackSlots, abilitySlots, passiveSlots, rarityId, upgradeId } = args;
+    await assertIsAdmin(ctx, token);
+
+    const exists = await ctx.db
+      .query("cards")
+      .withIndex("by_customId", (q) => q.eq("customId", customId))
+      .unique();
+    if (exists) throw new Error("A card with this customId already exists");
+
+    const name_normalized = cardName.toLowerCase();
+
+    const id = await ctx.db.insert("cards", {
+      customId,
+      cardType,
+      cardName,
+      name_normalized,
+      rarityId,
+      upgradeId,
+      health,
+      attackSlots,
+      abilitySlots,
+      passiveSlots,
+    });
+    return id;
+  },
+});
+
+// Create Attack / Passive / Ability
+export const createAttack = mutation({
+  args: {
+    token: v.string(),
+    name: v.string(),
+    description: v.string(),
+    attackType: v.string(),
+    subject: v.optional(v.string()),
+    damage: v.optional(v.number()),
+    heal: v.optional(v.number()),
+    value: v.optional(v.number()),
+  },
+  handler: async (ctx, { token, name, description, attackType, subject, damage, heal, value }) => {
+    await assertIsAdmin(ctx, token);
+
+    const id = await ctx.db.insert("attacks", {
+      name,
+      name_normalized: name.toLowerCase(),
+      subject,
+      description,
+      attackType,
+      damage,
+      heal,
+      value,
+    });
+    return id;
+  },
+});
+
+export const createPassive = mutation({
+  args: {
+    token: v.string(),
+    name: v.string(),
+    description: v.string(),
+    type: v.union(
+      v.literal("DAMAGE_BOOST"),
+      v.literal("HEALTH_BOOST"),
+      v.literal("DEFENCE"),
+      v.literal("AUTO_HEAL_SELF"),
+      v.literal("AUTO_HEAL_ALLY"),
+    ),
+  },
+  handler: async (ctx, { token, name, description, type }) => {
+    await assertIsAdmin(ctx, token);
+
+    const id = await ctx.db.insert("passives", {
+      name,
+      name_normalized: name.toLowerCase(),
+      type,
+      description,
+    });
+    return id;
+  },
+});
+
+export const createAbility = mutation({
+  args: {
+    token: v.string(),
+    name: v.string(),
+    description: v.string(),
+    type: v.union(
+      v.literal("DESTROY_TARGET"),
+      v.literal("STUN"),
+      v.literal("LONG_STUN"),
+      v.literal("EXTRA_LONG_STUN"),
+      v.literal("BOOST_ALL_ALLIES"),
+      v.literal("HEAL_ALLIES"),
+      v.literal("MULTIPLE_TARGETS"),
+      v.literal("REVIVE"),
+      v.literal("REUSE"),
+      v.literal("MULTIPLE_TURNS"),
+    ),
+    value: v.optional(v.number()),
+  },
+  handler: async (ctx, { token, name, description, type, value }) => {
+    await assertIsAdmin(ctx, token);
+
+    const id = await ctx.db.insert("abilities", {
+      name,
+      name_normalized: name.toLowerCase(),
+      type,
+      description,
+      value,
+    });
+    return id;
   },
 });
 
