@@ -64,6 +64,11 @@ const AdminCMS = lazy(() => import("./pages/AdminCMS.tsx"));
 const AdminModeration = lazy(() => import("./pages/AdminModeration.tsx"));
 const AdminCardInfo = lazy(() => import("./pages/AdminCardInfo.tsx"));
 
+// Add new CMS page imports
+const BlogsMain = lazy(() => import("./pages/cms/BlogsMain.tsx"));
+const CardBlogs = lazy(() => import("./pages/cms/CardBlogs.tsx"));
+const CompanyBlogs = lazy(() => import("./pages/cms/CompanyBlogs.tsx"));
+
 function RouteSyncer() {
   const location = useLocation();
   useEffect(() => {
@@ -144,6 +149,11 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/admin/cms" element={<ProtectedRoute><AdminCMS /></ProtectedRoute>} />
                 <Route path="/admin/moderation" element={<ProtectedRoute><AdminModeration /></ProtectedRoute>} />
                 <Route path="/admin/card-info" element={<ProtectedRoute><AdminCardInfo /></ProtectedRoute>} />
+                
+                {/* CMS Sub-routes */}
+                <Route path="/admin/cms/blogs" element={<ProtectedRoute><BlogsMain /></ProtectedRoute>} />
+                <Route path="/admin/cms/blogs/card-blogs" element={<ProtectedRoute><CardBlogs /></ProtectedRoute>} />
+                <Route path="/admin/cms/blogs/company-blogs" element={<ProtectedRoute><CompanyBlogs /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </BrowserRouter>
