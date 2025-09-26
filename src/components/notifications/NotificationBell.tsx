@@ -22,24 +22,111 @@ type NotificationDoc = {
   read: boolean;
 };
 
+// Add: escape + formatter to support custom markup
+function escapeHtml(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function formatCustomMarkup(input: string): string {
+  let s = escapeHtml(input);
+
+  // Inline formats
+  // Bold: **text** and *text*
+  s = s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/\*(?!\s)(.+?)(?!\s)\*/g, "<strong>$1</strong>");
+
+  // Italics: -text-
+  s = s.replace(/-(?!\s)(.+?)(?!\s)-/g, "<em>$1</em>");
+
+  // Underline: _text_
+  s = s.replace(/_(?!\s)(.+?)(?!\s)_/g, "<u>$1</u>");
+
+  // Strikethrough: ~text~
+  s = s.replace(/~(?!\s)(.+?)(?!\s)~/g, "<s>$1</s>");
+
+  // Spoiler: `text`
+  s = s.replace(
+    /`(?!\s)(.+?)(?!\s)`/g,
+    '<span class="blur-[2px] hover:blur-0 bg-slate-700/60 px-1 rounded">$1</span>',
+  );
+
+  // Link: /text/ (assume text is URL; if not, still link to it via https)
+  s = s.replace(/\/(?!\s)(.+?)(?!\s)\//g, (_m, p1: string) => {
+    const url =
+      p1.startsWith("http://") || p1.startsWith("https://")
+        ? p1
+        : `https://${p1}`;
+    const safeText = escapeHtml(p1);
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-red-500 underline">${safeText}</a>`;
+  });
+
+  // Convert lines to lists/paragraphs
+  const lines = s.split(/\r?\n/);
+  const blocks: string[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    // Ordered list: "1. item"
+    if (/^\d+\.\s+/.test(lines[i])) {
+      const items: string[] = [];
+      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\d+\.\s+/, "").trim());
+        i++;
+      }
+      blocks.push(
+        `<ol class="list-decimal ml-6 space-y-1">${items
+          .map((li) => `<li>${li}</li>`)
+          .join("")}</ol>`,
+      );
+      continue;
+    }
+
+    // Unordered list: "- item"
+    if (/^-\s+/.test(lines[i])) {
+      const items: string[] = [];
+      while (i < lines.length && /^-\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^-+\s+/, "").trim());
+        i++;
+      }
+      blocks.push(
+        `<ul class="list-disc ml-6 space-y-1">${items
+          .map((li) => `<li>${li}</li>`)
+          .join("")}</ul>`,
+      );
+      continue;
+    }
+
+    // Preserve blank lines
+    if (lines[i].trim() === "") {
+      blocks.push("<br/>");
+      i++;
+      continue;
+    }
+
+    // Paragraph
+    blocks.push(`<p>${lines[i]}</p>`);
+    i++;
+  }
+
+  return blocks.join("");
+}
+
 function parseTitleAndBody(message: string): { title: string; body: string } {
-  // Support formats:
-  // 1) **Title** — Message
-  // 2) TITLE — Message
-  // 3) Fallback: entire message as body
+  // Supported:
+  // - **Title** — Message
+  // - TITLE — Message
+  // - Fallback: entire message as body
   const emDash = " — ";
   if (message.includes(emDash)) {
     const [rawTitle, ...rest] = message.split(emDash);
-    const title = rawTitle.replace(/^\*\*(.+)\*\*$/, "$1").trim(); // strip **bold**
+    const title = rawTitle.replace(/^\*\*(.+)\*\*$/, "$1").trim();
     const body = rest.join(emDash).trim();
     return { title, body };
   }
-  // If there's no em dash, also try to strip **...**
   const boldMatch = message.match(/^\*\*(.+)\*\*\s*(.*)$/);
   if (boldMatch) {
     return { title: boldMatch[1].trim(), body: boldMatch[2].trim() };
   }
-  // Fallback: no title delimiter
   return { title: "Notification", body: message };
 }
 
@@ -141,14 +228,20 @@ export function NotificationBell() {
           ) : (
             unread.map((n) => {
               const { title, body } = parseTitleAndBody(n.message || "");
+              const html = formatCustomMarkup(body || "");
               return (
                 <div key={n._id} className="px-2 py-2">
                   <div className="flex items-start gap-2">
                     <div className="flex-1">
-                      <div className="font-semibold text-sm">{title}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">
-                        {body}
+                      {/* Title in bold on its own line */}
+                      <div className="text-sm mb-1">
+                        <strong>{title || "Notification"}</strong>
                       </div>
+                      {/* Content with custom formatting */}
+                      <div
+                        className="text-xs text-slate-300 mt-0.5 space-y-1"
+                        dangerouslySetInnerHTML={{ __html: html }}
+                      />
                     </div>
                     <Button
                       variant="outline"
