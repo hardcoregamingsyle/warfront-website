@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@/components/auth/UserButton";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { motion } from "framer-motion";
 import { Swords, Shield, Gamepad2, HelpCircle, Menu, X, Users, History } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -80,7 +81,8 @@ export default function Header() {
             {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
 
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-3">
+            <NotificationBell />
             <UserButton />
           </div>
           <Button
@@ -128,8 +130,11 @@ export default function Header() {
                 <span className="flex items-center gap-2"><Moon className="h-4 w-4" /> Switch to Dark</span>
               )}
             </Button>
-            <div className="border-t border-slate-700 pt-4">
-              <UserButton />
+            <div className="border-t border-slate-700 pt-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <NotificationBell />
+                <UserButton />
+              </div>
             </div>
           </div>
         </motion.div>
