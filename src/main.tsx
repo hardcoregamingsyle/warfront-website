@@ -8,6 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/layouts/ProtectedRoute";
 import "./index.css";
+import { cmsStore } from "@/pages/cms/cmsStore";
 
 // Initialize theme globally before React mounts so all routes get correct background/colors
 if (typeof window !== "undefined" && typeof document !== "undefined") {
@@ -92,6 +93,12 @@ function RouteSyncer() {
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
+
+  // NEW: Ensure current path exists in CMS store as an exact page entry
+  useEffect(() => {
+    const path = location.pathname || "/";
+    cmsStore.ensure(path);
+  }, [location.pathname]);
 
   return null;
 }

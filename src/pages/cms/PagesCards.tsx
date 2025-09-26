@@ -2,7 +2,11 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cmsStore } from "./cmsStore";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { toast } from "sonner";
+import { cmsStore, CmsCategory } from "./cmsStore";
 import { useEffect, useState } from "react";
 
 export default function PagesCards() {
@@ -14,9 +18,20 @@ export default function PagesCards() {
     (roleLc === "admin" || roleLc === "owner" || emailLc === "hardcorgamingstyle@gmail.com");
 
   const [rows, setRows] = useState(cmsStore.getByCategory("cards"));
+  const [drafts, setDrafts] = useState<Record<string, { path: string; nextCategory: CmsCategory | "" }>>({});
 
   useEffect(() => {
-    const sync = () => setRows(cmsStore.getByCategory("cards"));
+    const sync = () => {
+      const data = cmsStore.getByCategory("cards");
+      setRows(data);
+      setDrafts((prev) => {
+        const next = { ...prev };
+        for (const r of data) {
+          if (!next[r.path]) next[r.path] = { path: r.path, nextCategory: "" };
+        }
+        return next;
+      });
+    };
     const unsub = cmsStore.subscribe(sync);
     sync();
     return () => { unsub(); };
@@ -39,6 +54,17 @@ export default function PagesCards() {
     );
   }
 
+  const onSave = (path: string) => {
+    const draft = drafts[path];
+    if (!draft || !draft.nextCategory) {
+      toast("Please select a category first.");
+      return;
+    }
+    cmsStore.move(path, draft.nextCategory);
+    toast(`Moved ${path} to ${draft.nextCategory.toUpperCase()} successfully.`);
+    setDrafts((prev) => ({ ...prev, [path]: { path, nextCategory: "" } }));
+  };
+
   return (
     <DashboardLayout>
       <Helmet>
@@ -56,13 +82,52 @@ export default function PagesCards() {
             {rows.length === 0 ? (
               <p className="text-slate-400">No pages assigned to this category yet.</p>
             ) : (
-              <ul className="space-y-2">
-                {rows.map((r) => (
-                  <li key={r.path} className="text-white">
-                    <span className="font-mono text-slate-300">{r.path}</span> — {r.title}
-                  </li>
-                ))}
-              </ul>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-slate-300">Path</TableHead>
+                      <TableHead className="text-slate-300">Title</TableHead>
+                      <TableHead className="text-slate-300">Change To</TableHead>
+                      <TableHead className="text-slate-300 text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((r) => (
+                      <TableRow key={r.path} className="border-b border-slate-800">
+                        <TableCell className="font-mono text-sm">{r.path}</TableCell>
+                        <TableCell>{r.title}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={drafts[r.path]?.nextCategory || ""}
+                            onValueChange={(v) =>
+                              setDrafts((prev) => ({
+                                ...prev,
+                                [r.path]: { path: r.path, nextCategory: v as CmsCategory },
+                              }))
+                            }
+                          >
+                            <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                              <SelectItem value="public">Public Pages</SelectItem>
+                              <SelectItem value="private">Private Pages</SelectItem>
+                              <SelectItem value="cards">Card Pages</SelectItem>
+                              <SelectItem value="robot">Robot Pages</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button className="bg-red-600 hover:bg-red-700" onClick={() => onSave(r.path)}>
+                            Save
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>

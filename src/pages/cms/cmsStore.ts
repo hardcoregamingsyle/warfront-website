@@ -86,6 +86,27 @@ class CmsStore {
     return this.pages.filter((p) => p.category === category);
   }
 
+  ensure(path: string, title?: string) {
+    const exists = this.pages.some((p) => p.path === path);
+    if (!exists) {
+      const derivedTitle = title ?? this.deriveTitleFromPath(path);
+      this.pages = [{ path, title: derivedTitle, category: "unsorted" }, ...this.pages];
+      this.emit();
+    }
+  }
+
+  setTitle(path: string, title: string) {
+    let changed = false;
+    this.pages = this.pages.map((p) => {
+      if (p.path === path) {
+        changed = true;
+        return { ...p, title };
+      }
+      return p;
+    });
+    if (changed) this.emit();
+  }
+
   move(path: string, to: CmsCategory) {
     let changed = false;
     this.pages = this.pages.map((p) => {
@@ -105,6 +126,19 @@ class CmsStore {
 
   private emit() {
     for (const fn of this.listeners) fn();
+  }
+
+  private deriveTitleFromPath(path: string): string {
+    // e.g. "/blog/advanced-strategy" -> "Advanced Strategy"
+    const segs = path.split("/").filter(Boolean);
+    const last = segs[segs.length - 1] ?? "/";
+    if (!last) return path;
+    const words = last.replace(/[-_]+/g, " ").trim();
+    if (!words) return path;
+    return words
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
   }
 }
 
