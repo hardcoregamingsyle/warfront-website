@@ -119,25 +119,28 @@ export const adminBroadcastNotification = mutation({
       }
     }
 
-    // Insert notifications
+    // Add: formatted message with bold title (markdown-like)
+    const formattedMessage = `**${title}** — ${message}`;
+
+    // Insert notifications with bold title prefix in message
     for (const [, userId] of userMap) {
       await ctx.db.insert("notifications", {
         userId,
         type: "broadcast",
-        message: `${title}: ${message}`,
+        message: formattedMessage, // Title shown in bold-style prefix
         href: "/dashboard",
         read: false,
       });
     }
 
-    // Fire-and-forget emails via Brevo (optional, best-effort)
+    // Send emails with HTML bold title and text fallback
     for (const u of usersForEmail) {
       await ctx.scheduler.runAfter(0, internal.auth_actions.sendNotificationEmail, {
         email: u.email,
         name: u.name,
         subject: title,
-        html: null,
-        text: message,
+        html: `<strong>${title}</strong><br/>${message}`,
+        text: `${title} — ${message}`,
       });
     }
 
