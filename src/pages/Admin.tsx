@@ -30,13 +30,13 @@ export default function Admin() {
   // Add: roles list for broadcasting notifications (must match backend roles)
   const ALL_ROLES = useMemo(
     () => [
-      "UNVERIFIED",
-      "VERIFIED",
-      "INFLUENCER",
-      "ADMIN",
-      "OWNER",
-      "CARD_SETTER",
-      "BLOGGERS",
+      "Unverified",
+      "Verified",
+      "Influencer",
+      "Admin",
+      "Owner",
+      "Card Setter",
+      "Bloggers",
     ] as const,
     [],
   );
