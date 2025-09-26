@@ -49,7 +49,7 @@ function formatCustomMarkup(input: string): string {
     '<span class="blur-[2px] hover:blur-0 bg-slate-700/60 px-1 rounded transition-all duration-200 cursor-pointer">$1</span>',
   );
 
-  // Link: /text/ (assume text is URL; if not, still link to it via https)
+  // Link: /text/ (assume text is URL; if not, still link via https)
   s = s.replace(/\/(?!\s)(.+?)(?<!\s)\//g, (_m, p1: string) => {
     const url =
       p1.startsWith("http://") || p1.startsWith("https://")
@@ -65,11 +65,14 @@ function formatCustomMarkup(input: string): string {
   let i = 0;
 
   while (i < lines.length) {
-    // Ordered list: "1. item"
-    if (/^\d+\.\s+/.test(lines[i])) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    // Ordered list: allow leading spaces. Pattern: "1. item"
+    if (/^\s*\d+\.\s+/.test(line)) {
       const items: string[] = [];
-      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\d+\.\s+/, "").trim());
+      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*\d+\.\s+/, "").trim());
         i++;
       }
       blocks.push(
@@ -80,11 +83,11 @@ function formatCustomMarkup(input: string): string {
       continue;
     }
 
-    // Unordered list: "- item"
-    if (/^-\s+/.test(lines[i])) {
+    // Unordered list: allow leading spaces and both '-' and '•'
+    if (/^\s*[-•]\s+/.test(line)) {
       const items: string[] = [];
-      while (i < lines.length && /^-\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^-+\s+/, "").trim());
+      while (i < lines.length && /^\s*[-•]\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*[-•]\s+/, "").trim());
         i++;
       }
       blocks.push(
@@ -96,14 +99,14 @@ function formatCustomMarkup(input: string): string {
     }
 
     // Preserve blank lines as line breaks
-    if (lines[i].trim() === "") {
+    if (trimmed === "") {
       blocks.push("<br/>");
       i++;
       continue;
     }
 
-    // Regular paragraph
-    blocks.push(`<p class="text-slate-300 mb-2">${lines[i]}</p>`);
+    // Regular paragraph line
+    blocks.push(`<p class="text-slate-300 mb-2">${line}</p>`);
     i++;
   }
 
