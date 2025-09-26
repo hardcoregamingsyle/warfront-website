@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -12,7 +12,9 @@ import { memo } from "react";
 function AllCards() {
     const cards = useQuery(api.allCards.getAllCardsWithOwners);
     const deleteAllCards = useMutation(api.cards.deleteAllCards);
+    const deleteCardMutation = useMutation(api.cards.deleteCard);
     const { user, token } = useAuth();
+    const navigate = useNavigate();
 
     // Normalize role/email for robust checks (case-insensitive)
     const roleLc = (user?.role ?? "").toString().toLowerCase();
@@ -36,6 +38,24 @@ function AllCards() {
                 toast.error(`Failed to delete all cards: ${error.message}`, { id: toastId });
                 console.error(error);
             }
+        }
+    };
+
+    const handleDeleteCard = async (cardId: string, cardName: string, e?: React.MouseEvent) => {
+        e?.preventDefault();
+        e?.stopPropagation();
+        if (!token) {
+            toast.error("Authentication error.");
+            return;
+        }
+        if (!window.confirm(`Delete card "${cardName}"? This action is irreversible.`)) return;
+        const toastId = toast.loading("Deleting card...");
+        try {
+            await deleteCardMutation({ token, cardId: cardId as any });
+            toast.success("Card deleted successfully.", { id: toastId });
+        } catch (error: any) {
+            toast.error(`Failed to delete card: ${error.message}`, { id: toastId });
+            console.error(error);
         }
     };
 
@@ -95,6 +115,28 @@ function AllCards() {
                                 <CardContent className="p-4">
                                     <CardTitle className="text-lg text-red-400 truncate">{card.cardName}</CardTitle>
                                     <p className="text-sm text-slate-300">Owner: {card.ownerName}</p>
+
+                                    {isAuthorized && (
+                                        <div className="mt-3 grid grid-cols-2 gap-2">
+                                            <Button
+                                              variant="outline"
+                                              className="border-red-500 text-red-400 hover:bg-red-500/10"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                navigate(`/editor/card/${card.customId}`);
+                                              }}
+                                            >
+                                              Edit Card
+                                            </Button>
+                                            <Button
+                                              variant="destructive"
+                                              onClick={(e) => handleDeleteCard(card._id, card.cardName, e)}
+                                            >
+                                              Delete Card
+                                            </Button>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </Link>
