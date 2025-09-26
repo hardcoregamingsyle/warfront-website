@@ -73,6 +73,7 @@ const PagesPublic = lazy(() => import("./pages/cms/PagesPublic.tsx"));
 const PagesPrivate = lazy(() => import("./pages/cms/PagesPrivate.tsx"));
 const PagesCards = lazy(() => import("./pages/cms/PagesCards.tsx"));
 const RobotPages = lazy(() => import("./pages/cms/RobotPages.tsx"));
+const CreateBlog = lazy(() => import("./pages/cms/CreateBlog.tsx"));
 
 function RouteSyncer() {
   const location = useLocation();
@@ -171,6 +172,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/admin/cms/pages/private" element={<ProtectedRoute><PagesPrivate /></ProtectedRoute>} />
                 <Route path="/admin/cms/pages/cards" element={<ProtectedRoute><PagesCards /></ProtectedRoute>} />
                 <Route path="/admin/cms/robot" element={<ProtectedRoute><RobotPages /></ProtectedRoute>} />
+                <Route path="/admin/cms/create/blog/new" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </BrowserRouter>

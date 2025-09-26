@@ -70,10 +70,12 @@ export default function CardBlogs() {
             </Link>
             <h1 className="text-3xl font-bold text-red-400">Card Blogs</h1>
           </div>
-          <Button className="bg-red-600 hover:bg-red-700">
-            <Plus className="h-4 w-4 mr-2" />
-            New Card Blog
-          </Button>
+          <Link to="/admin/cms/create/blog/new">
+            <Button className="bg-red-600 hover:bg-red-700">
+              <Plus className="h-4 w-4 mr-2" />
+              New Card Blog
+            </Button>
+          </Link>
         </div>
 
         <Card className="bg-slate-900/50 border-red-500/20">
