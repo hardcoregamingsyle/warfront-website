@@ -13,7 +13,8 @@ import {
   BookOpen,
   Building2,
   ChevronRight,
-  ArrowLeft
+  ArrowLeft,
+  Bot
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -63,7 +64,8 @@ export default function AdminCMS() {
         { name: "Public Pages", path: "/admin/cms/pages/public" },
         { name: "Private Pages", path: "/admin/cms/pages/private" },
         { name: "Unsorted Pages", path: "/admin/cms/pages/unsorted" },
-        { name: "Card Pages", path: "/admin/cms/pages/cards" }
+        { name: "Card Pages", path: "/admin/cms/pages/cards" },
+        { name: "Robot Pages", path: "/admin/cms/robot" }
       ]
     }
   ];
@@ -116,6 +118,7 @@ export default function AdminCMS() {
                           {subOption.name === "Card Pages" && <CreditCard className="h-4 w-4" />}
                           {subOption.name === "Card Blogs" && <CreditCard className="h-4 w-4" />}
                           {subOption.name === "Company Blogs" && <Building2 className="h-4 w-4" />}
+                          {subOption.name === "Robot Pages" && <Bot className="h-4 w-4" />}
                           {subOption.name}
                         </span>
                         <ChevronRight className="h-4 w-4" />
