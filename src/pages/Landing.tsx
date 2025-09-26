@@ -1,7 +1,7 @@
 import { AuthButton } from "@/components/auth/AuthButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
   Play,
@@ -146,46 +146,48 @@ export default function Landing() {
           </div>
 
           {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <motion.div 
-              className="md:hidden bg-[var(--header-bg)] border-t border-slate-700"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                <a href="#features" className="block px-3 py-2 text-slate-300 hover:text-white">Features</a>
-                <a href="#gameplay" className="block px-3 py-2 text-slate-300 hover:text-white">Gameplay</a>
-                <a href="#contact" className="block px-3 py-2 text-slate-300 hover:text-white">Contact</a>
-                {isAuthenticated && isAdminOrOwner && (
-                  <Link to="/admin" className="block px-3 py-2">
-                    <Button className="w-full bg-red-600 hover:bg-red-700 text-white">Admin</Button>
-                  </Link>
-                )}
-                <div className="px-3 py-2 grid grid-cols-2 gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      toggleTheme();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full border-slate-600 text-slate-200 hover:bg-slate-800"
-                  >
-                    {isDark ? (
-                      <span className="flex items-center gap-2"><Sun className="h-4 w-4" /> Light</span>
-                    ) : (
-                      <span className="flex items-center gap-2"><Moon className="h-4 w-4" /> Dark</span>
-                    )}
-                  </Button>
-                  {!isAuthenticated && (
-                    <AuthButton 
-                      trigger={<Button className="w-full bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
-                    />
+          <AnimatePresence initial={false}>
+            {mobileMenuOpen && (
+              <motion.div 
+                className="md:hidden bg-[var(--header-bg)] border-t border-slate-700"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <div className="px-2 pt-2 pb-3 space-y-1">
+                  <a href="#features" className="block px-3 py-2 text-slate-300 hover:text-white">Features</a>
+                  <a href="#gameplay" className="block px-3 py-2 text-slate-300 hover:text-white">Gameplay</a>
+                  <a href="#contact" className="block px-3 py-2 text-slate-300 hover:text-white">Contact</a>
+                  {isAuthenticated && isAdminOrOwner && (
+                    <Link to="/admin" className="block px-3 py-2">
+                      <Button className="w-full bg-red-600 hover:bg-red-700 text-white">Admin</Button>
+                    </Link>
                   )}
+                  <div className="px-3 py-2 grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        toggleTheme();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full border-slate-600 text-slate-200 hover:bg-slate-800"
+                    >
+                      {isDark ? (
+                        <span className="flex items-center gap-2"><Sun className="h-4 w-4" /> Light</span>
+                      ) : (
+                        <span className="flex items-center gap-2"><Moon className="h-4 w-4" /> Dark</span>
+                      )}
+                    </Button>
+                    {!isAuthenticated && (
+                      <AuthButton 
+                        trigger={<Button className="w-full bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.nav>
 

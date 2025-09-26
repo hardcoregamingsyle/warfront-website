@@ -7,7 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { cmsStore, CmsCategory } from "./cmsStore";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+
+type CmsCategory = "unsorted" | "public" | "private" | "cards" | "robot";
 
 export default function PagesPublic() {
   const { user } = useAuth();
@@ -17,25 +20,19 @@ export default function PagesPublic() {
     !!user &&
     (roleLc === "admin" || roleLc === "owner" || emailLc === "hardcorgamingstyle@gmail.com");
 
-  const [rows, setRows] = useState(cmsStore.getByCategory("public"));
+  const rows = useQuery(api.cms.getByCategory, { category: "public" }) ?? [];
+  const moveMutation = useMutation(api.cms.move);
+
   const [drafts, setDrafts] = useState<Record<string, { path: string; nextCategory: CmsCategory | "" }>>({});
 
   useEffect(() => {
-    const sync = () => {
-      const data = cmsStore.getByCategory("public");
-      setRows(data);
-      setDrafts((prev) => {
-        const next = { ...prev };
-        for (const r of data) {
-          if (!next[r.path]) next[r.path] = { path: r.path, nextCategory: "" };
-        }
-        return next;
-      });
-    };
-    const unsub = cmsStore.subscribe(sync);
-    sync();
-    return () => { unsub(); };
-  }, []);
+    const next: Record<string, { path: string; nextCategory: CmsCategory | "" }> = {};
+    for (const r of rows) {
+      next[r.path] = drafts[r.path] ?? { path: r.path, nextCategory: "" };
+    }
+    setDrafts(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows?.length]);
 
   if (!isAuthorized) {
     return (
@@ -54,13 +51,13 @@ export default function PagesPublic() {
     );
   }
 
-  const onSave = (path: string) => {
+  const onSave = async (path: string) => {
     const draft = drafts[path];
     if (!draft || !draft.nextCategory) {
       toast("Please select a category first.");
       return;
     }
-    cmsStore.move(path, draft.nextCategory);
+    await moveMutation({ path, to: draft.nextCategory });
     toast(`Moved ${path} to ${draft.nextCategory.toUpperCase()} successfully.`);
     setDrafts((prev) => ({ ...prev, [path]: { path, nextCategory: "" } }));
   };

@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { cmsStore } from "./cmsStore";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useNavigate, Link } from "react-router";
 import { ArrowLeft } from "lucide-react";
 
@@ -41,8 +42,10 @@ export default function CreateBlog() {
     return `/blogs/cards/${normalizedSlug || ""}`;
   }, [normalizedSlug]);
 
+  const ensurePage = useMutation(api.cms.ensure);
+
   const onSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       const finalTitle = title.trim();
       const finalSlug = normalizedSlug;
@@ -56,13 +59,13 @@ export default function CreateBlog() {
         return;
       }
       const path = `/blogs/cards/${finalSlug}`;
-      // Register in CMS as "unsorted" so it can be classified
-      cmsStore.ensure(path, finalTitle);
+      // Register in Convex as "unsorted" so it can be classified
+      await ensurePage({ path, title: finalTitle }).catch(() => {});
 
       toast(`Created blog "${finalTitle}" at ${path}. Assign it to a category.`);
       navigate("/admin/cms/pages/unsorted");
     },
-    [title, normalizedSlug, navigate]
+    [title, normalizedSlug, navigate, ensurePage]
   );
 
   if (!isAuthorized) {

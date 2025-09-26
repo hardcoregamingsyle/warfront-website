@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/layouts/ProtectedRoute";
 import "./index.css";
 import { cmsStore } from "@/pages/cms/cmsStore";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 // Initialize theme globally before React mounts so all routes get correct background/colors
 if (typeof window !== "undefined" && typeof document !== "undefined") {
@@ -77,6 +79,8 @@ const CreateBlog = lazy(() => import("./pages/cms/CreateBlog.tsx"));
 
 function RouteSyncer() {
   const location = useLocation();
+  const ensurePage = useMutation(api.cms.ensure);
+
   useEffect(() => {
     window.parent.postMessage(
       { type: "iframe-route-change", path: location.pathname },
@@ -95,11 +99,13 @@ function RouteSyncer() {
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  // NEW: Ensure current path exists in CMS store as an exact page entry
+  // Persist current path in Convex as an unsorted page if new
   useEffect(() => {
     const path = location.pathname || "/";
-    cmsStore.ensure(path);
-  }, [location.pathname]);
+    // Use document.title as a hint; fall back to derived server title
+    const title = typeof document !== "undefined" ? document.title : undefined;
+    ensurePage({ path, title }).catch(() => {});
+  }, [location.pathname, ensurePage]);
 
   return null;
 }

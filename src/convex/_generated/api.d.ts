@@ -20,6 +20,7 @@ import type * as battles from "../battles.js";
 import type * as blogs from "../blogs.js";
 import type * as cardInfo from "../cardInfo.js";
 import type * as cards from "../cards.js";
+import type * as cms from "../cms.js";
 import type * as crons from "../crons.js";
 import type * as dev from "../dev.js";
 import type * as files from "../files.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   blogs: typeof blogs;
   cardInfo: typeof cardInfo;
   cards: typeof cards;
+  cms: typeof cms;
   crons: typeof crons;
   dev: typeof dev;
   files: typeof files;

@@ -7,7 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
-import { cmsStore, CmsCategory, CmsPage } from "./cmsStore";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+
+// Local CMS types to match backend
+type CmsCategory = "unsorted" | "public" | "private" | "cards" | "robot";
+type CmsPage = { path: string; title: string; category: CmsCategory };
 import { motion } from "framer-motion";
 
 type RowDraft = {
@@ -23,27 +28,18 @@ export default function PagesUnsorted() {
     !!user &&
     (roleLc === "admin" || roleLc === "owner" || emailLc === "hardcorgamingstyle@gmail.com");
 
-  const [rows, setRows] = useState<Array<CmsPage>>([]);
+  const rows = useQuery(api.cms.getByCategory, { category: "unsorted" }) ?? [];
+  const moveMutation = useMutation(api.cms.move);
   const [drafts, setDrafts] = useState<Record<string, RowDraft>>({});
 
   useEffect(() => {
-    // subscribe for live updates
-    const sync = () => {
-      const data = cmsStore.getByCategory("unsorted");
-      setRows(data);
-      // initialize drafts for any new rows
-      setDrafts((prev) => {
-        const next = { ...prev };
-        for (const r of data) {
-          if (!next[r.path]) next[r.path] = { path: r.path, nextCategory: "" };
-        }
-        return next;
-      });
-    };
-    sync();
-    const unsub = cmsStore.subscribe(sync);
-    return () => { unsub(); };
-  }, []);
+    const next: Record<string, RowDraft> = {};
+    for (const r of rows ?? []) {
+      next[r.path] = drafts[r.path] ?? { path: r.path, nextCategory: "" };
+    }
+    setDrafts(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows?.length]);
 
   const categories: Array<{ label: string; value: CmsCategory }> = useMemo(
     () => [
@@ -72,13 +68,13 @@ export default function PagesUnsorted() {
     );
   }
 
-  const onSave = (path: string) => {
+  const onSave = async (path: string) => {
     const draft = drafts[path];
     if (!draft || !draft.nextCategory) {
       toast("Please select a category first.");
       return;
     }
-    cmsStore.move(path, draft.nextCategory);
+    await moveMutation({ path, to: draft.nextCategory });
     toast(`Moved ${path} to ${draft.nextCategory.toUpperCase()} successfully.`);
     // Clear draft selection for that row
     setDrafts((prev) => ({ ...prev, [path]: { path, nextCategory: "" } }));
