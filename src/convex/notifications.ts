@@ -119,15 +119,15 @@ export const adminBroadcastNotification = mutation({
       }
     }
 
-    // Add: formatted message with bold title (markdown-like)
+    // Format message with proper title/content separation
     const formattedMessage = `**${title}** — ${message}`;
 
-    // Insert notifications with bold title prefix in message
+    // Insert notifications with properly formatted message
     for (const [, userId] of userMap) {
       await ctx.db.insert("notifications", {
         userId,
         type: "broadcast",
-        message: formattedMessage, // Title shown in bold-style prefix
+        message: formattedMessage,
         href: "/dashboard",
         read: false,
       });
@@ -139,8 +139,8 @@ export const adminBroadcastNotification = mutation({
         email: u.email,
         name: u.name,
         subject: title,
-        html: `<strong>${title}</strong><br/>${message}`,
-        text: `${title} — ${message}`,
+        html: `<strong>${title}</strong><br/><br/>${message}`,
+        text: `${title}\n\n${message}`,
       });
     }
 
