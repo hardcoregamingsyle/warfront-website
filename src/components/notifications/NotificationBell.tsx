@@ -27,86 +27,81 @@ function escapeHtml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function formatCustomMarkup(input: string): string {
+// New: inline formatter applied to each list/paragraph item AFTER block grouping
+function formatInline(input: string): string {
   let s = escapeHtml(input);
 
-  // Inline formats
+  // Links: /text/
+  s = s.replace(/\/(?!\s)(.+?)(?<!\s)\//g, (_m, p1: string) => {
+    const url = p1.startsWith("http://") || p1.startsWith("https://") ? p1 : `https://${p1}`;
+    const safeText = escapeHtml(p1);
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-red-500 underline hover:text-red-400 transition-colors">${safeText}</a>`;
+  });
+
   // Bold: *text*
   s = s.replace(/\*(?!\s)(.+?)(?<!\s)\*/g, "<strong>$1</strong>");
-  
   // Italics: -text-
   s = s.replace(/-(?!\s)(.+?)(?<!\s)-/g, "<em>$1</em>");
-
   // Underline: _text_
   s = s.replace(/_(?!\s)(.+?)(?<!\s)_/g, "<u>$1</u>");
-
   // Strikethrough: ~text~
   s = s.replace(/~(?!\s)(.+?)(?<!\s)~/g, "<s>$1</s>");
-
   // Spoiler: `text`
   s = s.replace(
     /`(?!\s)(.+?)(?<!\s)`/g,
     '<span class="blur-[2px] hover:blur-0 bg-slate-700/60 px-1 rounded transition-all duration-200 cursor-pointer">$1</span>',
   );
 
-  // Link: /text/ (assume text is URL; if not, still link via https)
-  s = s.replace(/\/(?!\s)(.+?)(?<!\s)\//g, (_m, p1: string) => {
-    const url =
-      p1.startsWith("http://") || p1.startsWith("https://")
-        ? p1
-        : `https://${p1}`;
-    const safeText = escapeHtml(p1);
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-red-500 underline hover:text-red-400 transition-colors">${safeText}</a>`;
-  });
+  return s;
+}
 
-  // Convert lines to lists/paragraphs
-  const lines = s.split(/\r?\n/);
+// Remade: block-aware formatter with robust list parsing
+function formatCustomMarkup(input: string): string {
+  if (!input) return "";
+
+  const lines = input.split(/\r?\n/);
   const blocks: string[] = [];
+
   let i = 0;
+  const isOL = (line: string) => /^\s*\d+\.\s+/.test(line);
+  const isUL = (line: string) => /^\s*[-*•]\s+/.test(line);
 
   while (i < lines.length) {
     const line = lines[i];
-    const trimmed = line.trim();
 
-    // Ordered list: allow leading spaces. Pattern: "1. item"
-    if (/^\s*\d+\.\s+/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\s*\d+\.\s+/, "").trim());
-        i++;
-      }
-      blocks.push(
-        `<ol class="list-decimal ml-6 space-y-1 my-2">${items
-          .map((li) => `<li class="text-slate-300">${li}</li>`)
-          .join("")}</ol>`,
-      );
-      continue;
-    }
-
-    // Unordered list: allow leading spaces and both '-' and '•'
-    if (/^\s*[-•]\s+/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length && /^\s*[-•]\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\s*[-•]\s+/, "").trim());
-        i++;
-      }
-      blocks.push(
-        `<ul class="list-disc ml-6 space-y-1 my-2">${items
-          .map((li) => `<li class="text-slate-300">${li}</li>`)
-          .join("")}</ul>`,
-      );
-      continue;
-    }
-
-    // Preserve blank lines as line breaks
-    if (trimmed === "") {
+    // Blank line => visual gap
+    if (line.trim() === "") {
       blocks.push("<br/>");
       i++;
       continue;
     }
 
-    // Regular paragraph line
-    blocks.push(`<p class="text-slate-300 mb-2">${line}</p>`);
+    // Ordered list group
+    if (isOL(line)) {
+      const items: string[] = [];
+      while (i < lines.length && isOL(lines[i])) {
+        items.push(lines[i].replace(/^\s*\d+\.\s+/, "").trim());
+        i++;
+      }
+      const lis = items.map(li => `<li class="text-slate-300">${formatInline(li)}</li>`).join("");
+      blocks.push(`<ol class="list-decimal ml-6 space-y-1 my-2">${lis}</ol>`);
+      continue;
+    }
+
+    // Unordered list group
+    if (isUL(line)) {
+      const items: string[] = [];
+      while (i < lines.length && isUL(lines[i])) {
+        items.push(lines[i].replace(/^\s*[-*•]\s+/, "").trim());
+        i++;
+      }
+      const lis = items.map(li => `<li class="text-slate-300">${formatInline(li)}</li>`).join("");
+      blocks.push(`<ul class="list-disc ml-6 space-y-1 my-2">${lis}</ul>`);
+      continue;
+    }
+
+    // Paragraph line (kept as-is, not merged into lists)
+    blocks.push(`<p class="text-slate-300 mb-2">${formatInline(line)}</p>`);
     i++;
   }
 
