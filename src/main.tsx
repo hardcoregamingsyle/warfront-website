@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/sonner";
-import { VlyToolbar } from "@/components/VlyToolbar";
 import { InstrumentationProvider } from "@/instrumentation.tsx";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { StrictMode, useEffect, lazy, Suspense } from "react";
@@ -105,7 +104,8 @@ const SuspenseFallback = () => (
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <VlyToolbar />
+    {/* Removed VlyToolbar to avoid DOM overlay interfering with React reconciliation */}
+    {/* <VlyToolbar /> */}
     <InstrumentationProvider>
       <ConvexProvider client={convex}>
         <HelmetProvider>
