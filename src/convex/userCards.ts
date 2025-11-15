@@ -62,37 +62,27 @@ export const addWithClaimCode = mutation({
             return { success: false, message: "Invalid claim code." };
         }
 
-        // Find if any user currently owns this card
-        const existingOwnerEntry = await ctx.db
-            .query("userCards")
-            .withIndex("by_cardId", (q) => q.eq("cardId", cardId))
-            .unique();
-
-        if (existingOwnerEntry) {
-            // If the current user already owns it, do nothing.
-            if (existingOwnerEntry.userId === session.userId) {
-                return { success: false, message: "Card already in your inventory." };
-            }
-
-            // If another user owns it, remove it from their inventory.
-            await ctx.db.delete(existingOwnerEntry._id);
-
-            // Notify the previous owner
-            const previousOwner = await ctx.db.get(existingOwnerEntry.userId);
-            if (previousOwner) {
-                 await ctx.db.insert("notifications", {
-                    userId: previousOwner._id,
-                    type: "card_transfer",
-                    message: `Your card '${card.cardName}' was claimed by ${currentUser.displayName || currentUser.name}.`,
-                    href: `/cards/${card.customId}`,
-                    read: false,
-                });
-            }
+        // Check if card has already been claimed (one-time use)
+        if (card.isClaimed) {
+            return { success: false, message: "This claim code has already been used. Cards can only be claimed once." };
         }
 
-        // Mark card as claimed and add to user's inventory
+        // Check if user already owns this card
+        const existingOwnership = await ctx.db
+            .query("userCards")
+            .withIndex("by_user_card", (q) => 
+                q.eq("userId", session.userId).eq("cardId", cardId)
+            )
+            .unique();
+
+        if (existingOwnership) {
+            return { success: false, message: "Card already in your inventory." };
+        }
+
+        // Mark card as claimed permanently (one-time use)
         await ctx.db.patch(cardId, { isClaimed: true });
         
+        // Add to user's inventory
         await ctx.db.insert("userCards", {
             userId: session.userId,
             cardId,
