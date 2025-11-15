@@ -24,14 +24,9 @@ export default function CardViewer() {
   const [claimCode, setClaimCode] = useState("");
   const [isVerified, setIsVerified] = useState(false);
 
-  const verifyToken = searchParams.get("verify");
   const method = searchParams.get("method");
 
   const card = useQuery(api.cards.get, customId ? { customId } : "skip");
-  const verifyResult = useQuery(
-    api.cards.validateVerifyToken,
-    verifyToken && customId ? { customId, verifyToken } : "skip"
-  );
   
   const userCard = useQuery(
     api.userCards.getForCurrentUser,
@@ -41,31 +36,16 @@ export default function CardViewer() {
   const addWithClaimCode = useMutation(api.userCards.addWithClaimCode);
   const deleteCardMutation = useMutation(api.cards.deleteCard);
   const createCardWithId = useMutation(api.cards.createCardWithId);
-  const consumeToken = useMutation(api.cards.consumeVerifyToken);
 
-  // Handle QR code verification flow
+  // Handle QR code verification flow with static method parameter
   useEffect(() => {
-    if (verifyToken && verifyResult && customId) {
-      if (verifyResult.valid) {
-        // Valid QR scan - mark as verified and immediately redirect to method=valid
-        // This hides the verification token from the URL
-        setIsVerified(true);
-        setSearchParams({ method: "valid" }, { replace: true });
-        // Consume the token so it can't be reused
-        if (verifyResult.cardId) {
-          consumeToken({ cardId: verifyResult.cardId }).catch(() => {});
-        }
-      } else {
-        // Invalid or expired token
-        toast.error(verifyResult.reason || "Invalid QR code");
-        navigate(`/cards/${customId}`, { replace: true });
-      }
-    } else if (method === "valid" && !isVerified) {
-      // Someone tried to access method=valid directly without scanning
-      toast.error("Please scan the QR code on your physical card");
-      navigate(`/cards/${customId}`, { replace: true });
+    if (method === "mnhsgwbwyqosu" && customId) {
+      // Valid QR scan detected - mark as verified and clean the URL
+      setIsVerified(true);
+      setSearchParams({}, { replace: true });
+      toast.success("QR code verified! You can now claim this card.");
     }
-  }, [verifyToken, verifyResult, method, isVerified, customId, setSearchParams, consumeToken, navigate]);
+  }, [method, customId, setSearchParams]);
 
   const handleClaimCard = async () => {
     if (!token || !customId || !card) {
