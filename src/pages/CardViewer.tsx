@@ -47,9 +47,10 @@ export default function CardViewer() {
   useEffect(() => {
     if (verifyToken && verifyResult && customId) {
       if (verifyResult.valid) {
-        // Valid QR scan - mark as verified and update URL
+        // Valid QR scan - mark as verified and immediately redirect to method=valid
+        // This hides the verification token from the URL
         setIsVerified(true);
-        setSearchParams({ method: "valid" });
+        setSearchParams({ method: "valid" }, { replace: true });
         // Consume the token so it can't be reused
         if (verifyResult.cardId) {
           consumeToken({ cardId: verifyResult.cardId }).catch(() => {});
@@ -57,14 +58,14 @@ export default function CardViewer() {
       } else {
         // Invalid or expired token
         toast.error(verifyResult.reason || "Invalid QR code");
-        setSearchParams({});
+        navigate(`/cards/${customId}`, { replace: true });
       }
     } else if (method === "valid" && !isVerified) {
       // Someone tried to access method=valid directly without scanning
       toast.error("Please scan the QR code on your physical card");
-      setSearchParams({});
+      navigate(`/cards/${customId}`, { replace: true });
     }
-  }, [verifyToken, verifyResult, method, isVerified, customId, setSearchParams, consumeToken]);
+  }, [verifyToken, verifyResult, method, isVerified, customId, setSearchParams, consumeToken, navigate]);
 
   const handleClaimCard = async () => {
     if (!token || !customId || !card) {
