@@ -62,11 +62,6 @@ export const addWithClaimCode = mutation({
             return { success: false, message: "Invalid claim code." };
         }
 
-        // Check if already claimed
-        if (card.isClaimed) {
-            return { success: false, message: "This card has already been claimed." };
-        }
-
         // Find if any user currently owns this card
         const existingOwnerEntry = await ctx.db
             .query("userCards")
