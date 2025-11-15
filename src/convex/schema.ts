@@ -139,11 +139,15 @@ const schema = defineSchema(
       attackSlots: v.optional(v.number()),
       abilitySlots: v.optional(v.number()),
       passiveSlots: v.optional(v.number()),
+      // Security: One-time claim code
+      claimCode: v.optional(v.string()), // Unique code printed on physical card
+      isClaimed: v.optional(v.boolean()), // Whether this card has been claimed
     })
       .index("by_customId", ["customId"])
       .index("by_name_normalized", ["name_normalized"])
       .index("by_rarityId", ["rarityId"])
-      .index("by_upgradeId", ["upgradeId"]),
+      .index("by_upgradeId", ["upgradeId"])
+      .index("by_claimCode", ["claimCode"]),
 
     // New tables for the card management system
     rarities: defineTable({

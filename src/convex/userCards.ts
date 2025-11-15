@@ -30,10 +30,14 @@ export const getForCurrentUser = query({
     },
 });
 
-// Add a card to the current user's inventory, ensuring unique ownership
-export const add = mutation({
-    args: { cardId: v.id("cards"), token: v.string() },
-    handler: async (ctx, { cardId, token }) => {
+// Add a card to the current user's inventory using a claim code
+export const addWithClaimCode = mutation({
+    args: { 
+      cardId: v.id("cards"), 
+      claimCode: v.string(),
+      token: v.string() 
+    },
+    handler: async (ctx, { cardId, claimCode, token }) => {
         const session = await ctx.db
             .query("sessions")
             .withIndex("by_token", (q) => q.eq("token", token))
@@ -46,6 +50,21 @@ export const add = mutation({
         const currentUser = await ctx.db.get(session.userId);
         if (!currentUser) {
             return { success: false, message: "User not found." };
+        }
+
+        const card = await ctx.db.get(cardId);
+        if (!card) {
+            return { success: false, message: "Card not found." };
+        }
+
+        // Verify claim code
+        if (!card.claimCode || card.claimCode !== claimCode) {
+            return { success: false, message: "Invalid claim code." };
+        }
+
+        // Check if already claimed
+        if (card.isClaimed) {
+            return { success: false, message: "This card has already been claimed." };
         }
 
         // Find if any user currently owns this card
@@ -65,8 +84,7 @@ export const add = mutation({
 
             // Notify the previous owner
             const previousOwner = await ctx.db.get(existingOwnerEntry.userId);
-            const card = await ctx.db.get(cardId);
-            if (previousOwner && card) {
+            if (previousOwner) {
                  await ctx.db.insert("notifications", {
                     userId: previousOwner._id,
                     type: "card_transfer",
@@ -77,17 +95,26 @@ export const add = mutation({
             }
         }
 
-        // Add the card to the new user's inventory
+        // Mark card as claimed and add to user's inventory
+        await ctx.db.patch(cardId, { isClaimed: true });
+        
         await ctx.db.insert("userCards", {
             userId: session.userId,
             cardId,
         });
 
-        if (existingOwnerEntry) {
-             return { success: true, message: "Card transferred to your inventory!" };
-        } else {
-             return { success: true, message: "Card added to inventory!" };
-        }
+        return { success: true, message: "Card successfully claimed!" };
+    },
+});
+
+// Keep the old add mutation for backward compatibility but mark it as deprecated
+export const add = mutation({
+    args: { cardId: v.id("cards"), token: v.string() },
+    handler: async (ctx, { cardId, token }) => {
+        return { 
+          success: false, 
+          message: "Please use the claim code to add this card to your inventory." 
+        };
     },
 });
 
