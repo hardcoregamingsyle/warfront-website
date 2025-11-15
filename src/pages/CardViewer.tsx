@@ -20,8 +20,6 @@ export default function CardViewer() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showClaimDialog, setShowClaimDialog] = useState(false);
-  const [claimCode, setClaimCode] = useState("");
   const [isVerified, setIsVerified] = useState(false);
 
   const method = searchParams.get("method");
@@ -58,22 +56,15 @@ export default function CardViewer() {
       return;
     }
     
-    if (!claimCode.trim()) {
-      toast.error("Please enter the claim code from your physical card.");
-      return;
-    }
-    
     const toastId = toast.loading("Claiming card...");
     try {
       const result = await addWithClaimCode({ 
         token, 
         cardId: card._id,
-        claimCode: claimCode.trim()
+        claimCode: card.claimCode || "" // Use the card's stored claim code
       });
       if (result.success) {
         toast.success(result.message, { id: toastId });
-        setShowClaimDialog(false);
-        setClaimCode("");
         setIsVerified(false);
         setSearchParams({});
       } else {
@@ -235,11 +226,7 @@ export default function CardViewer() {
                       <Button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (!isVerified) {
-                            toast.error("Please scan the QR code on your physical card first");
-                            return;
-                          }
-                          setShowClaimDialog(true);
+                          handleClaimCard();
                         }} 
                         className="w-full bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed"
                         disabled={cardIsInInventory || !isVerified}
@@ -262,43 +249,6 @@ export default function CardViewer() {
           </Card>
         </motion.div>
       </div>
-
-      {/* Claim Code Dialog */}
-      <Dialog open={showClaimDialog} onOpenChange={setShowClaimDialog}>
-        <DialogContent className="bg-slate-900 border-red-500/20 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-red-400">Claim Card</DialogTitle>
-            <DialogDescription className="text-slate-300">
-              Enter the unique claim code printed on your physical card to add it to your inventory.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="claimCode" className="text-slate-200">Claim Code</Label>
-              <Input
-                id="claimCode"
-                value={claimCode}
-                onChange={(e) => setClaimCode(e.target.value)}
-                placeholder="Enter claim code"
-                className="bg-slate-800 border-slate-700 text-white"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleClaimCard();
-                  }
-                }}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowClaimDialog(false)} className="border-slate-600 text-slate-300">
-              Cancel
-            </Button>
-            <Button onClick={handleClaimCard} className="bg-red-600 hover:bg-red-700">
-              Claim Card
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </DashboardLayout>
   );
 }
