@@ -221,3 +221,65 @@ export const createCardWithId = mutation({
         return cardId;
     }
 })
+
+export const generateVerifyToken = mutation({
+  args: { cardId: v.id("cards") },
+  handler: async (ctx, { cardId }) => {
+    const card = await ctx.db.get(cardId);
+    if (!card) {
+      throw new Error("Card not found");
+    }
+
+    // Generate a random verification token
+    const verifyToken = Math.random().toString(36).substring(2, 15) + 
+                       Math.random().toString(36).substring(2, 15);
+    
+    // Token expires in 5 minutes
+    const verifyTokenExpiry = Date.now() + (5 * 60 * 1000);
+
+    await ctx.db.patch(cardId, {
+      verifyToken,
+      verifyTokenExpiry,
+    });
+
+    return verifyToken;
+  },
+});
+
+export const validateVerifyToken = query({
+  args: { 
+    customId: v.string(),
+    verifyToken: v.string() 
+  },
+  handler: async (ctx, { customId, verifyToken }) => {
+    const card = await ctx.db
+      .query("cards")
+      .withIndex("by_customId", (q) => q.eq("customId", customId))
+      .unique();
+    
+    if (!card) {
+      return { valid: false, reason: "Card not found" };
+    }
+
+    if (!card.verifyToken || card.verifyToken !== verifyToken) {
+      return { valid: false, reason: "Invalid verification token" };
+    }
+
+    if (!card.verifyTokenExpiry || card.verifyTokenExpiry < Date.now()) {
+      return { valid: false, reason: "Verification token expired" };
+    }
+
+    return { valid: true, cardId: card._id };
+  },
+});
+
+export const consumeVerifyToken = mutation({
+  args: { cardId: v.id("cards") },
+  handler: async (ctx, { cardId }) => {
+    // Clear the verification token after successful use
+    await ctx.db.patch(cardId, {
+      verifyToken: undefined,
+      verifyTokenExpiry: undefined,
+    });
+  },
+});
