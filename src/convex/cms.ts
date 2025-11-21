@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 
 const CategoryValidator = v.union(
   v.literal("unsorted"),
@@ -38,21 +39,32 @@ export const ensure = mutation({
       .query("cms_pages")
       .withIndex("by_path", (q) => q.eq("path", path))
       .unique();
+    
+    let shouldTrigger = false;
+
     if (existing) {
       // Update title if provided and changed
       if (title && title !== existing.title) {
         await ctx.db.patch(existing._id, { title });
+        shouldTrigger = true;
       }
-      return existing._id;
+    } else {
+      // Derive a title if not provided
+      const derivedTitle = title ?? deriveTitleFromPath(path);
+      await ctx.db.insert("cms_pages", {
+        path,
+        title: derivedTitle,
+        category: "unsorted",
+      });
+      shouldTrigger = true;
     }
-    // Derive a title if not provided
-    const derivedTitle = title ?? deriveTitleFromPath(path);
-    const id = await ctx.db.insert("cms_pages", {
-      path,
-      title: derivedTitle,
-      category: "unsorted",
-    });
-    return id;
+
+    if (shouldTrigger) {
+      await ctx.scheduler.runAfter(0, (internal as any).seo.triggerBuild, {});
+      await ctx.scheduler.runAfter(0, (internal as any).seo.notifyIndexNow, { paths: [path] });
+    }
+
+    return existing ? existing._id : null;
   },
 });
 
@@ -70,6 +82,12 @@ export const move = mutation({
       throw new Error(`Page not found for path: ${path}`);
     }
     await ctx.db.patch(existing._id, { category: to });
+    
+    await ctx.scheduler.runAfter(0, (internal as any).seo.triggerBuild, {});
+    // Moving a page might not change its URL if the URL is just the path, but if category affects it, we should notify.
+    // Assuming path is the URL for now.
+    await ctx.scheduler.runAfter(0, (internal as any).seo.notifyIndexNow, { paths: [path] });
+
     return null;
   },
 });
@@ -88,6 +106,10 @@ export const setTitle = mutation({
       throw new Error(`Page not found for path: ${path}`);
     }
     await ctx.db.patch(existing._id, { title });
+
+    await ctx.scheduler.runAfter(0, (internal as any).seo.triggerBuild, {});
+    await ctx.scheduler.runAfter(0, (internal as any).seo.notifyIndexNow, { paths: [path] });
+
     return null;
   },
 });
