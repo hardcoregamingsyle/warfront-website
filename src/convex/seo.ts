@@ -1,71 +1,64 @@
 "use node";
 import { v } from "convex/values";
-import { action } from "./_generated/server";
+import { internalAction } from "./_generated/server";
 
-const CLOUDFLARE_DEPLOY_HOOK = "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/89fcc9eb-8276-4114-a3d2-39ff4950d1cf";
+// Cloudflare Pages Deploy Hook
+const DEPLOY_HOOK_URL = "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/89fcc9eb-8276-4114-a3d2-39ff4950d1cf";
+const SITE_URL = "https://warfront.vly.site";
+const INDEXNOW_KEY = "4321432143214321"; // Replace with your actual IndexNow key
+const INDEXNOW_KEY_LOCATION = `https://warfront.vly.site/${INDEXNOW_KEY}.txt`;
 
-export const triggerBuild = action({
+export const triggerBuild = internalAction({
   args: {},
-  handler: async () => {
+  handler: async (ctx) => {
+    console.log("Triggering Cloudflare Pages build...");
     try {
-      console.log("Triggering Cloudflare build...");
-      const response = await fetch(CLOUDFLARE_DEPLOY_HOOK, {
-        method: "POST",
-      });
-      if (!response.ok) {
-        throw new Error(`Cloudflare responded with ${response.status}`);
+      const res = await fetch(DEPLOY_HOOK_URL, { method: "POST" });
+      if (res.ok) {
+        console.log("Build triggered successfully");
+      } else {
+        console.error("Failed to trigger build", await res.text());
       }
-      console.log("Successfully triggered Cloudflare build");
     } catch (e) {
-      console.error("Failed to trigger Cloudflare build", e);
+      console.error("Error triggering build", e);
     }
   },
 });
 
-export const notifyIndexNow = action({
+export const notifyIndexNow = internalAction({
   args: { paths: v.array(v.string()) },
   handler: async (ctx, { paths }) => {
-    const host = process.env.SITE_URL || "warfront.vly.site";
-    // We assume the key is stored in an env var.
-    // The user must also host this key at https://<host>/<key>.txt
-    const key = process.env.INDEXNOW_KEY; 
-    
-    if (!key) {
-        console.log("INDEXNOW_KEY environment variable not set. Skipping IndexNow notification.");
-        return;
-    }
-
-    const keyLocation = `https://${host}/${key}.txt`;
-    
-    const urlList = paths.map(p => {
-        const path = p.startsWith("/") ? p : `/${p}`;
-        return `https://${host}${path}`;
+    const urlList = paths.map((path) => {
+        // Ensure path starts with / and append to site URL
+        const p = path.startsWith("/") ? path : `/${path}`;
+        return `${SITE_URL}${p}`;
     });
 
+    console.log("Notifying IndexNow for:", urlList);
+
     const body = {
-      host,
-      key,
-      keyLocation,
+      host: "warfront.vly.site",
+      key: INDEXNOW_KEY,
+      keyLocation: INDEXNOW_KEY_LOCATION,
       urlList,
     };
 
     try {
-      console.log(`Notifying IndexNow for ${urlList.length} URLs...`);
-      const response = await fetch("https://api.indexnow.org/indexnow", {
+      const res = await fetch("https://api.indexnow.org/indexnow", {
         method: "POST",
         headers: {
           "Content-Type": "application/json; charset=utf-8",
         },
         body: JSON.stringify(body),
       });
-      
-      if (!response.ok) {
-         console.error(`IndexNow responded with ${response.status}: ${await response.text()}`);
+
+      if (res.ok) {
+        console.log("IndexNow notification sent successfully");
       } else {
-         console.log("Successfully notified IndexNow");
+        console.error("IndexNow notification failed", await res.text());
       }
     } catch (e) {
-      console.error("Failed to notify IndexNow", e);
+      console.error("Error notifying IndexNow", e);
     }
   },
 });
