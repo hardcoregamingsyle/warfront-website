@@ -65,6 +65,7 @@ const AdminUsers = lazy(() => import("./pages/AdminUsers.tsx"));
 const AdminCMS = lazy(() => import("./pages/AdminCMS.tsx"));
 const AdminModeration = lazy(() => import("./pages/AdminModeration.tsx"));
 const AdminCardInfo = lazy(() => import("./pages/AdminCardInfo.tsx"));
+const PackViewer = lazy(() => import("./pages/PackViewer.tsx"));
 
 // Add new CMS page imports
 const BlogsMain = lazy(() => import("./pages/cms/BlogsMain.tsx"));
@@ -137,6 +138,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/how-to-play" element={<HowToPlay />} />
                 <Route path="/cards" element={<CardsRedirect />} />
                 <Route path="/cards/:cardId" element={<CardViewer />} />
+                <Route path="/pack/:packId" element={<PackViewer />} />
                 <Route path="/blog" element={<BlogList />} />
                 <Route path="/blog/:slug" element={<BlogViewer />} />
                 <Route path="/all-cards" element={<ProtectedRoute><AllCards /></ProtectedRoute>} />

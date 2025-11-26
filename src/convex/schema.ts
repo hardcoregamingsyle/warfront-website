@@ -257,6 +257,12 @@ const schema = defineSchema(
     })
       .index("by_path", ["path"])
       .index("by_category", ["category"]),
+
+    packs: defineTable({
+      packId: v.string(),
+      scanCount: v.number(),
+      batch: v.optional(v.string()),
+    }).index("by_packId", ["packId"]),
   },
   {
     schemaValidation: false,

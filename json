@@ -1,0 +1,3 @@
+{
+  "plan": "1. Verify the pack verification flow by checking the new route and logic.\n2. Ensure the scan count increments correctly on scan.\n3. Confirm the warning message appears when scan count > 1."
+}
