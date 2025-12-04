@@ -14,10 +14,10 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/use-auth";
 import { Suspense, lazy } from "react";
 
-const FeaturesSection = lazy(() => import("./landing/FeaturesSection"));
-const GameplaySection = lazy(() => import("./landing/GameplaySection"));
-const CTASection = lazy(() => import("./landing/CTASection"));
-const FooterSection = lazy(() => import("./landing/FooterSection"));
+const FeaturesSection = lazy(() => import("./landing/FeaturesSection.tsx"));
+const GameplaySection = lazy(() => import("./landing/GameplaySection.tsx"));
+const CTASection = lazy(() => import("./landing/CTASection.tsx"));
+const FooterSection = lazy(() => import("./landing/FooterSection.tsx"));
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
