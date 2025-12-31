@@ -126,24 +126,12 @@
   --header-bg: oklch(0.20 0.03 255);
   --bg-image: url('/assets/Untitled_design__1_.png');
 }
->>>>>>> REPLACE
-<<<<<<< SEARCH
-/* Dark mode optimized background */
-.dark body {
-  background-image: var(--bg-image);
-  background-repeat: repeat;
-  background-size: 480px 480px;
-  background-position: center center;
-  background-attachment: scroll;
-  /* Darker overlay for better contrast in dark mode */
-  position: relative;
-}
-=======
+
 /* Dark mode optimized background */
 .dark body {
   background-image: var(--bg-image);
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 150%;
   background-position: center center;
   background-attachment: fixed;
   /* Darker overlay for better contrast in dark mode */
@@ -165,7 +153,7 @@
     background-color: var(--background);
     background-image: var(--bg-image);
     background-repeat: repeat;
-    background-size: 480px 480px;
+    background-size: 640px 640px;
     background-position: center center;
     background-attachment: scroll;
     /* Faster transitions */
@@ -228,10 +216,10 @@
 /* Dark mode optimized background */
 .dark body {
   background-image: var(--bg-image);
-  background-repeat: repeat;
-  background-size: 480px 480px;
+  background-repeat: no-repeat;
+  background-size: 150%;
   background-position: center center;
-  background-attachment: scroll;
+  background-attachment: fixed;
   /* Darker overlay for better contrast in dark mode */
   position: relative;
 }
