@@ -1,175 +1,142 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
+
+// Helper to validate privileged user
+async function validatePrivilegedUser(ctx: any, token: string) {
+    const session = await ctx.db
+        .query("sessions")
+        .withIndex("by_token", (q: any) => q.eq("token", token))
+        .unique();
+
+    if (!session || session.expires < Date.now()) {
+        throw new Error("Invalid or expired session");
+    }
+
+    const user = await ctx.db.get(session.userId);
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+
+    const roleNorm = (user.role ?? "").toString().toLowerCase().replace(/[\s_-]+/g, "");
+    const emailNorm = (user.email ?? "").toString().toLowerCase();
+    const isPrivileged = ["admin", "owner", "cardsetter"].includes(roleNorm) || 
+                         emailNorm === "hardcorgamingstyle@gmail.com";
+    
+    if (!isPrivileged) {
+        throw new Error("Unauthorized");
+    }
+
+    return { user, session };
+}
 
 export const get = query({
-  args: { customId: v.string() },
-  handler: async (ctx, { customId }) => {
-    const card = await ctx.db
-      .query("cards")
-      .withIndex("by_customId", (q) => q.eq("customId", customId))
-      .unique();
-    
-    if (!card) {
-        return null;
-    }
+    args: { customId: v.string() },
+    handler: async (ctx, { customId }) => {
+        const card = await ctx.db
+            .query("cards")
+            .withIndex("by_customId", (q) => q.eq("customId", customId))
+            .unique();
+        
+        if (!card) return null;
 
-    const imageUrl = card.imageId ? await ctx.storage.getUrl(card.imageId) : null;
+        const imageUrl = card.imageId ? await ctx.storage.getUrl(card.imageId) : null;
 
-    return {
-        ...card,
-        imageUrl,
-    }
-  },
+        return {
+            ...card,
+            imageUrl,
+        };
+    },
 });
 
 export const update = mutation({
-  args: {
-    cardId: v.id("cards"), // Use the real _id for patching
-    cardType: v.string(),
-    cardName: v.string(),
-    imageId: v.optional(v.id("_storage")),
-    rarity: v.optional(v.string()),
-    frame: v.optional(v.string()),
-    batch: v.optional(v.string()),
-    numberingA: v.optional(v.number()),
-    numberingB: v.optional(v.number()),
-    signed: v.optional(v.string()),
-    token: v.string(),
-  },
-  handler: async (ctx, { cardId, cardType, cardName, imageId, rarity, frame, batch, numberingA, numberingB, signed, token }) => {
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", token))
-      .unique();
+    args: {
+        cardId: v.id("cards"),
+        cardType: v.string(),
+        cardName: v.string(),
+        imageId: v.optional(v.id("_storage")),
+        rarity: v.optional(v.string()),
+        frame: v.optional(v.string()),
+        batch: v.optional(v.string()),
+        numberingA: v.optional(v.number()),
+        numberingB: v.optional(v.number()),
+        signed: v.optional(v.string()),
+        token: v.string(),
+    },
+    handler: async (ctx, { cardId, cardType, cardName, imageId, rarity, frame, batch, numberingA, numberingB, signed, token }) => {
+        await validatePrivilegedUser(ctx, token);
 
-    if (!session || session.expires < Date.now()) {
-      throw new Error("Invalid or expired session");
-    }
-
-    const user = await ctx.db.get(session.userId);
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-    const roleNorm = (user.role ?? "").toString().toLowerCase().replace(/[\s_-]+/g, "");
-    const emailNorm = (user.email ?? "").toString().toLowerCase();
-    const isPrivileged = ["admin", "owner", "cardsetter"].includes(roleNorm) || emailNorm === "hardcorgamingstyle@gmail.com";
-    if (!isPrivileged) {
-      throw new Error("Unauthorized");
-    }
-
-    await ctx.db.patch(cardId, {
-      cardType,
-      cardName,
-      // keep the normalized name in sync
-      name_normalized: cardName.toLowerCase(),
-      imageId,
-      rarity,
-      frame,
-      batch,
-      numberingA,
-      numberingB,
-      signed,
-    });
-  },
+        await ctx.db.patch(cardId, {
+            cardType,
+            cardName,
+            name_normalized: cardName.toLowerCase(),
+            imageId,
+            rarity,
+            frame,
+            batch,
+            numberingA,
+            numberingB,
+            signed,
+        });
+    },
 });
 
 export const deleteCard = mutation({
-  args: { cardId: v.id("cards"), token: v.string() },
-  handler: async (ctx, { cardId, token }) => {
-    // Authorization
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", token))
-      .unique();
+    args: { cardId: v.id("cards"), token: v.string() },
+    handler: async (ctx, { cardId, token }) => {
+        await validatePrivilegedUser(ctx, token);
 
-    if (!session || session.expires < Date.now()) {
-      throw new Error("Invalid or expired session");
-    }
+        const card = await ctx.db.get(cardId);
+        if (!card) {
+            throw new Error("Card not found");
+        }
 
-    const user = await ctx.db.get(session.userId);
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-    const roleNorm = (user.role ?? "").toString().toLowerCase().replace(/[\s_-]+/g, "");
-    const emailNorm = (user.email ?? "").toString().toLowerCase();
-    const isPrivileged = ["admin", "owner", "cardsetter"].includes(roleNorm) || emailNorm === "hardcorgamingstyle@gmail.com";
-    if (!isPrivileged) {
-      throw new Error("Unauthorized");
-    }
+        if (card.imageId) {
+            await ctx.storage.delete(card.imageId);
+        }
 
-    const card = await ctx.db.get(cardId);
-    if (!card) {
-      throw new Error("Card not found");
-    }
+        await ctx.db.delete(cardId);
 
-    // Delete image from storage
-    if (card.imageId) {
-      await ctx.storage.delete(card.imageId);
-    }
+        const userCardEntries = await ctx.db
+            .query("userCards")
+            .withIndex("by_cardId", (q) => q.eq("cardId", cardId))
+            .collect();
 
-    // 1. Delete the card itself
-    await ctx.db.delete(cardId);
+        await Promise.all(userCardEntries.map(entry => ctx.db.delete(entry._id)));
 
-    // 2. Find and delete all userCards associated with this card
-    const userCardEntries = await ctx.db
-      .query("userCards")
-      .withIndex("by_cardId", (q) => q.eq("cardId", cardId))
-      .collect();
-
-    for (const entry of userCardEntries) {
-      await ctx.db.delete(entry._id);
-    }
-
-    return { success: true };
-  },
+        return { success: true };
+    },
 });
 
 export const deleteAllCards = mutation({
     args: { token: v.string() },
     handler: async (ctx, { token }) => {
-        // Authorization
-        const session = await ctx.db
-            .query("sessions")
-            .withIndex("by_token", (q) => q.eq("token", token))
-            .unique();
-
-        if (!session || session.expires < Date.now()) {
-            throw new Error("Invalid or expired session");
-        }
-
-        const user = await ctx.db.get(session.userId);
-        if (!user) {
-          throw new Error("Unauthorized");
-        }
+        const { user } = await validatePrivilegedUser(ctx, token);
+        
         const roleNorm = (user.role ?? "").toString().toLowerCase().replace(/[\s_-]+/g, "");
         const emailNorm = (user.email ?? "").toString().toLowerCase();
-        const isAdminOwner = ["admin", "owner"].includes(roleNorm) || emailNorm === "hardcorgamingstyle@gmail.com";
+        const isAdminOwner = ["admin", "owner"].includes(roleNorm) || 
+                             emailNorm === "hardcorgamingstyle@gmail.com";
+        
         if (!isAdminOwner) {
-          throw new Error("Unauthorized");
+            throw new Error("Unauthorized");
         }
 
         const allCards = await ctx.db.query("cards").collect();
         let deletedCount = 0;
 
         for (const card of allCards) {
-            // Delete image from storage
             if (card.imageId) {
                 await ctx.storage.delete(card.imageId);
             }
             
-            // Delete the card itself
             await ctx.db.delete(card._id);
 
-            // Find and delete all userCards associated with this card
             const userCardEntries = await ctx.db
                 .query("userCards")
                 .withIndex("by_cardId", (q) => q.eq("cardId", card._id))
                 .collect();
 
-            for (const entry of userCardEntries) {
-                await ctx.db.delete(entry._id);
-            }
+            await Promise.all(userCardEntries.map(entry => ctx.db.delete(entry._id)));
             deletedCount++;
         }
 
@@ -177,31 +144,11 @@ export const deleteAllCards = mutation({
     }
 });
 
-// This function creates a new card with a specific custom ID.
 export const createCardWithId = mutation({
     args: { token: v.string(), customId: v.string() },
     handler: async (ctx, { token, customId }) => {
-        const session = await ctx.db
-          .query("sessions")
-          .withIndex("by_token", (q) => q.eq("token", token))
-          .unique();
+        await validatePrivilegedUser(ctx, token);
 
-        if (!session || session.expires < Date.now()) {
-          throw new Error("Invalid or expired session");
-        }
-
-        const user = await ctx.db.get(session.userId);
-        if (!user) {
-          throw new Error("Unauthorized");
-        }
-        const roleNorm = (user.role ?? "").toString().toLowerCase().replace(/[\s_-]+/g, "");
-        const emailNorm = (user.email ?? "").toString().toLowerCase();
-        const isPrivileged = ["admin", "owner", "cardsetter"].includes(roleNorm) || emailNorm === "hardcorgamingstyle@gmail.com";
-        if (!isPrivileged) {
-          throw new Error("Unauthorized");
-        }
-
-        // Check if a card with this custom ID already exists
         const existingCard = await ctx.db
             .query("cards")
             .withIndex("by_customId", q => q.eq("customId", customId))
@@ -211,13 +158,11 @@ export const createCardWithId = mutation({
             throw new Error("A card with this ID already exists.");
         }
 
-        const cardId = await ctx.db.insert("cards", {
+        return await ctx.db.insert("cards", {
             customId: customId,
-            cardType: "Default Type", // Default value
-            cardName: "New Card", // Default value
+            cardType: "Default Type",
+            cardName: "New Card",
             name_normalized: "new card",
         });
-
-        return cardId;
     }
-})
+});
