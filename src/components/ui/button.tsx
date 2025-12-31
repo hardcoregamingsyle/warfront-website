@@ -50,9 +50,9 @@ function Button({
 
   const animationProps = !asChild
     ? {
-        whileHover: { scale: 0.97 },
-        whileTap: { scale: 0.95 },
-        transition: { duration: 0.08 },
+        whileHover: { scale: 0.98 },
+        whileTap: { scale: 0.96 },
+        transition: { duration: 0.1, ease: "easeOut" },
       }
     : {};
 
@@ -64,5 +64,7 @@ function Button({
     />
   );
 }
+
+Button.displayName = "Button";
 
 export { Button, buttonVariants };

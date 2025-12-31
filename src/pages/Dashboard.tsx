@@ -26,32 +26,40 @@ const QuickActionCard = memo(({
   href?: string;
   onClick?: () => void;
 }) => (
-  <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-colors cursor-pointer">
-    <CardHeader className="pb-3">
-      <CardTitle className="flex items-center gap-2 text-red-400">
-        <Icon className="h-5 w-5" />
-        {title}
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-slate-300 text-sm mb-4">{description}</p>
-      {href ? (
-        <Link to={href}>
-          <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
+  <motion.div
+    whileHover={{ scale: 1.02, y: -4 }}
+    transition={{ duration: 0.2 }}
+  >
+    <Card className="bg-slate-900/50 border-red-500/20 hover:border-red-500/40 transition-all duration-300 cursor-pointer h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-red-400">
+          <Icon className="h-5 w-5" aria-hidden="true" />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-slate-300 text-sm mb-4 leading-relaxed">{description}</p>
+        {href ? (
+          <Link to={href}>
+            <Button className="w-full bg-red-600 hover:bg-red-700 text-white" aria-label={buttonText}>
+              {buttonText}
+            </Button>
+          </Link>
+        ) : (
+          <Button
+            onClick={onClick}
+            className="w-full bg-red-600 hover:bg-red-700 text-white"
+            aria-label={buttonText}
+          >
             {buttonText}
           </Button>
-        </Link>
-      ) : (
-        <Button
-          onClick={onClick}
-          className="w-full bg-red-600 hover:bg-red-700 text-white"
-        >
-          {buttonText}
-        </Button>
-      )}
-    </CardContent>
-  </Card>
+        )}
+      </CardContent>
+    </Card>
+  </motion.div>
 ));
+
+QuickActionCard.displayName = "QuickActionCard";
 
 export default function Dashboard() {
   const { user, token } = useAuth();

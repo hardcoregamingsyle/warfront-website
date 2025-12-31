@@ -55,22 +55,29 @@ function Inventory() {
 
           {inventoryCards && inventoryCards.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {inventoryCards.map((card) => (
+              {inventoryCards.map((card, index) => (
                 <motion.div
                   key={card._id}
                   layout
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300, 
+                    damping: 25,
+                    delay: index * 0.02
+                  }}
+                  whileHover={{ scale: 1.05, y: -8 }}
                 >
-                  <Link to={`/cards/${card.customId}`}>
-                    <Card className="bg-slate-900 border-slate-700 hover:border-red-500/50 transition-all duration-300 overflow-hidden group aspect-[2.5/3.5]">
+                  <Link to={`/cards/${card.customId}`} aria-label={`View ${card.cardName}`}>
+                    <Card className="bg-slate-900 border-slate-700 hover:border-red-500/50 transition-all duration-300 overflow-hidden group aspect-[2.5/3.5] shadow-lg hover:shadow-red-500/20">
                       <CardContent className="p-0">
                         <img
                           src={card.imageUrl || "https://via.placeholder.com/300x400"}
                           alt={card.cardName}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          loading="lazy"
                         />
                       </CardContent>
                     </Card>

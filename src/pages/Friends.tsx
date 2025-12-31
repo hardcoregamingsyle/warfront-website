@@ -71,12 +71,18 @@ function Friends() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {friendRequests.map((request) => (
-                <div key={request._id} className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+              {friendRequests.map((request, index) => (
+                <motion.div 
+                  key={request._id} 
+                  className="flex items-center justify-between p-4 bg-slate-800 rounded-lg hover:bg-slate-700/50 transition-colors"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
                   <div className="flex items-center gap-4">
                     <Avatar>
-                      <AvatarImage src={request.requester?.image} alt={request.requester?.name} />
-                      <AvatarFallback>{request.requester?.name?.[0]}</AvatarFallback>
+                      <AvatarImage src={request.requester?.image} alt={request.requester?.name || "User"} />
+                      <AvatarFallback>{request.requester?.name?.[0] || "?"}</AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-semibold text-white">
@@ -90,20 +96,22 @@ function Friends() {
                       onClick={() => handleResponse(request._id, "accepted")}
                       className="bg-green-600 hover:bg-green-700"
                       size="sm"
+                      aria-label={`Accept friend request from ${request.requester?.name}`}
                     >
-                      <UserCheck className="mr-2 h-4 w-4" />
+                      <UserCheck className="mr-2 h-4 w-4" aria-hidden="true" />
                       Accept
                     </Button>
                     <Button 
                       onClick={() => handleResponse(request._id, "declined")}
                       variant="outline"
                       size="sm"
+                      aria-label={`Decline friend request from ${request.requester?.name}`}
                     >
-                      <UserX className="mr-2 h-4 w-4" />
+                      <UserX className="mr-2 h-4 w-4" aria-hidden="true" />
                       Decline
                     </Button>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </CardContent>
           </Card>
@@ -120,12 +128,18 @@ function Friends() {
           <CardContent>
             {friends && friends.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {friends.map((friend) => (
-                  <div key={friend._id} className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+                {friends.map((friend, index) => (
+                  <motion.div 
+                    key={friend._id} 
+                    className="flex items-center justify-between p-4 bg-slate-800 rounded-lg hover:bg-slate-700/50 transition-colors"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.03 }}
+                  >
                     <div className="flex items-center gap-4">
                       <Avatar>
-                        <AvatarImage src={friend.image} alt={friend.name} />
-                        <AvatarFallback>{friend.name?.[0]}</AvatarFallback>
+                        <AvatarImage src={friend.image} alt={friend.name || "User"} />
+                        <AvatarFallback>{friend.name?.[0] || "?"}</AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-semibold text-white">
@@ -139,13 +153,13 @@ function Friends() {
                         variant="destructive"
                         size="sm"
                         onClick={() => handleUnfriend(friend._id as Id<"users">)}
-                        title="Unfriend"
+                        aria-label={`Unfriend ${friend.name}`}
                       >
-                        <UserMinus className="mr-2 h-4 w-4" />
+                        <UserMinus className="mr-2 h-4 w-4" aria-hidden="true" />
                         Unfriend
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             ) : (
