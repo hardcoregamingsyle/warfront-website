@@ -124,7 +124,7 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   --header-bg: oklch(0.20 0.03 255);
-  --bg-image: url('/assets/camouflage-seamless-pattern-for-army-and-military-free-vector.jpg');
+  --bg-image: url('https://vly-assets.s3.us-east-1.amazonaws.com/asset_1767185885486_ux0c3jdwf.jpg');
 }
 
 @layer base {

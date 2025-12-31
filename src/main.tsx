@@ -8,7 +8,6 @@ import { HelmetProvider } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/layouts/ProtectedRoute";
 import "./index.css";
-import { cmsStore } from "@/pages/cms/cmsStore";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -61,22 +60,7 @@ const BlogViewer = lazy(() => import("./pages/BlogViewer.tsx"));
 const BlogEditor = lazy(() => import("./pages/BlogEditor.tsx"));
 const AllCards = lazy(() => import("./pages/AllCards.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
-const AdminUsers = lazy(() => import("./pages/AdminUsers.tsx"));
-const AdminCMS = lazy(() => import("./pages/AdminCMS.tsx"));
-const AdminModeration = lazy(() => import("./pages/AdminModeration.tsx"));
-const AdminCardInfo = lazy(() => import("./pages/AdminCardInfo.tsx"));
 const PackViewer = lazy(() => import("./pages/PackViewer.tsx"));
-
-// Add new CMS page imports
-const BlogsMain = lazy(() => import("./pages/cms/BlogsMain.tsx"));
-const CardBlogs = lazy(() => import("./pages/cms/CardBlogs.tsx"));
-const CompanyBlogs = lazy(() => import("./pages/cms/CompanyBlogs.tsx"));
-const PagesUnsorted = lazy(() => import("./pages/cms/PagesUnsorted.tsx"));
-const PagesPublic = lazy(() => import("./pages/cms/PagesPublic.tsx"));
-const PagesPrivate = lazy(() => import("./pages/cms/PagesPrivate.tsx"));
-const PagesCards = lazy(() => import("./pages/cms/PagesCards.tsx"));
-const RobotPages = lazy(() => import("./pages/cms/RobotPages.tsx"));
-const CreateBlog = lazy(() => import("./pages/cms/CreateBlog.tsx"));
 
 function RouteSyncer() {
   const location = useLocation();
@@ -166,21 +150,6 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/editor/card/:cardId" element={<ProtectedRoute><CardEditor /></ProtectedRoute>} />
                 <Route path="/editor/blog/:blogId" element={<ProtectedRoute><BlogEditor /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
-                <Route path="/admin/cms" element={<ProtectedRoute><AdminCMS /></ProtectedRoute>} />
-                <Route path="/admin/moderation" element={<ProtectedRoute><AdminModeration /></ProtectedRoute>} />
-                <Route path="/admin/card-info" element={<ProtectedRoute><AdminCardInfo /></ProtectedRoute>} />
-                
-                {/* CMS Sub-routes */}
-                <Route path="/admin/cms/blogs" element={<ProtectedRoute><BlogsMain /></ProtectedRoute>} />
-                <Route path="/admin/cms/blogs/card-blogs" element={<ProtectedRoute><CardBlogs /></ProtectedRoute>} />
-                <Route path="/admin/cms/blogs/company-blogs" element={<ProtectedRoute><CompanyBlogs /></ProtectedRoute>} />
-                <Route path="/admin/cms/pages/unsorted" element={<ProtectedRoute><PagesUnsorted /></ProtectedRoute>} />
-                <Route path="/admin/cms/pages/public" element={<ProtectedRoute><PagesPublic /></ProtectedRoute>} />
-                <Route path="/admin/cms/pages/private" element={<ProtectedRoute><PagesPrivate /></ProtectedRoute>} />
-                <Route path="/admin/cms/pages/cards" element={<ProtectedRoute><PagesCards /></ProtectedRoute>} />
-                <Route path="/admin/cms/robot" element={<ProtectedRoute><RobotPages /></ProtectedRoute>} />
-                <Route path="/admin/cms/create/blog/new" element={<ProtectedRoute><CreateBlog /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </BrowserRouter>
