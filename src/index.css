@@ -131,11 +131,23 @@
 .dark body {
   background-image: var(--bg-image);
   background-repeat: no-repeat;
-  background-size: 165%;
+  background-size: 120%;
   background-position: center center;
   background-attachment: fixed;
   /* Darker overlay for better contrast in dark mode */
   position: relative;
+}
+
+.dark body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: -1;
 }
 
 @layer base {
@@ -211,27 +223,4 @@
       scroll-behavior: auto !important;
     }
   }
-}
-
-/* Dark mode optimized background */
-.dark body {
-  background-image: var(--bg-image);
-  background-repeat: no-repeat;
-  background-size: 165%;
-  background-position: center center;
-  background-attachment: fixed;
-  /* Darker overlay for better contrast in dark mode */
-  position: relative;
-}
-
-.dark body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  z-index: -1;
 }
