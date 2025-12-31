@@ -47,21 +47,17 @@
   --radius: 0.625rem;
 
   /* Light theme palette: Khaki whitish yellow base, khaki greens for primary, greens instead of reds */
-  --background: oklch(0.93 0.06 95);           /* khaki-cream */
-  --foreground: oklch(0.22 0.03 95);           /* deep olive text */
+  --background: oklch(0.93 0.06 95);
+  --foreground: oklch(0.22 0.03 95);
   --card: oklch(0.95 0.04 95);
   --card-foreground: oklch(0.22 0.03 95);
   --popover: oklch(0.95 0.04 95);
   --popover-foreground: oklch(0.22 0.03 95);
 
-  /* Primary previously blue -> khaki green */
-  --primary: oklch(0.72 0.12 135);             /* khaki green */
+  --primary: oklch(0.72 0.12 135);
   --primary-foreground: oklch(0.2 0.03 95);
-
-  /* Add a slightly darker primary for hover states in light mode */
   --primary-dark: oklch(0.62 0.12 135);
 
-  /* Replace red with green accents for light */
   --secondary: oklch(0.9 0.04 95);
   --secondary-foreground: oklch(0.22 0.03 95);
   --muted: oklch(0.92 0.02 95);
@@ -69,7 +65,7 @@
   --accent: oklch(0.86 0.05 135);
   --accent-foreground: oklch(0.22 0.03 95);
 
-  --destructive: oklch(0.69 0.13 142);         /* use green instead of red */
+  --destructive: oklch(0.69 0.13 142);
   --border: oklch(0.85 0.02 95);
   --input: oklch(0.88 0.02 95);
   --ring: oklch(0.72 0.12 135);
@@ -89,15 +85,11 @@
   --sidebar-border: oklch(0.85 0.02 95);
   --sidebar-ring: oklch(0.72 0.12 135);
 
-  /* Header background for light theme: brown */
   --header-bg: oklch(0.6 0.09 60);
-
-  /* Background image variable for light theme (use local asset) */
   --bg-image: url('/assets/camouflage-seamless-pattern-for-army-and-military-free-vector.jpg');
 }
 
 .dark {
-  /* Existing dark stays similar; keep strong contrast and reds */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -105,7 +97,6 @@
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
 
-  /* Keep current red accents for dark */
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
@@ -132,11 +123,8 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 
-  /* Header background for dark theme: deep navy blue */
   --header-bg: oklch(0.20 0.03 255);
-
-  /* Background image variable for dark theme (uploaded asset) */
-  --bg-image: url('https://harmless-tapir-303.convex.cloud/api/storage/bace9929-c4de-4d8d-a3de-0b6ae569c325');
+  --bg-image: url('/assets/camouflage-seamless-pattern-for-army-and-military-free-vector.jpg');
 }
 
 @layer base {
@@ -144,38 +132,31 @@
     @apply border-border outline-ring/50;
   }
   
-  /* Preload background images for faster loading */
-  html::before {
-    content: '';
-    position: fixed;
-    top: -10px;
-    left: -10px;
-    width: 1px;
-    height: 1px;
-    background-image: url('/assets/camouflage-seamless-pattern-for-army-and-military-free-vector.jpg');
-    opacity: 0;
-    pointer-events: none;
-    z-index: -1;
+  html {
+    /* Prevent layout shift */
+    min-height: 100vh;
   }
   
   body {
     @apply text-foreground;
-    /* Optimized background with fallback color and lazy loading */
     background-color: var(--background);
     background-image: var(--bg-image);
     background-repeat: repeat;
-    /* Increase light mode pattern size more */
-    background-size: 960px 960px;
+    background-size: 480px 480px;
     background-position: center center;
     background-attachment: scroll;
-    /* Add transition for smoother theme switching */
-    transition: background-color 0.3s ease;
+    /* Faster transitions */
+    transition: background-color 0.15s ease;
+    /* GPU acceleration */
+    will-change: background-color;
+    /* Prevent flash */
+    min-height: 100vh;
   }
 
-  /* Light mode: remap red utility classes -> true warning yellow (high L, low C, slight orange hue) */
-  :root:not(.dark) .text-red-400 { color: oklch(0.92 0.08 90) !important; } /* warning yellow */
+  /* Light mode: remap red utility classes -> warning yellow */
+  :root:not(.dark) .text-red-400 { color: oklch(0.92 0.08 90) !important; }
   :root:not(.dark) .hover\:text-red-400:hover { color: oklch(0.92 0.08 90) !important; }
-  :root:not(.dark) .text-red-500 { color: oklch(0.88 0.12 90) !important; } /* deeper warning yellow */
+  :root:not(.dark) .text-red-500 { color: oklch(0.88 0.12 90) !important; }
   :root:not(.dark) .hover\:text-red-500:hover { color: oklch(0.88 0.12 90) !important; }
 
   :root:not(.dark) .bg-red-600 { background-color: oklch(0.88 0.12 90) !important; }
@@ -188,18 +169,31 @@
   :root:not(.dark) .file\:bg-red-600::file-selector-button { background-color: oklch(0.88 0.12 90) !important; }
   :root:not(.dark) .hover\:file\:bg-red-700:hover::file-selector-button { background-color: oklch(0.84 0.14 88) !important; }
 
-  /* Ensure ALL buttons have white text in Light mode */
   :root:not(.dark) button,
   :root:not(.dark) [role="button"] {
     color: #FFFFFF !important;
   }
 }
 
-/* Override background behavior only in dark mode to make it single, full-screen */
+/* Dark mode optimized background */
 .dark body {
   background-image: var(--bg-image);
-  background-repeat: no-repeat;        /* single image */
-  background-size: cover;              /* full-screen cover */
-  background-position: center center;  /* centered */
-  background-attachment: fixed;        /* subtle parallax; improves perceived quality */
+  background-repeat: repeat;
+  background-size: 480px 480px;
+  background-position: center center;
+  background-attachment: scroll;
+  /* Darker overlay for better contrast in dark mode */
+  position: relative;
+}
+
+.dark body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: -1;
 }

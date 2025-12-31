@@ -46,7 +46,7 @@ const Navigation = memo(({
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.2 }}
         >
-          <img src="/assets/Logo.png" alt="Warfront Logo" className="h-12 w-auto" />
+          <img src="/assets/Logo.png" alt="Warfront Logo" className="h-12 w-auto" loading="eager" />
         </motion.div>
 
         <div className="hidden md:flex items-center space-x-8">
@@ -197,13 +197,6 @@ export default function Landing() {
     );
 
   useEffect(() => {
-    const img = new Image();
-    img.src = '/assets/camouflage-seamless-pattern-for-army-and-military-free-vector.jpg';
-    const darkImg = new Image();
-    darkImg.src = 'https://harmless-tapir-303.convex.cloud/api/storage/bace9929-c4de-4d8d-a3de-0b6ae569c325';
-  }, []);
-
-  useEffect(() => {
     if (typeof document !== "undefined") {
       const root = document.documentElement;
       if (isDark) {
@@ -224,7 +217,7 @@ export default function Landing() {
         <title>Combat for the Digital Age – Warfront</title>
         <link rel="icon" type="image/png" href="/assets/Logo.png" />
         <link rel="preload" as="image" href="/assets/camouflage-seamless-pattern-for-army-and-military-free-vector.jpg" />
-        <link rel="preload" as="image" href="https://harmless-tapir-303.convex.cloud/api/storage/bace9929-c4de-4d8d-a3de-0b6ae569c325" />
+        <link rel="preload" as="image" href="/assets/Logo.png" />
         <meta name="description" content="Experience Warfront, the family-friendly military TCG & CCG. Battle online with friends or play offline with physical cards. A perfect mix of combat, strategy, and fun for all ages." />
         <meta name="keywords" content="Warfront, Military, War, TCG, CCG, card game, strategy game, family-friendly, collectible card game" />
         <meta property="og:title" content="Warfront: A Family-Friendly TCG for the Digital Age" />
