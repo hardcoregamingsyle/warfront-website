@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -85,6 +86,9 @@ export default function EditFieldDialog({
       <DialogContent className="bg-slate-900 border-slate-700 text-white">
         <DialogHeader>
           <DialogTitle>Edit {fieldName}</DialogTitle>
+          <DialogDescription>
+            Update your {fieldName.toLowerCase()} information below.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           {fieldName === "Profile Picture" ? (
