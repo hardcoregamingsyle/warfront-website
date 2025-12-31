@@ -45,18 +45,18 @@ export default function Admin() {
           <h1 className="text-4xl font-bold text-red-400 mb-6">Admin Control Panel</h1>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {/* Card Info quick access */}
             <Card className="bg-slate-900/50 border-red-500/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-red-400">
-                  Card Info
+                  <Shield className="h-5 w-5" />
+                  Card Management
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-slate-300">
-                <p>Quick access to card-related admin information and tools.</p>
-                <Link to="/admin/card-info">
+                <p>Add and manage cards in the system.</p>
+                <Link to="/admin/add-card">
                   <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
-                    Open Card Info
+                    Add Card
                   </Button>
                 </Link>
               </CardContent>
@@ -65,12 +65,12 @@ export default function Admin() {
             <Card className="bg-slate-900/50 border-red-500/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-red-400">
-                  <Shield className="h-5 w-5" />
-                  Moderation
+                  <Users className="h-5 w-5" />
+                  User Management
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-slate-300">
-                <p>Review reports, manage user roles, and handle escalations.</p>
+                <p>Manage users, roles, and permissions.</p>
                 <Link to="/admin/users">
                   <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
                     Manage Users
@@ -82,29 +82,12 @@ export default function Admin() {
             <Card className="bg-slate-900/50 border-red-500/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-red-400">
-                  <Users className="h-5 w-5" />
-                  Users
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-slate-300">
-                <p>Search users, inspect profiles, and manage access.</p>
-                <Link to="/admin/users">
-                  <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
-                    Open Users
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-slate-900/50 border-red-500/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-400">
                   <Settings className="h-5 w-5" />
-                  System
+                  Content Management
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-slate-300">
-                <p>Environment, maintenance tasks, and feature flags.</p>
+                <p>Manage blogs, cards, and company content.</p>
                 <Link to="/admin/cms">
                   <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
                     Open CMS
@@ -117,14 +100,14 @@ export default function Admin() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-red-400">
                   <Activity className="h-5 w-5" />
-                  Activity & Logs
+                  All Cards
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-slate-300">
-                <p>Recent actions, health metrics, and security logs.</p>
+                <p>View and manage all cards in the database.</p>
                 <Link to="/all-cards">
                   <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
-                    Go to All Cards
+                    View All Cards
                   </Button>
                 </Link>
               </CardContent>

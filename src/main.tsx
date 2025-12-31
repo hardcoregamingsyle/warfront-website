@@ -61,6 +61,12 @@ const BlogEditor = lazy(() => import("./pages/BlogEditor.tsx"));
 const AllCards = lazy(() => import("./pages/AllCards.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
 const PackViewer = lazy(() => import("./pages/PackViewer.tsx"));
+const AdminUsers = lazy(() => import("./pages/admin/Users.tsx"));
+const AdminCMS = lazy(() => import("./pages/admin/CMS.tsx"));
+const AdminAddCard = lazy(() => import("./pages/admin/AddCard.tsx"));
+const AdminAddBlog = lazy(() => import("./pages/admin/cms/AddBlog.tsx"));
+const AdminAddBlogCard = lazy(() => import("./pages/admin/cms/AddBlogCard.tsx"));
+const AdminAddBlogCompany = lazy(() => import("./pages/admin/cms/AddBlogCompany.tsx"));
 
 function RouteSyncer() {
   const location = useLocation();
@@ -103,8 +109,6 @@ const SuspenseFallback = () => (
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* Removed VlyToolbar to avoid DOM overlay interfering with React reconciliation */}
-    {/* <VlyToolbar /> */}
     <InstrumentationProvider>
       <ConvexProvider client={convex}>
         <HelmetProvider>
@@ -150,6 +154,12 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/editor/card/:cardId" element={<ProtectedRoute><CardEditor /></ProtectedRoute>} />
                 <Route path="/editor/blog/:blogId" element={<ProtectedRoute><BlogEditor /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+                <Route path="/admin/cms" element={<ProtectedRoute><AdminCMS /></ProtectedRoute>} />
+                <Route path="/admin/add-card" element={<ProtectedRoute><AdminAddCard /></ProtectedRoute>} />
+                <Route path="/admin/cms/add-blog" element={<ProtectedRoute><AdminAddBlog /></ProtectedRoute>} />
+                <Route path="/admin/cms/add-blog/card" element={<ProtectedRoute><AdminAddBlogCard /></ProtectedRoute>} />
+                <Route path="/admin/cms/add-blog/company" element={<ProtectedRoute><AdminAddBlogCompany /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </BrowserRouter>
