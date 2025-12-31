@@ -2,7 +2,6 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
-  Bell,
   Home,
   Package,
   Users,
@@ -13,23 +12,11 @@ import {
   LogOut,
   Users2,
   Swords,
-  Mail,
   Sun,
   Moon,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { memo, useCallback, useEffect, useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Id } from "@/convex/_generated/dataModel";
+import { useEffect, useState } from "react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -45,60 +32,8 @@ const navItems = [
   { href: "/users", icon: Users2, label: "Users" },
 ];
 
-const NotificationDropdown = memo(({ token }: { token: string | null }) => {
-  const notifications = useQuery(
-    api.notifications.getUnread,
-    token ? { token } : "skip"
-  );
-  const markAsRead = useMutation(api.notifications.markAsRead);
-  const markAllAsRead = useMutation(api.notifications.markAllAsRead);
-  const navigate = useNavigate();
-
-  const handleNotificationClick = useCallback(async (notification: { _id: Id<"notifications">, href: string }) => {
-    await markAsRead({ notificationId: notification._id });
-    navigate(notification.href);
-  }, [markAsRead, navigate]);
-
-  const handleMarkAllRead = useCallback(async () => {
-    if (!token) return;
-    await markAllAsRead({ token });
-  }, [token, markAllAsRead]);
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-6 w-6 text-slate-300 hover:text-red-400" />
-          {notifications && notifications.length > 0 && (
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 bg-slate-800 border-slate-700 text-white">
-        <DropdownMenuLabel className="flex justify-between items-center">
-          <span>Notifications</span>
-          {notifications && notifications.length > 0 && (
-            <Button variant="link" size="sm" onClick={handleMarkAllRead}>Mark all as read</Button>
-          )}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-slate-700" />
-        {notifications && notifications.length > 0 ? (
-          notifications.map((n) => (
-            <DropdownMenuItem key={n._id} onSelect={() => handleNotificationClick(n)} className="cursor-pointer hover:bg-slate-700">
-              <Mail className="mr-2 h-4 w-4" />
-              <span>{n.message}</span>
-            </DropdownMenuItem>
-          ))
-        ) : (
-          <p className="p-4 text-center text-sm text-slate-400">No new notifications</p>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-});
-
 function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { signOut, token } = useAuth();
+  const { signOut } = useAuth();
   const location = useLocation();
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -159,7 +94,6 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
             </nav>
           </div>
           <div className="mt-auto p-4 border-t border-slate-800 flex items-center gap-4">
-            <NotificationDropdown token={token} />
             <Link to="/profile">
               <User className="h-6 w-6 text-slate-300 hover:text-red-400" />
             </Link>
@@ -179,7 +113,6 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
               <span className="">Warfront</span>
             </Link>
             <div className="ml-auto flex items-center gap-4">
-              <NotificationDropdown token={token} />
               <Button
                 variant="outline"
                 size="icon"

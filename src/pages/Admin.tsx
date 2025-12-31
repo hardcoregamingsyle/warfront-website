@@ -5,17 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Users, Settings, Activity } from "lucide-react";
 import { Link } from "react-router";
-import { useState, useMemo } from "react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { toast } from "sonner";
 
 export default function Admin() {
-  // Include token from useAuth for authenticated actions
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const roleLc = (user?.role ?? "").toString().toLowerCase();
   const emailLc = (user?.email_normalized ?? "").toLowerCase();
 
@@ -26,65 +18,6 @@ export default function Admin() {
       roleLc === "owner" ||
       emailLc === "hardcorgamingstyle@gmail.com"
     );
-
-  // Add: roles list for broadcasting notifications (must match backend roles)
-  const ALL_ROLES = useMemo(
-    () => [
-      "Unverified",
-      "Verified",
-      "Influencer",
-      "Admin",
-      "Owner",
-      "Card Setter",
-      "Bloggers",
-    ] as const,
-    [],
-  );
-
-  const [selectedRoles, setSelectedRoles] = useState<Array<string>>([]);
-  const [title, setTitle] = useState("");
-  const [message, setMessage] = useState("");
-  const [isSending, setIsSending] = useState(false);
-
-  const broadcast = useMutation(api.notifications.adminBroadcastNotification);
-
-  const toggleRole = (role: string) => {
-    setSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role],
-    );
-  };
-
-  const handleSend = async () => {
-    try {
-      if (!token) {
-        toast.error("You must be logged in.");
-        return;
-      }
-      if (selectedRoles.length === 0) {
-        toast.error("Select at least one role.");
-        return;
-      }
-      if (!title.trim() || !message.trim()) {
-        toast.error("Title and Message are required.");
-        return;
-      }
-      setIsSending(true);
-      const res = await broadcast({
-        token: token ?? "",
-        roles: selectedRoles as any,
-        title: title.trim(),
-        message: message.trim(),
-      });
-      toast.success(typeof res === "string" ? res : "Notification sent!");
-      setTitle("");
-      setMessage("");
-      setSelectedRoles([]);
-    } catch (e: any) {
-      toast.error(e?.message ?? "Failed to send notifications");
-    } finally {
-      setIsSending(false);
-    }
-  };
 
   return (
     <DashboardLayout>
@@ -194,69 +127,6 @@ export default function Admin() {
                     Go to All Cards
                   </Button>
                 </Link>
-              </CardContent>
-            </Card>
-
-            {/* Send Notification Card */}
-            <Card className="bg-slate-900/50 border-red-500/20 md:col-span-2 xl:col-span-3">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-400">
-                  Send Notification
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-slate-300">
-                <div className="space-y-2">
-                  <Label className="text-slate-200">Select Roles</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {ALL_ROLES.map((role) => (
-                      <label
-                        key={role}
-                        className="flex items-center gap-2 bg-slate-800/50 border border-slate-700/50 rounded-md px-3 py-2 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          className="accent-red-500 cursor-pointer"
-                          checked={selectedRoles.includes(role)}
-                          onChange={() => toggleRole(role)}
-                        />
-                        <span className="text-sm">{role}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="broadcast-title" className="text-slate-200">Title</Label>
-                  <Input
-                    id="broadcast-title"
-                    placeholder="Enter a concise title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="bg-slate-800/40 border-slate-700/60 text-white placeholder:text-slate-400"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="broadcast-message" className="text-slate-200">Message</Label>
-                  <Textarea
-                    id="broadcast-message"
-                    placeholder="Write the message to send to all selected roles"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="bg-slate-800/40 border-slate-700/60 text-white placeholder:text-slate-400 min-h-32"
-                  />
-                </div>
-
-                <div className="pt-2">
-                  <Button
-                    onClick={handleSend}
-                    disabled={isSending}
-                    variant="outline"
-                    className="border-red-500 text-red-400 hover:bg-red-500/10"
-                  >
-                    {isSending ? "Sending..." : "Send"}
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </div>

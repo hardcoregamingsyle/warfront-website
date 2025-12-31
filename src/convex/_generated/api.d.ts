@@ -32,7 +32,6 @@ import type * as generators_nuclearCleanup from "../generators/nuclearCleanup.js
 import type * as helpers_auth from "../helpers/auth.js";
 import type * as http from "../http.js";
 import type * as multiplayerBattles from "../multiplayerBattles.js";
-import type * as notifications from "../notifications.js";
 import type * as packs from "../packs.js";
 import type * as seed from "../seed.js";
 import type * as seo from "../seo.js";
@@ -68,7 +67,6 @@ declare const fullApi: ApiFromModules<{
   "helpers/auth": typeof helpers_auth;
   http: typeof http;
   multiplayerBattles: typeof multiplayerBattles;
-  notifications: typeof notifications;
   packs: typeof packs;
   seed: typeof seed;
   seo: typeof seo;
