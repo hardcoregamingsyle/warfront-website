@@ -124,7 +124,30 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   --header-bg: oklch(0.20 0.03 255);
-  --bg-image: url('https://vly-assets.s3.us-east-1.amazonaws.com/asset_1767185885486_ux0c3jdwf.jpg');
+  --bg-image: url('/assets/Untitled_design__1_.png');
+}
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+/* Dark mode optimized background */
+.dark body {
+  background-image: var(--bg-image);
+  background-repeat: repeat;
+  background-size: 480px 480px;
+  background-position: center center;
+  background-attachment: scroll;
+  /* Darker overlay for better contrast in dark mode */
+  position: relative;
+}
+=======
+/* Dark mode optimized background */
+.dark body {
+  background-image: var(--bg-image);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  /* Darker overlay for better contrast in dark mode */
+  position: relative;
 }
 
 @layer base {
