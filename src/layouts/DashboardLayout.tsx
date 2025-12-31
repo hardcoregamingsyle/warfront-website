@@ -14,6 +14,7 @@ import {
   Swords,
   Sun,
   Moon,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
@@ -33,7 +34,7 @@ const navItems = [
 ];
 
 function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const location = useLocation();
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -55,6 +56,17 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [isDark]);
 
   const toggleTheme = () => setIsDark((v) => !v);
+
+  // Check if user is admin
+  const roleLc = (user?.role ?? "").toString().toLowerCase();
+  const emailLc = (user?.email_normalized ?? "").toLowerCase();
+  const isAdmin =
+    !!user &&
+    (
+      roleLc === "admin" ||
+      roleLc === "owner" ||
+      emailLc === "hardcorgamingstyle@gmail.com"
+    );
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white">
@@ -91,6 +103,18 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
                   {item.label}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 transition-all hover:text-red-400",
+                    location.pathname === "/admin" && "bg-slate-800 text-red-400",
+                  )}
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin Panel
+                </Link>
+              )}
             </nav>
           </div>
           <div className="mt-auto p-4 border-t border-slate-800 flex items-center gap-4">
