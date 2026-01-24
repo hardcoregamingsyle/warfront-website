@@ -2,13 +2,12 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@/components/auth/UserButton";
 import { motion } from "framer-motion";
-import { Swords, Shield, Gamepad2, HelpCircle, Menu, X, Users, History } from "lucide-react";
+import { Swords, Shield, Gamepad2, HelpCircle, Menu, Users, History, Sun, Moon } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Sun, Moon } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export default function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   // Add theme state + initializer
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -49,11 +48,55 @@ export default function Header() {
       transition={{ duration: 0.5 }}
       className="sticky top-0 z-50 w-full border-b border-slate-700 bg-[var(--header-bg)]"
     >
-      <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
-        <Link to="/" className="mr-6 flex items-center space-x-2">
-          <img src="/assets/Logo.png" alt="Warfront Logo" className="h-10 sm:h-12 w-auto" />
-          <span className="hidden font-bold sm:inline-block text-slate-200">Warfront</span>
-        </Link>
+      <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4">
+        <div className="flex items-center gap-4">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden text-slate-300 hover:text-white">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] bg-[var(--header-bg)] border-r-slate-800 p-0">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center gap-2 p-6 border-b border-slate-800">
+                  <img src="/assets/Logo.png" alt="Warfront Logo" className="h-8 w-8" />
+                  <span className="font-bold text-slate-200">Warfront</span>
+                </div>
+                <nav className="flex-1 overflow-auto py-4 px-4 space-y-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+                    >
+                      {link.icon}
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+                <div className="p-4 border-t border-slate-800 space-y-4">
+                  <Button
+                    variant="outline"
+                    onClick={toggleTheme}
+                    className="w-full justify-start gap-2 border-slate-600 text-slate-200 hover:bg-slate-800"
+                  >
+                    {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    {isDark ? "Light Mode" : "Dark Mode"}
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    <UserButton />
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <Link to="/" className="flex items-center space-x-2">
+            <img src="/assets/Logo.png" alt="Warfront Logo" className="h-10 sm:h-12 w-auto" />
+            <span className="hidden font-bold sm:inline-block text-slate-200">Warfront</span>
+          </Link>
+        </div>
 
         <nav className="hidden md:flex items-center gap-6 text-sm">
           {navLinks.map((link) => (
@@ -67,7 +110,9 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <NotificationBell />
+          
           {/* Theme toggle button (desktop) */}
           <Button
             variant="outline"
@@ -83,59 +128,8 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-3">
             <UserButton />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden text-slate-300 hover:text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </Button>
         </div>
       </div>
-
-      {mobileMenuOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          className="md:hidden bg-[var(--header-bg)]"
-        >
-          <div className="px-4 pt-2 pb-4 space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.icon}
-                {link.label}
-              </Link>
-            ))}
-            {/* Theme toggle (mobile) */}
-            <Button
-              variant="outline"
-              onClick={() => {
-                toggleTheme();
-                setMobileMenuOpen(false);
-              }}
-              className="w-full border-slate-600 text-slate-200 hover:bg-slate-800"
-            >
-              {isDark ? (
-                <span className="flex items-center gap-2"><Sun className="h-4 w-4" /> Switch to Light</span>
-              ) : (
-                <span className="flex items-center gap-2"><Moon className="h-4 w-4" /> Switch to Dark</span>
-              )}
-            </Button>
-            <div className="border-t border-slate-700 pt-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <UserButton />
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
     </motion.header>
   );
 }

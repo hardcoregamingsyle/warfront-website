@@ -3,7 +3,7 @@ import { InstrumentationProvider } from "@/instrumentation.tsx";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { StrictMode, useEffect, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router";
+import { HashRouter, Route, Routes, useLocation } from "react-router";
 import { HelmetProvider } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/layouts/ProtectedRoute";
@@ -112,7 +112,7 @@ createRoot(document.getElementById("root")!).render(
     <InstrumentationProvider>
       <ConvexProvider client={convex}>
         <HelmetProvider>
-          <BrowserRouter>
+          <HashRouter>
             <RouteSyncer />
             <Suspense fallback={<SuspenseFallback />}>
               <Routes>
@@ -162,7 +162,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/admin/cms/add-blog/company" element={<ProtectedRoute><AdminAddBlogCompany /></ProtectedRoute>} />
               </Routes>
             </Suspense>
-          </BrowserRouter>
+          </HashRouter>
           <Toaster />
         </HelmetProvider>
       </ConvexProvider>
