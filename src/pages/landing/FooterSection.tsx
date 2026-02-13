@@ -22,14 +22,14 @@ const footerLinks = {
 
 export default memo(function FooterSection() {
   return (
-    <footer id="contact" className="bg-slate-900 border-t border-slate-700 py-16 px-4 sm:px-6 lg:px-8">
+    <footer id="contact" className="bg-slate-900 border-t border-slate-700 py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-8">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-1 sm:col-span-2 md:col-span-1">
             <div className="mb-4">
-              <img src="/assets/Logo.png" alt="Warfront Logo" className="h-12 w-auto" />
+              <img src="/assets/Logo.png" alt="Warfront Logo" className="h-10 sm:h-12 w-auto" />
             </div>
-            <p className="text-slate-400 leading-relaxed">The ultimate military strategy card game experience.</p>
+            <p className="text-slate-400 leading-relaxed text-sm sm:text-base">The ultimate military strategy card game experience.</p>
           </div>
 
           <div>

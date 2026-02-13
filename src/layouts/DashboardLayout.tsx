@@ -90,17 +90,17 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
         </Button>
       </div>
       <div className="flex-1 overflow-auto py-2">
-        <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+        <nav className="grid items-start px-2 text-sm font-medium lg:px-4 space-y-1">
           {navItems.map((item) => (
             <Link
               key={item.label}
               to={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 transition-all hover:text-red-400",
+                "flex items-center gap-3 rounded-lg px-3 py-3 sm:py-2 text-slate-300 transition-all hover:text-red-400 text-base sm:text-sm",
                 location.pathname === item.href && "bg-slate-800 text-red-400",
               )}
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className="h-5 w-5 sm:h-4 sm:w-4" />
               {item.label}
             </Link>
           ))}
@@ -108,11 +108,11 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
             <Link
               to="/admin"
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 transition-all hover:text-red-400",
+                "flex items-center gap-3 rounded-lg px-3 py-3 sm:py-2 text-slate-300 transition-all hover:text-red-400 text-base sm:text-sm",
                 location.pathname === "/admin" && "bg-slate-800 text-red-400",
               )}
             >
-              <Shield className="h-4 w-4" />
+              <Shield className="h-5 w-5 sm:h-4 sm:w-4" />
               Admin Panel
             </Link>
           )}
@@ -141,8 +141,8 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="flex h-14 items-center gap-4 border-b border-slate-800 bg-[var(--header-bg)] px-4 lg:h-[60px] lg:px-6 md:hidden sticky top-0 z-50">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0 md:hidden">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="shrink-0 md:hidden -ml-2">
+                <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>

@@ -40,13 +40,13 @@ const Navigation = memo(({
     transition={{ duration: 0.5 }}
   >
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center h-16">
+      <div className="flex justify-between items-center h-14 sm:h-16">
         <motion.div 
           className="flex items-center"
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.2 }}
         >
-          <img src="/assets/Logo.png" alt="Warfront Logo" className="h-12 w-auto" loading="eager" />
+          <img src="/assets/Logo.png" alt="Warfront Logo" className="h-10 sm:h-12 w-auto" loading="eager" />
         </motion.div>
 
         <div className="hidden md:flex items-center space-x-8">
@@ -104,32 +104,32 @@ const Navigation = memo(({
             transition={{ duration: 0.3 }}
           >
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="#features" className="block px-3 py-2 text-slate-300 hover:text-white transition-colors">Features</a>
-              <a href="#gameplay" className="block px-3 py-2 text-slate-300 hover:text-white transition-colors">Gameplay</a>
-              <a href="#contact" className="block px-3 py-2 text-slate-300 hover:text-white transition-colors">Contact</a>
+              <a href="#features" className="block px-3 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors" onClick={() => setMobileMenuOpen(false)}>Features</a>
+              <a href="#gameplay" className="block px-3 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors" onClick={() => setMobileMenuOpen(false)}>Gameplay</a>
+              <a href="#contact" className="block px-3 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors" onClick={() => setMobileMenuOpen(false)}>Contact</a>
               {isAuthenticated && isAdminOrOwner && (
-                <Link to="/admin" className="block px-3 py-2">
+                <Link to="/admin" className="block px-3 py-2" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full bg-red-600 hover:bg-red-700 text-white">Admin</Button>
                 </Link>
               )}
-              <div className="px-3 py-2 grid grid-cols-2 gap-2">
+              <div className="px-3 py-2 grid grid-cols-2 gap-3 mt-2">
                 <Button
                   variant="outline"
                   onClick={() => {
                     toggleTheme();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full border-slate-600 text-slate-200 hover:bg-slate-800"
+                  className="w-full border-slate-600 text-slate-200 hover:bg-slate-800 h-12"
                 >
                   {isDark ? (
-                    <span className="flex items-center gap-2"><Sun className="h-4 w-4" /> Light</span>
+                    <span className="flex items-center gap-2"><Sun className="h-5 w-5" /> Light</span>
                   ) : (
-                    <span className="flex items-center gap-2"><Moon className="h-4 w-4" /> Dark</span>
+                    <span className="flex items-center gap-2"><Moon className="h-5 w-5" /> Dark</span>
                   )}
                 </Button>
                 {!isAuthenticated && (
                   <AuthButton 
-                    trigger={<Button className="w-full bg-red-600 hover:bg-red-700 text-white">Join Battle</Button>}
+                    trigger={<Button className="w-full bg-red-600 hover:bg-red-700 text-white h-12 text-base">Join Battle</Button>}
                   />
                 )}
               </div>
@@ -142,7 +142,7 @@ const Navigation = memo(({
 ));
 
 const HeroSection = memo(({ isAuthenticated }: { isAuthenticated: boolean }) => (
-  <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+  <section className="pt-24 pb-12 sm:pt-32 sm:pb-20 px-4 sm:px-6 lg:px-8">
     <div className="max-w-7xl mx-auto">
       <div className="text-center">
         <motion.div
@@ -150,11 +150,11 @@ const HeroSection = memo(({ isAuthenticated }: { isAuthenticated: boolean }) => 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-4 sm:mb-6 tracking-tight leading-tight">
             DOMINATE THE
-            <span className="block text-red-500 mt-2">BATTLEFIELD</span>
+            <span className="block text-red-500 mt-1 sm:mt-2">BATTLEFIELD</span>
           </h1>
-          <p className="text-xl md:text-2xl text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl text-slate-300 mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
             Command your forces in the ultimate military strategy card game. 
             Deploy tactics, outmaneuver enemies, and claim victory in intense battles.
           </p>
@@ -168,7 +168,7 @@ const HeroSection = memo(({ isAuthenticated }: { isAuthenticated: boolean }) => 
         >
           <AuthButton 
             trigger={
-              <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-10 py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+              <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 sm:px-10 sm:py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-200 w-full sm:w-auto">
                 <Play className="mr-2 h-6 w-6" />
                 Start Playing
               </Button>

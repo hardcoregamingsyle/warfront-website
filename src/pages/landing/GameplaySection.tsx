@@ -13,19 +13,20 @@ const gameplayFeatures = [
 
 export default memo(function GameplaySection() {
   return (
-    <section id="gameplay" className="py-20 px-4 sm:px-6 lg:px-8">
+    <section id="gameplay" className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
+            className="order-2 lg:order-1"
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 tracking-tight leading-tight">
               Master the Art of War
             </h2>
-            <p className="text-lg text-slate-300 mb-6 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-300 mb-6 leading-relaxed">
               Every decision matters in Warfront. Plan your moves, anticipate enemy tactics,
               and adapt your strategy in real-time battles that will test your military prowess.
             </p>
@@ -39,13 +40,13 @@ export default memo(function GameplaySection() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
+                  <div className="w-2 h-2 bg-red-500 rounded-full mr-3 shrink-0"></div>
                   {item}
                 </motion.li>
               ))}
             </ul>
-            <Link to="/how-to-play">
-              <Button className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+            <Link to="/how-to-play" className="block sm:inline-block">
+              <Button className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-12 text-base">
                 Learn How to Play
               </Button>
             </Link>
@@ -56,10 +57,11 @@ export default memo(function GameplaySection() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
+            className="order-1 lg:order-2 mb-8 lg:mb-0"
           >
             <div className="bg-slate-800/50 rounded-lg border border-slate-700 aspect-square flex items-center justify-center hover:border-slate-600 transition-all duration-300">
               <div className="text-center">
-                <Target className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                <Target className="h-12 w-12 sm:h-16 sm:w-16 text-red-500 mx-auto mb-4" />
                 <p className="text-slate-400 text-lg">Gameplay Screenshot</p>
               </div>
             </div>

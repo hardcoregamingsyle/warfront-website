@@ -48,11 +48,11 @@ export default function Header() {
       transition={{ duration: 0.5 }}
       className="sticky top-0 z-50 w-full border-b border-slate-700 bg-[var(--header-bg)]"
     >
-      <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4">
-        <div className="flex items-center gap-4">
+      <div className="container flex h-14 sm:h-16 max-w-screen-2xl items-center justify-between px-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden text-slate-300 hover:text-white">
+              <Button variant="ghost" size="icon" className="md:hidden text-slate-300 hover:text-white -ml-2">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
@@ -68,7 +68,7 @@ export default function Header() {
                     <Link
                       key={link.href}
                       to={link.href}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-slate-300 transition-colors hover:bg-slate-800 hover:text-white text-base"
                     >
                       {link.icon}
                       {link.label}
@@ -79,7 +79,7 @@ export default function Header() {
                   <Button
                     variant="outline"
                     onClick={toggleTheme}
-                    className="w-full justify-start gap-2 border-slate-600 text-slate-200 hover:bg-slate-800"
+                    className="w-full justify-start gap-2 border-slate-600 text-slate-200 hover:bg-slate-800 h-12"
                   >
                     {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                     {isDark ? "Light Mode" : "Dark Mode"}
@@ -93,7 +93,7 @@ export default function Header() {
           </Sheet>
 
           <Link to="/" className="flex items-center space-x-2">
-            <img src="/assets/Logo.png" alt="Warfront Logo" className="h-10 sm:h-12 w-auto" />
+            <img src="/assets/Logo.png" alt="Warfront Logo" className="h-8 sm:h-10 md:h-12 w-auto" />
             <span className="hidden font-bold sm:inline-block text-slate-200">Warfront</span>
           </Link>
         </div>
