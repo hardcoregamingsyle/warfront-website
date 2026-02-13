@@ -1,1 +1,11 @@
-setSearchParams({}, { replace: true });
+const validCards = data.map((row) => ({
+  customId: row.customId || row.id || row.ID, // Try to find ID column
+  cardName: row.cardName || row.name || row.Name || "Untitled",
+  cardType: row.cardType || row.type || "Standard",
+  rarity: row.rarity,
+  frame: row.frame,
+  batch: row.batch,
+  numberingA: row.numberingA && !isNaN(parseInt(row.numberingA)) ? parseInt(row.numberingA) : undefined,
+  numberingB: row.numberingB ? parseInt(row.numberingB) : undefined,
+  signed: row.signed,
+})).filter(c => c.customId);

@@ -164,3 +164,84 @@ export const createCardWithId = mutation({
     });
   },
 });
+
+export const bulkUpsertCards = mutation({
+  args: {
+    token: v.string(),
+    cards: v.array(
+      v.object({
+        customId: v.string(),
+        cardName: v.string(),
+        cardType: v.string(),
+        rarity: v.optional(v.string()),
+        frame: v.optional(v.string()),
+        batch: v.optional(v.string()),
+        numberingA: v.optional(v.number()),
+        numberingB: v.optional(v.number()),
+        signed: v.optional(v.string()),
+        // Add other fields as needed from the CSV
+      })
+    ),
+  },
+  handler: async (ctx, { token, cards }) => {
+    await validatePrivilegedUser(ctx, token);
+
+    let created = 0;
+    let updated = 0;
+
+    for (const cardData of cards) {
+      const existing = await ctx.db
+        .query("cards")
+        .withIndex("by_customId", (q) => q.eq("customId", cardData.customId))
+        .unique();
+
+      const dataToSave = {
+        ...cardData,
+        name_normalized: cardData.cardName.toLowerCase(),
+      };
+
+      if (existing) {
+        await ctx.db.patch(existing._id, dataToSave);
+        updated++;
+      } else {
+        await ctx.db.insert("cards", dataToSave);
+        created++;
+      }
+    }
+
+    return { created, updated };
+  },
+});
+
+export const linkImageByCustomId = mutation({
+  args: {
+    token: v.string(),
+    customId: v.string(),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, { token, customId, storageId }) => {
+    await validatePrivilegedUser(ctx, token);
+
+    const card = await ctx.db
+      .query("cards")
+      .withIndex("by_customId", (q) => q.eq("customId", customId))
+      .unique();
+
+    if (!card) {
+      // If card doesn't exist, we can't link. 
+      // Option: Create a placeholder card? 
+      // For now, let's throw or return false to indicate failure.
+      throw new Error(`Card with ID ${customId} not found`);
+    }
+
+    // If there was an old image, delete it to save space? 
+    // Optional: await ctx.storage.delete(card.imageId) if it exists.
+    // For safety, let's just overwrite the reference.
+
+    await ctx.db.patch(card._id, {
+      imageId: storageId,
+    });
+
+    return { success: true, cardName: card.cardName };
+  },
+});

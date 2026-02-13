@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Users, Settings, Activity } from "lucide-react";
+import { Shield, Users, Settings, Activity, Upload } from "lucide-react";
 import { Link } from "react-router";
 
 export default function Admin() {
@@ -54,11 +54,19 @@ export default function Admin() {
               </CardHeader>
               <CardContent className="space-y-2 text-slate-300">
                 <p>Add and manage cards in the system.</p>
-                <Link to="/admin/add-card">
-                  <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
-                    Add Card
-                  </Button>
-                </Link>
+                <div className="flex gap-2 flex-wrap">
+                  <Link to="/admin/add-card">
+                    <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
+                      Add Single Card
+                    </Button>
+                  </Link>
+                  <Link to="/admin/bulk-add-cards">
+                    <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Bulk Import
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
 
