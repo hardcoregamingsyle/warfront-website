@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
-import { Upload, FileSpreadsheet, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { Upload, FileSpreadsheet, Image as ImageIcon, AlertCircle, Download } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
 
 // Simple CSV Parser to avoid dependencies
@@ -70,7 +70,6 @@ const parseCSV = (text: string) => {
   const data = rows.slice(1).map(row => {
     const obj: any = {};
     headers.forEach((header, index) => {
-      // Handle case where row might be shorter than headers
       if (index < row.length) {
         obj[header] = row[index]?.trim();
       }
@@ -97,6 +96,31 @@ export default function BulkAddCards() {
   const isAuthorized =
     !!user &&
     (roleLc === "admin" || roleLc === "owner" || emailLc === "hardcorgamingstyle@gmail.com");
+
+  const handleDownloadTemplate = () => {
+    const headers = [
+      "customId",
+      "cardName",
+      "cardType",
+      "rarity",
+      "frame",
+      "batch",
+      "numberingA",
+      "numberingB",
+      "signed"
+    ];
+    const csvContent = headers.join(",") + "\n" + "card-001,Example Card,Standard,Common,Normal,1st Edition,1,100,false";
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "card_import_template.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleCsvUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -243,7 +267,7 @@ export default function BulkAddCards() {
         <h1 className="text-4xl font-bold text-red-400 mb-6">Bulk Import Tools</h1>
 
         <Tabs defaultValue="csv" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-slate-900/50 border border-slate-800">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-900/50 border-slate-800">
             <TabsTrigger value="csv" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               CSV Data Import
@@ -257,11 +281,23 @@ export default function BulkAddCards() {
           <TabsContent value="csv" className="mt-6">
             <Card className="bg-slate-900/50 border-slate-800">
               <CardHeader>
-                <CardTitle className="text-xl text-slate-200">Import Cards via CSV</CardTitle>
-                <CardDescription>
-                  Upload a CSV file containing card data. The file must have a <code>customId</code> column.
-                  Other supported columns: <code>cardName</code>, <code>cardType</code>, <code>rarity</code>, <code>frame</code>, <code>batch</code>, <code>numberingA</code>, <code>numberingB</code>.
-                </CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-xl text-slate-200">Import Cards via CSV</CardTitle>
+                    <CardDescription className="mt-2">
+                      Upload a CSV file containing card data. The file must have a <code>customId</code> column.
+                      Other supported columns: <code>cardName</code>, <code>cardType</code>, <code>rarity</code>, <code>frame</code>, <code>batch</code>, <code>numberingA</code>, <code>numberingB</code>.
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleDownloadTemplate} 
+                    className="shrink-0 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Template
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 rounded-lg p-12 hover:bg-slate-800/50 transition-colors">
