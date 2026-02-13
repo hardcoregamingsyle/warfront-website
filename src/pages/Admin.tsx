@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Users, Settings, Activity, Upload } from "lucide-react";
+import { Shield, Users, Settings, Activity, Upload, Database } from "lucide-react";
 import { Link } from "react-router";
 
 export default function Admin() {
@@ -116,6 +116,23 @@ export default function Admin() {
                 <Link to="/all-cards">
                   <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
                     View All Cards
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-900/50 border-red-500/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-400">
+                  <Database className="h-5 w-5" />
+                  Database
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-slate-300">
+                <p>Direct access to the Convex database dashboard.</p>
+                <Link to="/admin/database">
+                  <Button variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10">
+                    Open Database
                   </Button>
                 </Link>
               </CardContent>

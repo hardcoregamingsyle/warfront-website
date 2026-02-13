@@ -75,6 +75,7 @@ const AdminAddBlog = lazy(() => import("./pages/admin/cms/AddBlog.tsx"));
 const AdminAddBlogCard = lazy(() => import("./pages/admin/cms/AddBlogCard.tsx"));
 const AdminAddBlogCompany = lazy(() => import("./pages/admin/cms/AddBlogCompany.tsx"));
 const AdminBulkAddCards = lazy(() => import("./pages/admin/BulkAddCards.tsx"));
+const AdminDatabase = lazy(() => import("./pages/admin/Database.tsx"));
 
 function RouteSyncer() {
   const location = useLocation();
@@ -169,6 +170,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/admin/cms/add-blog" element={<ProtectedRoute><AdminAddBlog /></ProtectedRoute>} />
                 <Route path="/admin/cms/add-blog/card" element={<ProtectedRoute><AdminAddBlogCard /></ProtectedRoute>} />
                 <Route path="/admin/cms/add-blog/company" element={<ProtectedRoute><AdminAddBlogCompany /></ProtectedRoute>} />
+                <Route path="/admin/database" element={<ProtectedRoute><AdminDatabase /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </HashRouter>
