@@ -94,25 +94,25 @@ export default function Dashboard() {
         <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
         <meta name="description" content="Your personal Warfront dashboard. View your card collection, track your player stats, manage your account, and jump into a match." />
       </Helmet>
-      <div className="text-white -m-8 p-8 min-h-screen">
+      <div className="text-white min-h-[calc(100vh-4rem)]">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="space-y-8"
+          className="space-y-6 sm:space-y-8"
         >
           {/* Hero Section */}
-          <div className="text-center py-8">
-            <h1 className="text-5xl font-bold tracking-tight text-red-500 mb-4">
+          <div className="text-center py-4 sm:py-8">
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-red-500 mb-3 sm:mb-4">
               Command Center
             </h1>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto px-2">
               Welcome to your military headquarters. Deploy your forces, manage your arsenal, and dominate the battlefield.
             </p>
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <QuickActionCard
               icon={Swords}
               title="Quick Battle"
@@ -166,21 +166,21 @@ export default function Dashboard() {
           </div>
 
           {/* Call to Action */}
-          <div className="text-center py-8">
+          <div className="text-center py-4 sm:py-8">
             <Card className="bg-gradient-to-r from-red-900/20 to-slate-900/20 border-red-500/30">
-              <CardContent className="py-8">
-                <h2 className="text-3xl font-bold text-red-400 mb-4">Ready for Your First Battle?</h2>
-                <p className="text-slate-300 mb-6 max-w-2xl mx-auto">
+              <CardContent className="py-6 sm:py-8 px-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-red-400 mb-3 sm:mb-4">Ready for Your First Battle?</h2>
+                <p className="text-sm sm:text-base text-slate-300 mb-6 max-w-2xl mx-auto">
                   Your military campaign awaits. Choose your strategy, deploy your forces, and claim victory on the battlefield.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link to="/how-to-play">
-                    <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                  <Link to="/how-to-play" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-8">
                       Start Tutorial
                     </Button>
                   </Link>
-                  <Link to="/join-battle">
-                    <Button size="lg" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10 px-8">
+                  <Link to="/join-battle" className="w-full sm:w-auto">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto border-red-500 text-red-400 hover:bg-red-500/10 px-8">
                       Join Battle
                     </Button>
                   </Link>

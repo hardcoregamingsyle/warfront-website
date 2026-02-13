@@ -141,7 +141,7 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="flex h-14 items-center gap-4 border-b border-slate-800 bg-[var(--header-bg)] px-4 lg:h-[60px] lg:px-6 md:hidden sticky top-0 z-50">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0 md:hidden -ml-2">
+              <Button variant="ghost" size="icon" className="shrink-0 md:hidden -ml-2 text-slate-300">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>

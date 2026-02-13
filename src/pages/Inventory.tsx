@@ -26,13 +26,13 @@ function Inventory() {
         <meta name="description" content="Your Warfront digital inventory. View and manage your collection of physical cards, track card play counts and see their unique metadate." />
         <meta name="keywords" content={`${baseKeywords}, inventory, collection, my cards`} />
       </Helmet>
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-4 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-4xl font-bold text-red-400 mb-8">My Inventory</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-red-400 mb-6 sm:mb-8">My Inventory</h1>
 
           {inventoryCards === undefined && (
             <div className="flex justify-center items-center h-64">
@@ -41,9 +41,9 @@ function Inventory() {
           )}
 
           {inventoryCards && inventoryCards.length === 0 && (
-            <div className="text-center py-16 bg-slate-900/50 rounded-lg">
-              <h2 className="text-2xl font-semibold text-white">Your inventory is empty.</h2>
-              <p className="text-slate-400 mt-2">
+            <div className="text-center py-12 sm:py-16 bg-slate-900/50 rounded-lg px-4">
+              <h2 className="text-xl sm:text-2xl font-semibold text-white">Your inventory is empty.</h2>
+              <p className="text-slate-400 mt-2 text-sm sm:text-base">
                 Add cards to your digital inventory by finding them in the{" "}
                 <Link to="/all-cards" className="text-red-400 hover:underline">
                   Card Database
@@ -54,7 +54,7 @@ function Inventory() {
           )}
 
           {inventoryCards && inventoryCards.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
               {inventoryCards.map((card, index) => (
                 <motion.div
                   key={card._id}
@@ -72,7 +72,7 @@ function Inventory() {
                 >
                   <Link to={`/cards/${card.customId}`} aria-label={`View ${card.cardName}`}>
                     <Card className="bg-slate-900 border-slate-700 hover:border-red-500/50 transition-all duration-300 overflow-hidden group aspect-[2.5/3.5] shadow-lg hover:shadow-red-500/20">
-                      <CardContent className="p-0">
+                      <CardContent className="p-0 h-full">
                         <img
                           src={card.imageUrl || "https://via.placeholder.com/300x400"}
                           alt={card.cardName}

@@ -11,6 +11,13 @@ import "./index.css";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
+// Handle legacy URL redirects for QR codes (must run before router mounts)
+// This fixes the issue where old QR codes pointing to /cards/:id break on HashRouter
+if (typeof window !== "undefined" && window.location.pathname !== "/" && !window.location.hash) {
+  const newPath = `/#${window.location.pathname}${window.location.search}`;
+  window.location.replace(newPath);
+}
+
 // Initialize theme globally before React mounts so all routes get correct background/colors
 if (typeof window !== "undefined" && typeof document !== "undefined") {
   const saved = localStorage.getItem("theme");
