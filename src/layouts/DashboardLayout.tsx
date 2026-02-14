@@ -133,15 +133,15 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
   );
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white">
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] text-white bg-slate-950">
       <div className="hidden border-r border-slate-800 bg-[var(--header-bg)] md:block">
         <SidebarContent />
       </div>
-      <div className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b border-slate-800 bg-[var(--header-bg)] px-4 lg:h-[60px] lg:px-6 md:hidden sticky top-0 z-50">
+      <div className="flex flex-col min-h-screen">
+        <header className="flex h-14 items-center gap-4 border-b border-slate-800 bg-[var(--header-bg)] px-4 lg:h-[60px] lg:px-6 md:hidden sticky top-0 z-50 backdrop-blur-sm bg-opacity-90">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0 md:hidden -ml-2 text-slate-300">
+              <Button variant="ghost" size="icon" className="shrink-0 md:hidden -ml-2 text-slate-300 hover:text-white hover:bg-slate-800">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
@@ -161,7 +161,7 @@ function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="hidden md:flex h-14 items-center gap-4 border-b border-slate-800 bg-[var(--header-bg)] px-4 lg:h-[60px] lg:px-6 justify-end">
            <NotificationBell />
         </div>
-        <main className="flex-1 p-4 sm:p-6 md:p-8 lg:p-10">
+        <main className="flex-1 p-3 sm:p-6 md:p-8 lg:p-10 overflow-x-hidden">
           {children}
         </main>
       </div>

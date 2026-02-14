@@ -1,6 +1,6 @@
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { motion } from "framer-motion";
-import { Swords, Shield, Users, Trophy, FilePlus2, Library } from "lucide-react";
+import { Swords, Shield, Users, Trophy, FilePlus2, Library, QrCode, Layers } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router";
@@ -96,23 +96,39 @@ export default function Dashboard() {
       </Helmet>
       <div className="text-white min-h-[calc(100vh-4rem)]">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-6 sm:space-y-8"
+          transition={{ duration: 0.3 }}
+          className="space-y-6"
         >
           {/* Hero Section */}
           <div className="text-center py-4 sm:py-8">
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-red-500 mb-3 sm:mb-4">
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-red-500 mb-2 sm:mb-4">
               Command Center
             </h1>
-            <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto px-2">
-              Welcome to your military headquarters. Deploy your forces, manage your arsenal, and dominate the battlefield.
+            <p className="text-sm sm:text-xl text-slate-300 max-w-2xl mx-auto px-4">
+              Welcome to your military headquarters.
             </p>
           </div>
 
+          {/* Scan Actions - Prominent for Mobile */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 max-w-4xl mx-auto">
+            <Link to="/scan?mode=single">
+              <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-red-500/30 hover:bg-red-500/10 hover:border-red-500/60 text-red-400">
+                <QrCode className="h-6 w-6 sm:h-8 sm:w-8" />
+                <span className="text-xs sm:text-sm font-semibold">Scan 1 Card</span>
+              </Button>
+            </Link>
+            <Link to="/scan?mode=multi">
+              <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-red-500/30 hover:bg-red-500/10 hover:border-red-500/60 text-red-400">
+                <Layers className="h-6 w-6 sm:h-8 sm:w-8" />
+                <span className="text-xs sm:text-sm font-semibold">Scan Multiple</span>
+              </Button>
+            </Link>
+          </div>
+
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             <QuickActionCard
               icon={Swords}
               title="Quick Battle"
