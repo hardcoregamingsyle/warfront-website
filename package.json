@@ -59,6 +59,7 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.15.0",
     "hono": "^4.7.11",
+    "html5-qrcode": "^2.3.8",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.511.0",
     "nanoid": "^5.1.5",

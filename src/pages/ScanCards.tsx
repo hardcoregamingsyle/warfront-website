@@ -1,15 +1,77 @@
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { QrCode, Layers, Camera, ArrowLeft } from "lucide-react";
-import { Link, useSearchParams } from "react-router";
-import { useState } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
+import { toast } from "sonner";
 
 export default function ScanCards() {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode") || "single"; // 'single' or 'multi'
   const [isScanning, setIsScanning] = useState(true);
+  const [scannedCodes, setScannedCodes] = useState<string[]>([]);
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isScanning) return;
+
+    const scanner = new Html5QrcodeScanner(
+      "reader",
+      { 
+        qrbox: { width: 250, height: 250 }, 
+        fps: 5,
+        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+      },
+      false
+    );
+    
+    scannerRef.current = scanner;
+
+    scanner.render(
+      (decodedText) => {
+        if (mode === "single") {
+          scanner.clear();
+          setIsScanning(false);
+          toast.success("Card scanned successfully!");
+          
+          try {
+            const url = new URL(decodedText);
+            if (url.pathname.includes('/cards/')) {
+               navigate(url.pathname + url.search + url.hash);
+            } else {
+               toast.info(`Scanned: ${decodedText}`);
+            }
+          } catch {
+            if (decodedText.length > 5) {
+               navigate(`/cards/${decodedText}`);
+            } else {
+               toast.info(`Scanned: ${decodedText}`);
+            }
+          }
+        } else {
+          setScannedCodes((prev) => {
+            if (!prev.includes(decodedText)) {
+              toast.success("Card added to batch!");
+              return [...prev, decodedText];
+            }
+            return prev;
+          });
+        }
+      },
+      (error) => {
+        // Ignore errors, they happen constantly when no QR code is in view
+      }
+    );
+
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(console.error);
+      }
+    };
+  }, [isScanning, mode, navigate]);
 
   return (
     <DashboardLayout>
@@ -26,42 +88,39 @@ export default function ScanCards() {
         </div>
 
         <div className="flex-1 flex flex-col gap-6">
-          {/* Mock Camera Viewfinder */}
-          <div className="relative aspect-[3/4] bg-black rounded-2xl overflow-hidden border-2 border-slate-700 shadow-2xl">
+          {/* Camera Viewfinder */}
+          <div className="relative bg-black rounded-2xl overflow-hidden border-2 border-slate-700 shadow-2xl min-h-[300px]">
             {isScanning ? (
-              <>
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-64 h-64 border-2 border-red-500/50 rounded-lg relative">
-                    <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-500" />
-                    <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-red-500" />
-                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-red-500" />
-                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-500" />
-                    
-                    {/* Scanning Line Animation */}
-                    <motion.div 
-                      className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
-                      animate={{ top: ["0%", "100%", "0%"] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    />
-                  </div>
-                </div>
-                <div className="absolute bottom-8 left-0 right-0 text-center">
-                  <p className="text-white/80 text-sm font-medium bg-black/50 inline-block px-4 py-2 rounded-full backdrop-blur-sm">
-                    Align QR code within frame
-                  </p>
-                </div>
-              </>
+              <div id="reader" className="w-full h-full [&>div]:border-none [&_video]:object-cover [&_video]:h-full [&_video]:w-full" />
             ) : (
-              <div className="flex items-center justify-center h-full text-slate-500">
-                <Camera className="h-12 w-12 opacity-50" />
+              <div className="flex flex-col items-center justify-center h-full text-slate-500 py-12">
+                <Camera className="h-12 w-12 opacity-50 mb-4" />
+                <Button onClick={() => setIsScanning(true)}>Scan Again</Button>
               </div>
             )}
           </div>
 
+          {mode === "multi" && scannedCodes.length > 0 && (
+            <Card className="bg-slate-900/50 border-slate-800">
+              <CardContent className="p-4">
+                <h3 className="text-white font-semibold mb-2">Scanned Cards ({scannedCodes.length})</h3>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {scannedCodes.map((code, i) => (
+                    <div key={i} className="text-xs text-slate-300 bg-slate-800 p-2 rounded truncate">
+                      {code}
+                    </div>
+                  ))}
+                </div>
+                <Button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white">
+                  Process Batch
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Controls */}
           <div className="grid grid-cols-2 gap-4">
-            <Link to="/scan?mode=single" className="w-full">
+            <Link to="/scan?mode=single" className="w-full" onClick={() => { setScannedCodes([]); setIsScanning(true); }}>
               <Button 
                 variant={mode === "single" ? "default" : "outline"}
                 className={`w-full h-14 ${mode === "single" ? "bg-red-600 hover:bg-red-700" : "border-slate-700 text-slate-300"}`}
@@ -70,7 +129,7 @@ export default function ScanCards() {
                 Single
               </Button>
             </Link>
-            <Link to="/scan?mode=multi" className="w-full">
+            <Link to="/scan?mode=multi" className="w-full" onClick={() => { setScannedCodes([]); setIsScanning(true); }}>
               <Button 
                 variant={mode === "multi" ? "default" : "outline"}
                 className={`w-full h-14 ${mode === "multi" ? "bg-red-600 hover:bg-red-700" : "border-slate-700 text-slate-300"}`}
