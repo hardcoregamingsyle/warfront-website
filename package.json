@@ -46,6 +46,7 @@
     "@react-three/fiber": "^9.1.2",
     "@tailwindcss/vite": "^4.1.8",
     "@types/three": "^0.177.0",
+    "@vly-ai/integrations": "0.6.2",
     "@zumer/snapdom": "^1.7.1",
     "axios": "^1.9.0",
     "bcryptjs": "^2.4.3",

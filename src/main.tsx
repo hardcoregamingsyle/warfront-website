@@ -1,3 +1,4 @@
+import '@vly-ai/integrations';
 import { Toaster } from "@/components/ui/sonner";
 import { InstrumentationProvider } from "@/instrumentation.tsx";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
