@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalQuery } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { validatePrivilegedUser } from "./helpers/auth";
 
 export const get = query({
@@ -20,6 +21,13 @@ export const get = query({
       ...card,
       imageUrl,
     };
+  },
+});
+
+export const getForR2Sync = internalQuery({
+  args: { cardId: v.id("cards") },
+  handler: async (ctx, { cardId }) => {
+    return await ctx.db.get(cardId);
   },
 });
 
@@ -67,6 +75,10 @@ export const update = mutation({
       numberingB,
       signed,
     });
+
+    await ctx.scheduler.runAfter(0, internal.cardStorage.syncCardToR2, {
+      cardId,
+    });
   },
 });
 
@@ -95,6 +107,10 @@ export const deleteCard = mutation({
       userCardEntries.map((entry) => ctx.db.delete(entry._id))
     );
 
+    await ctx.scheduler.runAfter(0, internal.cardStorage.deleteCardFromR2, {
+      customId: card.customId,
+    });
+
     return { success: true };
   },
 });
@@ -118,6 +134,7 @@ export const deleteAllCards = mutation({
     }
 
     const allCards = await ctx.db.query("cards").collect();
+    const customIds = allCards.map((card) => card.customId);
     let deletedCount = 0;
 
     for (const card of allCards) {
@@ -138,6 +155,14 @@ export const deleteAllCards = mutation({
       deletedCount++;
     }
 
+    if (customIds.length > 0) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.cardStorage.deleteCardsFromR2,
+        { customIds }
+      );
+    }
+
     return { success: true, deletedCount };
   },
 });
@@ -156,12 +181,18 @@ export const createCardWithId = mutation({
       throw new Error("A card with this ID already exists.");
     }
 
-    return await ctx.db.insert("cards", {
+    const cardId = await ctx.db.insert("cards", {
       customId: customId,
       cardType: "Default Type",
       cardName: "New Card",
       name_normalized: "new card",
     });
+
+    await ctx.scheduler.runAfter(0, internal.cardStorage.syncCardToR2, {
+      cardId,
+    });
+
+    return cardId;
   },
 });
 
@@ -179,7 +210,6 @@ export const bulkUpsertCards = mutation({
         numberingA: v.optional(v.number()),
         numberingB: v.optional(v.number()),
         signed: v.optional(v.string()),
-        // Add other fields as needed from the CSV
       })
     ),
   },
@@ -202,9 +232,15 @@ export const bulkUpsertCards = mutation({
 
       if (existing) {
         await ctx.db.patch(existing._id, dataToSave);
+        await ctx.scheduler.runAfter(0, internal.cardStorage.syncCardToR2, {
+          cardId: existing._id,
+        });
         updated++;
       } else {
-        await ctx.db.insert("cards", dataToSave);
+        const cardId = await ctx.db.insert("cards", dataToSave);
+        await ctx.scheduler.runAfter(0, internal.cardStorage.syncCardToR2, {
+          cardId,
+        });
         created++;
       }
     }
@@ -228,18 +264,15 @@ export const linkImageByCustomId = mutation({
       .unique();
 
     if (!card) {
-      // If card doesn't exist, we can't link. 
-      // Option: Create a placeholder card? 
-      // For now, let's throw or return false to indicate failure.
       throw new Error(`Card with ID ${customId} not found`);
     }
 
-    // If there was an old image, delete it to save space? 
-    // Optional: await ctx.storage.delete(card.imageId) if it exists.
-    // For safety, let's just overwrite the reference.
-
     await ctx.db.patch(card._id, {
       imageId: storageId,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.cardStorage.syncCardToR2, {
+      cardId: card._id,
     });
 
     return { success: true, cardName: card.cardName };

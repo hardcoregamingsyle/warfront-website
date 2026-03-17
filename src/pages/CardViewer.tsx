@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -20,10 +20,11 @@ export default function CardViewer() {
     const navigate = useNavigate();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
+    const [card, setCard] = useState<any | null | undefined>(undefined);
 
     const method = searchParams.get("method");
 
-    const card = useQuery(api.cards.get, customId ? { customId } : "skip");
+    const getHydratedCard = useAction(api.cardStorage.getHydratedCard);
     const userCard = useQuery(
         api.userCards.getForCurrentUser,
         card && token ? { cardId: card._id, token } : "skip"
@@ -32,6 +33,27 @@ export default function CardViewer() {
     const addWithClaimCode = useMutation(api.userCards.addWithClaimCode);
     const deleteCardMutation = useMutation(api.cards.deleteCard);
     const createCardWithId = useMutation(api.cards.createCardWithId);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        if (!customId) {
+            setCard(null);
+            return;
+        }
+
+        setCard(undefined);
+
+        void getHydratedCard({ customId }).then((result) => {
+            if (!cancelled) {
+                setCard(result);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [customId, getHydratedCard]);
 
     useEffect(() => {
         if (method === "mnhsgwbwyqosu" && customId) {
@@ -61,6 +83,9 @@ export default function CardViewer() {
             });
             if (result.success) {
                 toast.success(result.message, { id: toastId });
+                setCard((current: any) =>
+                    current ? { ...current, isClaimed: true } : current
+                );
                 setIsVerified(false);
                 setSearchParams({});
             } else {
@@ -112,8 +137,13 @@ export default function CardViewer() {
     }
 
     if (card === null) {
-        const role = (user?.role ?? "").toString().toLowerCase();
-        const isAuthorizedCreator = !!user && (role === "admin" || role === "owner" || role === "card_setter");
+        const roleNorm = (user?.role ?? "")
+            .toString()
+            .toLowerCase()
+            .replace(/[\s_-]+/g, "");
+        const isAuthorizedCreator =
+            !!user &&
+            ["admin", "owner", "cardsetter"].includes(roleNorm);
 
         return (
             <DashboardLayout>
@@ -152,13 +182,17 @@ export default function CardViewer() {
         );
     }
 
-    const isAuthorizedEditor = user && ["admin", "owner", "cardsetter"].includes(user.role!);
+    const roleNorm = (user?.role ?? "")
+        .toString()
+        .toLowerCase()
+        .replace(/[\s_-]+/g, "");
+    const isAuthorizedEditor = !!user && ["admin", "owner", "cardsetter"].includes(roleNorm);
     const cardIsInInventory = !!userCard;
 
     return (
         <DashboardLayout>
             <div className="container mx-auto py-8 flex flex-col justify-center items-center gap-4">
-                {!isVerified && user && (
+                {!isVerified && user && !card.isClaimed && (
                     <Alert className="max-w-md bg-yellow-900/20 border-yellow-500/50">
                         <QrCode className="h-4 w-4" />
                         <AlertDescription className="text-yellow-200">
@@ -207,9 +241,13 @@ export default function CardViewer() {
                                         handleClaimCard();
                                     }} 
                                     className="w-full bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed"
-                                    disabled={cardIsInInventory || !isVerified}
+                                    disabled={cardIsInInventory || card.isClaimed || !isVerified}
                                 >
-                                    {cardIsInInventory ? "Card in Inventory" : isVerified ? "Claim Card" : "Scan QR Code First"}
+                                    {cardIsInInventory || card.isClaimed
+                                        ? "Card in Inventory"
+                                        : isVerified
+                                        ? "Claim Card"
+                                        : "Scan QR Code First"}
                                 </Button>
                             )}
                             {isAuthorizedEditor && (

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { validateSession } from "./helpers/auth";
 
 export const getForCurrentUser = query({
@@ -70,6 +71,10 @@ export const addWithClaimCode = mutation({
     await ctx.db.patch(cardId, { isClaimed: true });
     await ctx.db.insert("userCards", {
       userId: session.userId,
+      cardId,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.cardStorage.syncCardToR2, {
       cardId,
     });
 
