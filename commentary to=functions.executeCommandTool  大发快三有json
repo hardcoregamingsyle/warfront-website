@@ -1,0 +1,1 @@
+{"command":"npx convex run cardStorage:pushAllCardsToKV '{}' 2>&1 || true"}

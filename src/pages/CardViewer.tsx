@@ -24,27 +24,27 @@ export default function CardViewer() {
 
     const method = searchParams.get("method");
 
-    const getHydratedCard = useAction(api.cardStorage.getHydratedCard);
+    const loadCard = useAction(api.cardStorage.loadCard);
+    const releaseCard = useAction(api.cardStorage.releaseCard);
     const userCard = useQuery(
         api.userCards.getForCurrentUser,
         card && token ? { cardId: card._id, token } : "skip"
     );
-    
+
     const addWithClaimCode = useMutation(api.userCards.addWithClaimCode);
     const deleteCardMutation = useMutation(api.cards.deleteCard);
     const createCardWithId = useMutation(api.cards.createCardWithId);
 
     useEffect(() => {
-        let cancelled = false;
-
         if (!customId) {
             setCard(null);
             return;
         }
 
+        let cancelled = false;
         setCard(undefined);
 
-        void getHydratedCard({ customId }).then((result) => {
+        void loadCard({ customId }).then((result) => {
             if (!cancelled) {
                 setCard(result);
             }
@@ -52,8 +52,9 @@ export default function CardViewer() {
 
         return () => {
             cancelled = true;
+            void releaseCard({ customId });
         };
-    }, [customId, getHydratedCard]);
+    }, [customId, loadCard, releaseCard]);
 
     useEffect(() => {
         if (method === "mnhsgwbwyqosu" && customId) {
@@ -68,18 +69,18 @@ export default function CardViewer() {
             toast.error("You must be logged in to claim cards.");
             return;
         }
-        
+
         if (!isVerified) {
             toast.error("Please scan the QR code on your physical card first.");
             return;
         }
-        
+
         const toastId = toast.loading("Claiming card...");
         try {
-            const result = await addWithClaimCode({ 
-                token, 
+            const result = await addWithClaimCode({
+                token,
                 cardId: card._id,
-                claimCode: card.claimCode || ""
+                claimCode: card.claimCode || "",
             });
             if (result.success) {
                 toast.success(result.message, { id: toastId });
@@ -91,7 +92,7 @@ export default function CardViewer() {
             } else {
                 toast.error(result.message, { id: toastId });
             }
-        } catch (error) {
+        } catch {
             toast.error("Failed to claim card.", { id: toastId });
         }
     }, [token, customId, card, isVerified, addWithClaimCode, setSearchParams]);
@@ -120,7 +121,7 @@ export default function CardViewer() {
                 await deleteCardMutation({ token, cardId: card._id });
                 toast.success("Card deleted successfully.", { id: toastId });
                 navigate("/all-cards");
-            } catch (error) {
+            } catch {
                 toast.error("Failed to delete card.", { id: toastId });
             }
         }
@@ -173,7 +174,7 @@ export default function CardViewer() {
                             </CardFooter>
                         </Card>
                     ) : (
-                        <Button onClick={() => navigate('/dashboard')} variant="outline">
+                        <Button onClick={() => navigate("/dashboard")} variant="outline">
                             Back to Dashboard
                         </Button>
                     )}
@@ -208,10 +209,10 @@ export default function CardViewer() {
                             <p className="text-sm text-slate-400">{card.cardType}</p>
                         </CardHeader>
                         <CardContent>
-                            <CardImage 
-                                src={card.imageUrl || ""} 
+                            <CardImage
+                                src={card.imageUrl || ""}
                                 alt={card.cardName}
-                                layoutId={`card-image-${card._id}`}
+                                layoutId={`card-image-${card.customId}`}
                             />
                             {isExpanded && (
                                 <motion.div
@@ -219,7 +220,7 @@ export default function CardViewer() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2 }}
                                 >
-                                    <CardStats 
+                                    <CardStats
                                         rarity={card.rarity}
                                         frame={card.frame}
                                         batch={card.batch}
@@ -235,11 +236,11 @@ export default function CardViewer() {
                         </CardContent>
                         <CardFooter className="flex flex-col gap-2">
                             {user && (
-                                <Button 
+                                <Button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleClaimCard();
-                                    }} 
+                                    }}
                                     className="w-full bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed"
                                     disabled={cardIsInInventory || card.isClaimed || !isVerified}
                                 >
@@ -253,7 +254,9 @@ export default function CardViewer() {
                             {isAuthorizedEditor && (
                                 <div className="w-full grid grid-cols-2 gap-2">
                                     <Link to={`/editor/card/${card.customId}`} className="w-full">
-                                        <Button variant="outline" className="w-full border-red-500 text-red-400 hover:bg-red-500/10">Edit Card</Button>
+                                        <Button variant="outline" className="w-full border-red-500 text-red-400 hover:bg-red-500/10">
+                                            Edit Card
+                                        </Button>
                                     </Link>
                                     <Button variant="destructive" className="w-full" onClick={handleDeleteCard}>
                                         <Trash2 className="h-4 w-4 mr-2" />

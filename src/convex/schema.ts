@@ -229,11 +229,12 @@ const schema = defineSchema(
     userCards: defineTable({
       userId: v.id("users"),
       cardId: v.id("cards"),
+      customId: v.optional(v.string()),
     })
       .index("by_user_card", ["userId", "cardId"])
       .index("by_userId", ["userId"])
       .index("by_cardId", ["cardId"]),
-      
+
     blogs: defineTable({
       title: v.string(),
       slug: v.string(),
@@ -270,9 +271,10 @@ const schema = defineSchema(
       source: v.optional(v.string()), // e.g. "battle", "competitive", etc.
     }).index("by_email_normalized", ["email_normalized"]),
 
-    // Temporary card cache - KV is source of truth, Convex is RAM
+    // Temporary card cache - only actively viewed/rendered cards live here
     cardCache: defineTable({
       customId: v.string(),
+      sourceCardId: v.optional(v.id("cards")),
       cardType: v.string(),
       cardName: v.string(),
       name_normalized: v.string(),
@@ -291,7 +293,8 @@ const schema = defineSchema(
       isClaimed: v.optional(v.boolean()),
       verifyToken: v.optional(v.string()),
       verifyTokenExpiry: v.optional(v.number()),
-      loadedAt: v.number(), // timestamp when loaded into cache
+      activeViewers: v.number(),
+      loadedAt: v.number(),
     }).index("by_customId", ["customId"]),
   },
   {

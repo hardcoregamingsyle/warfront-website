@@ -31,6 +31,16 @@ export const getForR2Sync = internalQuery({
   },
 });
 
+export const getByCustomIdForStorage = internalQuery({
+  args: { customId: v.string() },
+  handler: async (ctx, { customId }) => {
+    return await ctx.db
+      .query("cards")
+      .withIndex("by_customId", (q) => q.eq("customId", customId))
+      .unique();
+  },
+});
+
 export const update = mutation({
   args: {
     cardId: v.id("cards"),
