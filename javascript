@@ -1,28 +1,37 @@
+// worker.js
 export default {
   async fetch(request, env) {
     // Auth check
-    const token = request.headers.get("X-Worker-Token") ||
-                  (request.headers.get("Authorization") || "").replace("Bearer ", "");
+    const authHeader = request.headers.get("Authorization") || "";
+    const workerToken = request.headers.get("X-Worker-Token") || "";
+    const token = authHeader.replace("Bearer ", "") || workerToken;
 
-    if (!token || token !== env.WORKER_SECRET_TOKEN) {
-      return new Response("Unauthorized", { status: 401 });
+    if (!env.WORKER_SECRET_TOKEN || token !== env.WORKER_SECRET_TOKEN) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const url = new URL(request.url);
-    // Key comes from query param ?key=cards/xxx/detail.json
     const key = url.searchParams.get("key");
 
     if (!key) {
-      return new Response("Missing key", { status: 400 });
+      return new Response(JSON.stringify({ error: "Missing key param" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     if (request.method === "GET") {
-      const object = await env.R2_BUCKET.get(key);
-      if (!object) {
-        return new Response("Not Found", { status: 404 });
+      const value = await env.CARD_KV.get(key);
+      if (value === null) {
+        return new Response(JSON.stringify({ error: "Not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
       }
-      const text = await object.text();
-      return new Response(text, {
+      return new Response(value, {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
@@ -31,9 +40,7 @@ export default {
     if (request.method === "PUT") {
       const body = await request.json();
       const value = body.value ?? body;
-      await env.R2_BUCKET.put(key, JSON.stringify(value), {
-        httpMetadata: { contentType: "application/json" },
-      });
+      await env.CARD_KV.put(key, JSON.stringify(value));
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -41,13 +48,16 @@ export default {
     }
 
     if (request.method === "DELETE") {
-      await env.R2_BUCKET.delete(key);
+      await env.CARD_KV.delete(key);
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    return new Response("Method Not Allowed", { status: 405 });
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { "Content-Type": "application/json" },
+    });
   },
 };
