@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as auth_actions from "../auth_actions.js";
 import type * as battles from "../battles.js";
 import type * as blogs from "../blogs.js";
+import type * as cardCache from "../cardCache.js";
 import type * as cardInfo from "../cardInfo.js";
 import type * as cardStorage from "../cardStorage.js";
 import type * as cards from "../cards.js";
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   auth_actions: typeof auth_actions;
   battles: typeof battles;
   blogs: typeof blogs;
+  cardCache: typeof cardCache;
   cardInfo: typeof cardInfo;
   cardStorage: typeof cardStorage;
   cards: typeof cards;

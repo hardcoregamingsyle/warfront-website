@@ -269,6 +269,30 @@ const schema = defineSchema(
       email_normalized: v.string(),
       source: v.optional(v.string()), // e.g. "battle", "competitive", etc.
     }).index("by_email_normalized", ["email_normalized"]),
+
+    // Temporary card cache - KV is source of truth, Convex is RAM
+    cardCache: defineTable({
+      customId: v.string(),
+      cardType: v.string(),
+      cardName: v.string(),
+      name_normalized: v.string(),
+      imageId: v.optional(v.id("_storage")),
+      rarity: v.optional(v.string()),
+      frame: v.optional(v.string()),
+      batch: v.optional(v.string()),
+      numberingA: v.optional(v.number()),
+      numberingB: v.optional(v.number()),
+      signed: v.optional(v.string()),
+      health: v.optional(v.number()),
+      attackSlots: v.optional(v.number()),
+      abilitySlots: v.optional(v.number()),
+      passiveSlots: v.optional(v.number()),
+      claimCode: v.optional(v.string()),
+      isClaimed: v.optional(v.boolean()),
+      verifyToken: v.optional(v.string()),
+      verifyTokenExpiry: v.optional(v.number()),
+      loadedAt: v.number(), // timestamp when loaded into cache
+    }).index("by_customId", ["customId"]),
   },
   {
     schemaValidation: false,

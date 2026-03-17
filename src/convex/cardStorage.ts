@@ -113,6 +113,98 @@ async function deleteCardObjectsFromWorker(
   }
 }
 
+// Load a card from KV into Convex cache (RAM), return the hydrated card
+export const loadCard: ReturnType<typeof action> = action({
+  args: { customId: v.string() },
+  handler: async (ctx, { customId }): Promise<HydratedCard | null> => {
+    // Check if already in Convex cache
+    const cached = (await ctx.runQuery(internal.cardCache.getCachedCard, {
+      customId,
+    })) as HydratedCard | null;
+
+    if (cached) {
+      return cached;
+    }
+
+    const worker = getWorkerConfig();
+
+    if (worker) {
+      // Try to load from KV (permanent storage)
+      const kvCard = (await readCardDetailFromWorker(
+        worker,
+        customId
+      )) as Partial<StoredCard> | null;
+
+      if (kvCard) {
+        // Write to Convex cache (RAM)
+        await ctx.runMutation(internal.cardCache.cacheCard, {
+          cardData: kvCard as StoredCard,
+        });
+
+        // Get image URL from Convex storage if imageId exists
+        const imageUrl =
+          kvCard.imageId
+            ? ((await ctx.runQuery(api.cards.get, { customId })) as HydratedCard | null)?.imageUrl ?? null
+            : null;
+
+        return { ...(kvCard as StoredCard), imageUrl };
+      }
+    }
+
+    // Fallback: load from Convex DB directly
+    const shell = (await ctx.runQuery(api.cards.get, {
+      customId,
+    })) as HydratedCard | null;
+
+    if (shell && worker) {
+      // Sync to KV for future loads
+      const rawCard = (await ctx.runQuery(internal.cards.getForR2Sync, {
+        cardId: shell._id,
+      })) as StoredCard | null;
+
+      if (rawCard) {
+        await writeCardDetailToWorker(worker, customId, rawCard);
+      }
+    }
+
+    return shell;
+  },
+});
+
+// Release a card from Convex cache (RAM) when no longer needed
+export const releaseCard: ReturnType<typeof action> = action({
+  args: { customId: v.string() },
+  handler: async (ctx, { customId }): Promise<void> => {
+    await ctx.runMutation(internal.cardCache.removeCachedCard, { customId });
+  },
+});
+
+// Push all cards from Convex DB to KV (initial sync)
+export const pushAllCardsToKV: ReturnType<typeof action> = action({
+  args: {},
+  handler: async (ctx): Promise<{ synced: number; skipped: number }> => {
+    const worker = getWorkerConfig();
+    if (!worker) {
+      return { synced: 0, skipped: 0 };
+    }
+
+    const cards = (await ctx.runQuery(internal.cardCache.getAllCardsForSync)) as StoredCard[];
+    let synced = 0;
+    let skipped = 0;
+
+    for (const card of cards) {
+      try {
+        await writeCardDetailToWorker(worker, card.customId, card);
+        synced++;
+      } catch {
+        skipped++;
+      }
+    }
+
+    return { synced, skipped };
+  },
+});
+
 export const getHydratedCard: ReturnType<typeof action> = action({
   args: { customId: v.string() },
   handler: async (
