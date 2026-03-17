@@ -1,79 +1,34 @@
 import DashboardLayout from "@/layouts/DashboardLayout";
-import { useParams, useNavigate } from "react-router";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
-import { Loader2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
-import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { Users, Clock } from "lucide-react";
 
 export default function MultiBattle() {
-    const { battleId } = useParams<{ battleId: Id<"multiplayerBattles"> }>();
-    const battle = useQuery(api.multiplayerBattles.get, battleId ? { battleId } : "skip");
-    const { user, token } = useAuth();
-    const navigate = useNavigate();
-    const leaveBattle = useMutation(api.multiplayerBattles.leave);
-
-    const handleLeaveBattle = async () => {
-        if (!battleId || !token) {
-            toast.error("Error leaving battle.");
-            return;
-        }
-        try {
-            await leaveBattle({ battleId, token });
-            toast.success("You have left the battle.");
-            navigate("/join-battle");
-        } catch (error: any) {
-            toast.error(error.data || "Failed to leave battle.");
-        }
-    };
-
-    if (battle === undefined) {
-        return (
-            <DashboardLayout>
-                <div className="flex justify-center items-center h-full">
-                    <Loader2 className="h-12 w-12 animate-spin text-red-500" />
-                </div>
-            </DashboardLayout>
-        );
-    }
-
-    if (battle === null) {
-        return (
-            <DashboardLayout>
-                <div className="text-center text-white">
-                    <h1 className="text-3xl font-bold">Battle Not Found</h1>
-                </div>
-            </DashboardLayout>
-        );
-    }
-
-    return (
-        <DashboardLayout>
-            <div className="container mx-auto text-white">
-                <div className="flex justify-between items-center mb-8">
-                  <h1 className="text-4xl font-bold">Multiplayer Battle Room</h1>
-                  {battle && user && battle.playerIds.includes(user._id) && (
-                         <Button variant="destructive" onClick={handleLeaveBattle}>Leave Battle</Button>
-                    )}
-                </div>
-                <p className="text-center text-xl mb-4">Status: <span className="font-semibold">{battle.status}</span></p>
-                <p className="text-center text-lg mb-8">Players: {battle.players.length} / {battle.maxPlayers}</p>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {battle.players.map(player => (
-                        <div key={player._id} className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-lg">
-                            <Avatar className="h-20 w-20">
-                                <AvatarImage src={player.image || undefined} />
-                                <AvatarFallback>{player.name?.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <p className="font-semibold">{player.name}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </DashboardLayout>
-    );
+  return (
+    <DashboardLayout>
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center px-4"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
+            className="flex justify-center mb-6"
+          >
+            <Users className="h-20 w-20 text-blue-400 opacity-80" />
+          </motion.div>
+          <h1 className="text-4xl sm:text-6xl font-bold text-yellow-300 mb-4">Coming Soon</h1>
+          <p className="text-lg sm:text-xl text-slate-300 max-w-md mx-auto mb-6">
+            Multiplayer battles are currently under development. Rally your squad!
+          </p>
+          <div className="flex items-center justify-center gap-2 text-slate-400">
+            <Clock className="h-5 w-5" />
+            <span>Stay tuned for updates</span>
+          </div>
+        </motion.div>
+      </div>
+    </DashboardLayout>
+  );
 }

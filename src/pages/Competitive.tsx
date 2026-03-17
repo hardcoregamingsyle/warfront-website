@@ -1,23 +1,38 @@
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Helmet } from "react-helmet-async";
+import { motion } from "framer-motion";
+import { Trophy, Clock } from "lucide-react";
 
 export default function Competitive() {
-  const baseKeywords = "Warfront, Military, War, War Front, Game, Gaming, TCG, CCG, collectibles, card, card game, collectible card game, trading, trading card game, trading game, war game, military game, fun, family, family friendly, family friendly game, card games online, online games, fun games, Warfront, TCG, CCG, card game, online card game, offline card game, military theme, strategy game, family-friendly, collectible card game, physical cards, digital cards";
-  const pageKeywords = "Warfront tournaments, competitive card game, TCG leagues, Warfront rankings, online tournaments, esports, competitive play";
-
   return (
     <DashboardLayout>
       <Helmet>
-        <title>Warfront Competitive Tournaments & Leagues</title>
-        <link rel="icon" type="image/png" href="/assets/Untitled_design.png" />
-        <meta name="description" content="Join official Warfront tournaments, compete in ranked leagues, and climb the global leaderboards. Host your own custom tournaments and prove your skills in Combat for the Digital Age." />
-        <meta name="keywords" content="Warfront tournaments, competitive card game, TCG leagues, Warfront rankings, online tournaments, esports, competitive play" />
-        <meta property="og:title" content="Warfront Competitive Tournaments" />
-        <meta property="og:description" content="Compete in official Warfront tournaments and climb the global leaderboards." />
-        <meta property="og:image" content="https://www.printyourbrackets.com/single-elimination-tournament-brackets.html" />
+        <title>Warfront | Competitive Tournaments</title>
+        <meta name="description" content="Competitive tournaments are coming soon to Warfront." />
       </Helmet>
-      <div className="flex items-center justify-center h-full">
-        <h1 className="text-4xl font-bold text-red-400">Competitive Page</h1>
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center px-4"
+        >
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+            className="flex justify-center mb-6"
+          >
+            <Trophy className="h-20 w-20 text-yellow-400 opacity-80" />
+          </motion.div>
+          <h1 className="text-4xl sm:text-6xl font-bold text-yellow-300 mb-4">Coming Soon</h1>
+          <p className="text-lg sm:text-xl text-slate-300 max-w-md mx-auto mb-6">
+            Competitive tournaments and ranked leagues are under development. Train hard!
+          </p>
+          <div className="flex items-center justify-center gap-2 text-slate-400">
+            <Clock className="h-5 w-5" />
+            <span>Stay tuned for updates</span>
+          </div>
+        </motion.div>
       </div>
     </DashboardLayout>
   );
