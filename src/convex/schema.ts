@@ -263,6 +263,12 @@ const schema = defineSchema(
       scanCount: v.number(),
       batch: v.optional(v.string()),
     }).index("by_packId", ["packId"]),
+
+    emailSignups: defineTable({
+      email: v.string(),
+      email_normalized: v.string(),
+      source: v.optional(v.string()), // e.g. "battle", "competitive", etc.
+    }).index("by_email_normalized", ["email_normalized"]),
   },
   {
     schemaValidation: false,
