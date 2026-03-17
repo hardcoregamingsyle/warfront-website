@@ -1,133 +1,157 @@
 "use node";
 
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
 import { v } from "convex/values";
 import { action, internalAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { Doc } from "./_generated/dataModel";
 
-const R2_BUCKET = process.env.R2_BUCKET;
+type WorkerConfig = {
+  baseUrl: string;
+  token: string;
+  accessId: string;
+};
 
-function getR2Client() {
-  const endpoint = process.env.R2_ENDPOINT;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+type StoredCard = Doc<"cards">;
+type HydratedCard = StoredCard & {
+  imageUrl: string | null;
+};
 
-  if (!endpoint || !accessKeyId || !secretAccessKey || !R2_BUCKET) {
+function getWorkerConfig(): WorkerConfig | null {
+  const baseUrl = process.env.CLOUDFLARE_WORKER_URL;
+  const token = process.env.CLOUDFLARE_WORKER_TOKEN;
+  const accessId = process.env.CLOUDFLARE_API_ACCESS_ID;
+
+  if (!baseUrl || !token || !accessId) {
     return null;
   }
 
-  return new S3Client({
-    region: "auto",
-    endpoint,
-    forcePathStyle: true,
-    credentials: {
-      accessKeyId,
-      secretAccessKey,
-    },
-  });
+  return {
+    baseUrl: baseUrl.replace(/\/+$/, ""),
+    token,
+    accessId,
+  };
 }
 
 function getCardDetailKey(customId: string) {
   return `cards/${customId}/detail.json`;
 }
 
-function getCardImageKey(customId: string) {
-  return `cards/${customId}/image`;
+function getCardDetailUrl(config: WorkerConfig, customId: string) {
+  const key = encodeURIComponent(getCardDetailKey(customId));
+  return `${config.baseUrl}/cards/${encodeURIComponent(customId)}?key=${key}`;
 }
 
-async function readCardDetailFromR2(client: S3Client, customId: string) {
-  try {
-    const response = await client.send(
-      new GetObjectCommand({
-        Bucket: R2_BUCKET,
-        Key: getCardDetailKey(customId),
-      })
-    );
+function getWorkerHeaders(
+  config: WorkerConfig,
+  options?: { json?: boolean; extra?: Record<string, string> }
+) {
+  return {
+    Authorization: `Bearer ${config.token}`,
+    "X-Worker-Token": config.token,
+    "CF-Access-Client-Id": config.accessId,
+    "X-Cloudflare-Access-Id": config.accessId,
+    ...(options?.json ? { "Content-Type": "application/json" } : {}),
+    ...(options?.extra ?? {}),
+  };
+}
 
-    const body = await response.Body?.transformToString();
-    if (!body) {
-      return null;
-    }
+async function readCardDetailFromWorker(
+  config: WorkerConfig,
+  customId: string
+) {
+  const response = await fetch(getCardDetailUrl(config, customId), {
+    method: "GET",
+    headers: getWorkerHeaders(config),
+  });
 
-    return JSON.parse(body);
-  } catch (error: any) {
-    if (
-      error?.name === "NoSuchKey" ||
-      error?.Code === "NoSuchKey" ||
-      error?.$metadata?.httpStatusCode === 404
-    ) {
-      return null;
-    }
-    throw error;
+  if (response.status === 404) {
+    return null;
   }
+
+  if (!response.ok) {
+    throw new Error(`Worker read failed with status ${response.status}`);
+  }
+
+  const payload = await response.json();
+  return payload?.value ?? payload?.data ?? payload ?? null;
 }
 
-async function writeCardDetailToR2(
-  client: S3Client,
+async function writeCardDetailToWorker(
+  config: WorkerConfig,
   customId: string,
   payload: unknown
 ) {
-  await client.send(
-    new PutObjectCommand({
-      Bucket: R2_BUCKET,
-      Key: getCardDetailKey(customId),
-      Body: JSON.stringify(payload),
-      ContentType: "application/json",
-    })
-  );
+  const response = await fetch(getCardDetailUrl(config, customId), {
+    method: "PUT",
+    headers: getWorkerHeaders(config, { json: true }),
+    body: JSON.stringify({
+      key: getCardDetailKey(customId),
+      value: payload,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Worker write failed with status ${response.status}`);
+  }
 }
 
-async function deleteCardObjectsFromR2(client: S3Client, customId: string) {
-  await Promise.all([
-    client.send(
-      new DeleteObjectCommand({
-        Bucket: R2_BUCKET,
-        Key: getCardDetailKey(customId),
-      })
-    ),
-    client.send(
-      new DeleteObjectCommand({
-        Bucket: R2_BUCKET,
-        Key: getCardImageKey(customId),
-      })
-    ),
-  ]);
+async function deleteCardObjectsFromWorker(
+  config: WorkerConfig,
+  customId: string
+) {
+  const response = await fetch(getCardDetailUrl(config, customId), {
+    method: "DELETE",
+    headers: getWorkerHeaders(config),
+  });
+
+  if (response.status === 404) {
+    return;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Worker delete failed with status ${response.status}`);
+  }
 }
 
-export const getHydratedCard = action({
+export const getHydratedCard: ReturnType<typeof action> = action({
   args: { customId: v.string() },
-  handler: async (ctx, { customId }) => {
-    const shell = await ctx.runQuery(api.cards.get, { customId });
+  handler: async (
+    ctx,
+    { customId }
+  ): Promise<HydratedCard | null> => {
+    const shell = (await ctx.runQuery(api.cards.get, {
+      customId,
+    })) as HydratedCard | null;
+
     if (!shell) {
       return null;
     }
 
-    const client = getR2Client();
-    if (!client) {
+    const worker = getWorkerConfig();
+    if (!worker) {
       return shell;
     }
 
-    const r2Card = await readCardDetailFromR2(client, customId);
-    if (r2Card) {
+    const workerCard = (await readCardDetailFromWorker(
+      worker,
+      customId
+    )) as Partial<StoredCard> | null;
+
+    if (workerCard) {
       return {
         ...shell,
-        ...r2Card,
+        ...workerCard,
         _id: shell._id,
         imageUrl: shell.imageUrl,
       };
     }
 
-    const rawCard = await ctx.runQuery(internal.cards.getForR2Sync, {
+    const rawCard = (await ctx.runQuery(internal.cards.getForR2Sync, {
       cardId: shell._id,
-    });
+    })) as StoredCard | null;
 
     if (rawCard) {
-      await writeCardDetailToR2(client, customId, rawCard);
+      await writeCardDetailToWorker(worker, customId, rawCard);
     }
 
     return shell;
@@ -137,8 +161,8 @@ export const getHydratedCard = action({
 export const syncCardToR2 = internalAction({
   args: { cardId: v.id("cards") },
   handler: async (ctx, { cardId }) => {
-    const client = getR2Client();
-    if (!client) {
+    const worker = getWorkerConfig();
+    if (!worker) {
       return null;
     }
 
@@ -147,7 +171,7 @@ export const syncCardToR2 = internalAction({
       return null;
     }
 
-    await writeCardDetailToR2(client, card.customId, card);
+    await writeCardDetailToWorker(worker, card.customId, card);
     return null;
   },
 });
@@ -155,12 +179,12 @@ export const syncCardToR2 = internalAction({
 export const deleteCardFromR2 = internalAction({
   args: { customId: v.string() },
   handler: async (_ctx, { customId }) => {
-    const client = getR2Client();
-    if (!client) {
+    const worker = getWorkerConfig();
+    if (!worker) {
       return null;
     }
 
-    await deleteCardObjectsFromR2(client, customId);
+    await deleteCardObjectsFromWorker(worker, customId);
     return null;
   },
 });
@@ -168,12 +192,14 @@ export const deleteCardFromR2 = internalAction({
 export const deleteCardsFromR2 = internalAction({
   args: { customIds: v.array(v.string()) },
   handler: async (_ctx, { customIds }) => {
-    const client = getR2Client();
-    if (!client || customIds.length === 0) {
+    const worker = getWorkerConfig();
+    if (!worker || customIds.length === 0) {
       return null;
     }
 
-    await Promise.all(customIds.map((customId) => deleteCardObjectsFromR2(client, customId)));
+    await Promise.all(
+      customIds.map((customId) => deleteCardObjectsFromWorker(worker, customId))
+    );
     return null;
   },
 });
