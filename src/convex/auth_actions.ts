@@ -17,8 +17,6 @@ type BrevoSendArgs = {
   subject: string;
   html?: string;
   text?: string;
-  senderEmail?: string;
-  senderName?: string;
 };
 
 async function brevoSendEmail({
@@ -27,31 +25,23 @@ async function brevoSendEmail({
   subject,
   html,
   text,
-  senderEmail,
-  senderName,
 }: BrevoSendArgs): Promise<boolean> {
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) {
-    console.error("BREVO_API_KEY is not set! Cannot send email.");
-    return false;
-  }
-
-  const client = createBrevoClient();
-  const senderEmailAddr = senderEmail || process.env.BREVO_SENDER_EMAIL || "noreply@warfront.skinticals.com";
-  const senderNameStr = senderName || process.env.BREVO_SENDER_NAME || "Warfront";
-
-  const emailPayload: any = {
-    sender: { email: senderEmailAddr, name: senderNameStr },
-    to: [{ email: toEmail, name: toName || toEmail }],
-    subject,
-  };
-
-  if (html) emailPayload.htmlContent = html;
-  if (text) emailPayload.textContent = text;
-
-  console.log(`[Brevo] Sending email to: ${toEmail}, subject: "${subject}", sender: ${senderEmailAddr}`);
-
   try {
+    const client = createBrevoClient();
+    const senderEmailAddr = "onboarding@mail.warfront.skinticals.com";
+    const senderNameStr = "Warfront Onboarding";
+
+    const emailPayload: any = {
+      sender: { email: senderEmailAddr, name: senderNameStr },
+      to: [{ email: toEmail, name: toName || toEmail }],
+      subject,
+    };
+
+    if (html) emailPayload.htmlContent = html;
+    if (text) emailPayload.textContent = text;
+
+    console.log(`[Brevo] Sending email to: ${toEmail}, subject: "${subject}", sender: ${senderEmailAddr}`);
+
     const result = await client.transactionalEmails.sendTransacEmail(emailPayload);
     console.log("[Brevo] Email sent successfully!", JSON.stringify(result));
     return true;
@@ -78,7 +68,6 @@ export const sendVerificationEmail = internalAction({
     console.log(`Attempting to send verification email to: ${email}`);
 
     await brevoSendEmail({
-      senderName: "Warfront",
       toEmail: email,
       toName: name,
       subject: "Verify your Warfront Account",
@@ -114,7 +103,6 @@ export const sendPasswordResetEmail = internalAction({
     console.log(`Attempting to send password reset email to: ${email}`);
 
     await brevoSendEmail({
-      senderName: "Warfront",
       toEmail: email,
       toName: name,
       subject: "Reset Your Warfront Password",
@@ -144,7 +132,6 @@ export const sendNotificationEmail = internalAction({
   handler: async (ctx, { email, name, subject, html, text }) => {
     console.log(`Sending notification email to: ${email}`);
     await brevoSendEmail({
-      senderName: "Warfront",
       toEmail: email,
       toName: name,
       subject,
@@ -165,7 +152,6 @@ export const sendAlertEmail = internalAction({
   handler: async (ctx, { email, name, subject, html, text }) => {
     console.log(`Sending alert email to: ${email}`);
     await brevoSendEmail({
-      senderName: "Warfront",
       toEmail: email,
       toName: name,
       subject,
