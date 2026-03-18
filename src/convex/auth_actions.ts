@@ -77,9 +77,9 @@ export const sendVerificationEmail = internalAction({
     token: v.string(),
   },
   handler: async (ctx, { email, name, token }) => {
-    // Use provided SITE_URL or fall back to the correct production domain
     const siteUrl = process.env.SITE_URL || "https://warfront.vly.site";
-    const verificationUrl = `${siteUrl}/verify-email?token=${token}`;
+    // HashRouter requires /#/ prefix for client-side routing
+    const verificationUrl = `${siteUrl}/#/verify-email?token=${token}`;
 
     console.log(`Attempting to send verification email to: ${email}`);
 
@@ -89,12 +89,7 @@ export const sendVerificationEmail = internalAction({
       toEmail: email,
       toName: name,
       subject: "Verify your Warfront Account",
-      text: `Please verify your Warfront Account by clicking here: ${verificationUrl}
-
-If that link doesn't work then please copy the link below and paste it in your browser:
-${verificationUrl}
-
-If you still face any problem then please contact hardcorgamingstyle@gmail.com with your Account name, Email, and proof that you are not a bot and you own the Email.`,
+      text: `Please verify your Warfront Account by clicking here: ${verificationUrl}\n\nIf that link doesn't work then please copy the link below and paste it in your browser:\n${verificationUrl}\n\nIf you still face any problem then please contact hardcorgamingstyle@gmail.com with your Account name, Email, and proof that you are not a bot and you own the Email.`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
           <h1 style="margin: 0 0 12px; color: #d32f2f;">Verify your Warfront Account</h1>
@@ -120,7 +115,8 @@ export const sendPasswordResetEmail = internalAction({
   },
   handler: async (ctx, { email, name, token }) => {
     const siteUrl = process.env.SITE_URL || "https://warfront.vly.site";
-    const resetUrl = `${siteUrl}/reset-password?token=${token}`;
+    // HashRouter requires /#/ prefix for client-side routing
+    const resetUrl = `${siteUrl}/#/reset-password?token=${token}`;
 
     console.log(`Attempting to send password reset email to: ${email}`);
 
@@ -140,16 +136,7 @@ export const sendPasswordResetEmail = internalAction({
         <hr />
         <p>If you cannot click the button, copy and paste this link into your browser: ${resetUrl}</p>
       `,
-      text: `Password Reset Request
-
-Hello ${name},
-
-You requested to reset your password for your Warfront account. Open this link to set a new password:
-${resetUrl}
-
-This link will expire in 1 hour.
-
-If you didn't request this password reset, please ignore this email.`,
+      text: `Password Reset Request\n\nHello ${name},\n\nYou requested to reset your password for your Warfront account. Open this link to set a new password:\n${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this password reset, please ignore this email.`,
     });
   },
 });
