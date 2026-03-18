@@ -2,9 +2,9 @@
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 
-const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
+const RESEND_API_URL = "https://api.resend.com/emails";
 
-type BrevoSendArgs = {
+type ResendSendArgs = {
   toEmail: string;
   toName?: string;
   subject: string;
@@ -14,54 +14,53 @@ type BrevoSendArgs = {
   senderName?: string;
 };
 
-async function brevoSendEmail({
+async function resendSendEmail({
   toEmail,
   toName,
   subject,
   html,
   text,
-  senderEmail,
   senderName,
-}: BrevoSendArgs): Promise<boolean> {
-  const apiKey = process.env.BREVO_API_KEY;
+}: ResendSendArgs): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.error("CRITICAL: BREVO_API_KEY environment variable is not set.");
+    console.error("CRITICAL: RESEND_API_KEY environment variable is not set.");
     return false;
   }
 
-  const fromEmail = senderEmail || process.env.BREVO_SENDER_EMAIL || "onboarding@mail.warfront.skinticals.com";
-  const fromName = senderName || process.env.BREVO_SENDER_NAME || "Warfront";
+  const fromName = senderName || "Warfront";
+  // Use resend.dev domain which works without domain verification
+  const from = `${fromName} <onboarding@resend.dev>`;
 
   const body: any = {
-    sender: { email: fromEmail, name: fromName },
-    to: [{ email: toEmail, name: toName || toEmail }],
+    from,
+    to: [toEmail],
     subject,
   };
-  if (html) body.htmlContent = html;
-  if (text) body.textContent = text;
+  if (html) body.html = html;
+  if (text) body.text = text;
 
   try {
-    const res = await fetch(BREVO_API_URL, {
+    const res = await fetch(RESEND_API_URL, {
       method: "POST",
       headers: {
-        "accept": "application/json",
-        "api-key": apiKey,
-        "content-type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
     });
 
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
-      console.error("Failed to send email via Brevo:", res.status, errText);
+      console.error("Failed to send email via Resend:", res.status, errText);
       return false;
     }
 
     const data = await res.json().catch(() => null);
-    console.log("Brevo email sent successfully!", data);
+    console.log("Resend email sent successfully!", data);
     return true;
   } catch (exception) {
-    console.error("An unexpected exception occurred while sending email via Brevo:", exception);
+    console.error("An unexpected exception occurred while sending email via Resend:", exception);
     return false;
   }
 }
@@ -78,8 +77,7 @@ export const sendVerificationEmail = internalAction({
 
     console.log(`Attempting to send verification email to: ${email}`);
 
-    await brevoSendEmail({
-      senderEmail: "onboarding@mail.warfront.skinticals.com",
+    await resendSendEmail({
       senderName: "Warfront",
       toEmail: email,
       toName: name,
@@ -115,8 +113,7 @@ export const sendPasswordResetEmail = internalAction({
 
     console.log(`Attempting to send password reset email to: ${email}`);
 
-    await brevoSendEmail({
-      senderEmail: "support@mail.warfront.skinticals.com",
+    await resendSendEmail({
       senderName: "Warfront",
       toEmail: email,
       toName: name,
@@ -146,8 +143,7 @@ export const sendNotificationEmail = internalAction({
   },
   handler: async (ctx, { email, name, subject, html, text }) => {
     console.log(`Sending notification email to: ${email}`);
-    await brevoSendEmail({
-      senderEmail: "no-reply@mail.warfront.skinticals.com",
+    await resendSendEmail({
       senderName: "Warfront",
       toEmail: email,
       toName: name,
@@ -168,8 +164,7 @@ export const sendAlertEmail = internalAction({
   },
   handler: async (ctx, { email, name, subject, html, text }) => {
     console.log(`Sending alert email to: ${email}`);
-    await brevoSendEmail({
-      senderEmail: "alert@mail.warfront.skinticals.com",
+    await resendSendEmail({
       senderName: "Warfront",
       toEmail: email,
       toName: name,
