@@ -1,10 +1,17 @@
 "use node";
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
+import { BrevoClient } from "@getbrevo/brevo";
 
-const RESEND_API_URL = "https://api.resend.com/emails";
+function createBrevoClient() {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    throw new Error("CRITICAL: BREVO_API_KEY environment variable is not set.");
+  }
+  return new BrevoClient({ apiKey });
+}
 
-type ResendSendArgs = {
+type BrevoSendArgs = {
   toEmail: string;
   toName?: string;
   subject: string;
@@ -14,53 +21,34 @@ type ResendSendArgs = {
   senderName?: string;
 };
 
-async function resendSendEmail({
+async function brevoSendEmail({
   toEmail,
   toName,
   subject,
   html,
   text,
+  senderEmail,
   senderName,
-}: ResendSendArgs): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.error("CRITICAL: RESEND_API_KEY environment variable is not set.");
-    return false;
-  }
-
-  const fromName = senderName || "Warfront";
-  // Use resend.dev domain which works without domain verification
-  const from = `${fromName} <onboarding@resend.dev>`;
-
-  const body: any = {
-    from,
-    to: [toEmail],
-    subject,
-  };
-  if (html) body.html = html;
-  if (text) body.text = text;
-
+}: BrevoSendArgs): Promise<boolean> {
   try {
-    const res = await fetch(RESEND_API_URL, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+    const client = createBrevoClient();
+    const senderEmailAddr = senderEmail || process.env.BREVO_SENDER_EMAIL || "noreply@warfront.skinticals.com";
+    const senderNameStr = senderName || process.env.BREVO_SENDER_NAME || "Warfront";
 
-    if (!res.ok) {
-      const errText = await res.text().catch(() => "");
-      console.error("Failed to send email via Resend:", res.status, errText);
-      return false;
-    }
+    const emailPayload: any = {
+      sender: { email: senderEmailAddr, name: senderNameStr },
+      to: [{ email: toEmail, name: toName || toEmail }],
+      subject,
+    };
 
-    const data = await res.json().catch(() => null);
-    console.log("Resend email sent successfully!", data);
+    if (html) emailPayload.htmlContent = html;
+    if (text) emailPayload.textContent = text;
+
+    const result = await client.transactionalEmails.sendTransacEmail(emailPayload);
+    console.log("Brevo email sent successfully!", result);
     return true;
-  } catch (exception) {
-    console.error("An unexpected exception occurred while sending email via Resend:", exception);
+  } catch (error: any) {
+    console.error("Failed to send email via Brevo:", error?.body || error?.message || error);
     return false;
   }
 }
@@ -77,7 +65,7 @@ export const sendVerificationEmail = internalAction({
 
     console.log(`Attempting to send verification email to: ${email}`);
 
-    await resendSendEmail({
+    await brevoSendEmail({
       senderName: "Warfront",
       toEmail: email,
       toName: name,
@@ -113,7 +101,7 @@ export const sendPasswordResetEmail = internalAction({
 
     console.log(`Attempting to send password reset email to: ${email}`);
 
-    await resendSendEmail({
+    await brevoSendEmail({
       senderName: "Warfront",
       toEmail: email,
       toName: name,
@@ -143,7 +131,7 @@ export const sendNotificationEmail = internalAction({
   },
   handler: async (ctx, { email, name, subject, html, text }) => {
     console.log(`Sending notification email to: ${email}`);
-    await resendSendEmail({
+    await brevoSendEmail({
       senderName: "Warfront",
       toEmail: email,
       toName: name,
@@ -164,7 +152,7 @@ export const sendAlertEmail = internalAction({
   },
   handler: async (ctx, { email, name, subject, html, text }) => {
     console.log(`Sending alert email to: ${email}`);
-    await resendSendEmail({
+    await brevoSendEmail({
       senderName: "Warfront",
       toEmail: email,
       toName: name,
