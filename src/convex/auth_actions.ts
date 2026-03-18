@@ -30,25 +30,37 @@ async function brevoSendEmail({
   senderEmail,
   senderName,
 }: BrevoSendArgs): Promise<boolean> {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    console.error("BREVO_API_KEY is not set! Cannot send email.");
+    return false;
+  }
+
+  const client = createBrevoClient();
+  const senderEmailAddr = senderEmail || process.env.BREVO_SENDER_EMAIL || "noreply@warfront.skinticals.com";
+  const senderNameStr = senderName || process.env.BREVO_SENDER_NAME || "Warfront";
+
+  const emailPayload: any = {
+    sender: { email: senderEmailAddr, name: senderNameStr },
+    to: [{ email: toEmail, name: toName || toEmail }],
+    subject,
+  };
+
+  if (html) emailPayload.htmlContent = html;
+  if (text) emailPayload.textContent = text;
+
+  console.log(`[Brevo] Sending email to: ${toEmail}, subject: "${subject}", sender: ${senderEmailAddr}`);
+
   try {
-    const client = createBrevoClient();
-    const senderEmailAddr = senderEmail || process.env.BREVO_SENDER_EMAIL || "noreply@warfront.skinticals.com";
-    const senderNameStr = senderName || process.env.BREVO_SENDER_NAME || "Warfront";
-
-    const emailPayload: any = {
-      sender: { email: senderEmailAddr, name: senderNameStr },
-      to: [{ email: toEmail, name: toName || toEmail }],
-      subject,
-    };
-
-    if (html) emailPayload.htmlContent = html;
-    if (text) emailPayload.textContent = text;
-
     const result = await client.transactionalEmails.sendTransacEmail(emailPayload);
-    console.log("Brevo email sent successfully!", result);
+    console.log("[Brevo] Email sent successfully!", JSON.stringify(result));
     return true;
   } catch (error: any) {
-    console.error("Failed to send email via Brevo:", error?.body || error?.message || error);
+    console.error("[Brevo] FAILED to send email!");
+    console.error("[Brevo] Error name:", error?.name);
+    console.error("[Brevo] Status code:", error?.statusCode);
+    console.error("[Brevo] Body:", JSON.stringify(error?.body));
+    console.error("[Brevo] Message:", error?.message);
     return false;
   }
 }
