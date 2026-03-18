@@ -19,7 +19,17 @@ export default function ScanCards() {
   const streamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const lastScannedRef = useRef<string | null>(null);
+  const mirrorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // External scanner (USB/Bluetooth keyboard) buffer
+  const externalBufferRef = useRef<string>("");
+  const externalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
+
+  const triggerMirrorFlash = useCallback(() => {
+    if (mirrorTimeoutRef.current) clearTimeout(mirrorTimeoutRef.current);
+    setMirrored(true);
+    mirrorTimeoutRef.current = setTimeout(() => setMirrored(false), 600);
+  }, []);
 
   const stopCamera = useCallback(() => {
     if (animFrameRef.current) {
@@ -34,24 +44,26 @@ export default function ScanCards() {
 
   const handleQRCode = useCallback(
     (decodedText: string) => {
+      const trimmed = decodedText.trim();
+      if (!trimmed) return;
+
       // Debounce: ignore same code within 2 seconds
-      if (lastScannedRef.current === decodedText) return;
-      lastScannedRef.current = decodedText;
+      if (lastScannedRef.current === trimmed) return;
+      lastScannedRef.current = trimmed;
       setTimeout(() => { lastScannedRef.current = null; }, 2000);
 
       const isWarfrontCard = (() => {
         try {
-          const url = new URL(decodedText);
+          const url = new URL(trimmed);
           return url.pathname.includes("/cards/");
         } catch {
-          return decodedText.length > 5;
+          // Not a URL — check if it looks like a card ID
+          return /^[a-zA-Z0-9_-]{8,}$/.test(trimmed);
         }
       })();
 
       if (!isWarfrontCard) {
-        // Mirror flash feedback for wrong QR code
-        setMirrored(true);
-        setTimeout(() => setMirrored(false), 600);
+        triggerMirrorFlash();
         toast.error("Invalid card QR code");
         return;
       }
@@ -61,23 +73,56 @@ export default function ScanCards() {
         setIsScanning(false);
         toast.success("Card scanned successfully!");
         try {
-          const url = new URL(decodedText);
+          const url = new URL(trimmed);
           navigate(url.pathname + url.search + url.hash);
         } catch {
-          navigate(`/cards/${decodedText}`);
+          navigate(`/cards/${trimmed}`);
         }
       } else {
         setScannedCodes((prev) => {
-          if (!prev.includes(decodedText)) {
+          if (!prev.includes(trimmed)) {
             toast.success("Card added to batch!");
-            return [...prev, decodedText];
+            return [...prev, trimmed];
           }
           return prev;
         });
       }
     },
-    [mode, navigate, stopCamera]
+    [mode, navigate, stopCamera, triggerMirrorFlash]
   );
+
+  // Handle external USB/Bluetooth QR scanner (acts as keyboard)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // External scanners type fast and end with Enter
+      if (e.key === "Enter") {
+        const buffer = externalBufferRef.current;
+        externalBufferRef.current = "";
+        if (externalTimerRef.current) clearTimeout(externalTimerRef.current);
+        if (buffer.length > 5) {
+          handleQRCode(buffer);
+        }
+        return;
+      }
+
+      // Only capture printable characters
+      if (e.key.length === 1) {
+        externalBufferRef.current += e.key;
+        // Auto-flush if no Enter within 100ms (some scanners don't send Enter)
+        if (externalTimerRef.current) clearTimeout(externalTimerRef.current);
+        externalTimerRef.current = setTimeout(() => {
+          const buffer = externalBufferRef.current;
+          externalBufferRef.current = "";
+          if (buffer.length > 5) {
+            handleQRCode(buffer);
+          }
+        }, 100);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleQRCode]);
 
   const startScanning = useCallback(() => {
     const video = videoRef.current;
@@ -88,16 +133,20 @@ export default function ScanCards() {
     if (!ctx) return;
 
     const tick = () => {
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "dontInvert",
-        });
-        if (code) {
-          handleQRCode(code.data);
+        try {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth",
+          });
+          if (code && code.data) {
+            handleQRCode(code.data);
+          }
+        } catch {
+          // Ignore decode errors
         }
       }
       animFrameRef.current = requestAnimationFrame(tick);
@@ -115,7 +164,7 @@ export default function ScanCards() {
     navigator.mediaDevices
       .getUserMedia({
         video: {
-          facingMode: "environment",
+          facingMode: { ideal: "environment" },
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
@@ -131,11 +180,19 @@ export default function ScanCards() {
       })
       .catch((err) => {
         console.error("Camera error:", err);
-        setCameraError("Camera access denied or unavailable. Please grant camera permissions.");
+        setCameraError("Camera access denied or unavailable. You can still use an external QR scanner.");
       });
 
     return () => stopCamera();
   }, [isScanning, startScanning, stopCamera]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (mirrorTimeoutRef.current) clearTimeout(mirrorTimeoutRef.current);
+      if (externalTimerRef.current) clearTimeout(externalTimerRef.current);
+    };
+  }, []);
 
   const handleRescan = () => {
     setScannedCodes([]);
@@ -166,7 +223,7 @@ export default function ScanCards() {
                   className="w-full h-full object-cover"
                   style={{
                     transform: mirrored ? "scaleX(-1)" : "scaleX(1)",
-                    transition: "transform 0.15s ease-in-out",
+                    transition: "transform 0.1s ease-in-out",
                     display: "block",
                     minHeight: 300,
                   }}
@@ -187,6 +244,7 @@ export default function ScanCards() {
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white text-center p-4">
                     <Camera className="h-10 w-10 mb-3 opacity-50" />
                     <p className="text-sm text-slate-300">{cameraError}</p>
+                    <p className="text-xs text-slate-400 mt-2">External QR scanner still works</p>
                   </div>
                 )}
               </>
@@ -241,9 +299,9 @@ export default function ScanCards() {
           <Card className="bg-slate-900/50 border-slate-800">
             <CardContent className="p-4">
               <p className="text-sm text-slate-400 text-center">
-                Point your camera at a Warfront card QR code.
-                <br />
-                Wrong QR codes will flash a mirror effect.
+                Point your camera at a Warfront card QR code,<br />
+                or use an external QR scanner.<br />
+                Invalid QR codes will flash a mirror effect.
               </p>
             </CardContent>
           </Card>
